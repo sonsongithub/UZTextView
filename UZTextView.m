@@ -62,63 +62,49 @@
 	if (!_isSelecting)
 		return;
 	
-	// re-order start and end index.
+	// Re-order start and end index.
 	NSUInteger start = _from < _end ? _from : _end;
 	NSUInteger end = _from > _end ? _from : _end;
 	
-	// set drawing color
+	// Set drawing color
 	[[UIColor colorWithRed:0 green:1 blue:0 alpha:0.1] setFill];
 	CGContextRef context = UIGraphicsGetCurrentContext();
-	
-	NSLog(@"start=%d => end=%d", start, end);
-	
-	// estimate regions to render
+
+	// Estimate regions to render
 	for (int i = start; i <= end;) {
+		// Get right glyph index and left one on the line
 		NSRange effectiveRange;
-		CGRect lineRect = [_layoutManager lineFragmentRectForGlyphAtIndex:i effectiveRange:(NSRangePointer)&effectiveRange];
-		NSLog(@"effectiveRange");
-		NSLog(@"i=%d", i);
-		NSLog(@"start=%d => end=%d", effectiveRange.location, effectiveRange.location + effectiveRange.length	);
-		
+		[_layoutManager lineFragmentRectForGlyphAtIndex:i effectiveRange:(NSRangePointer)&effectiveRange];
 		NSUInteger left = effectiveRange.location >= i ? effectiveRange.location : i;
-		NSUInteger right = effectiveRange.location + effectiveRange.length <= end ? effectiveRange.location + effectiveRange.length : end;
+		NSUInteger right = effectiveRange.location + effectiveRange.length <= end ? effectiveRange.location + effectiveRange.length - 1 : end;
 		
-		CGGlyph leftGlyph = [_layoutManager glyphAtIndex:left];
+		// Skip new line code
 		CGGlyph rightGlyph = [_layoutManager glyphAtIndex:right];
-		
-		NSLog(@"G:%d=>%d", leftGlyph, rightGlyph);
-		NSLog(@"I:%d=>%d", left, right);
-		
 		if (rightGlyph == 65535)
-			right-=2;
-		else
 			right--;
 		
+		// Get regions of right and left glyph
 		CGRect r1 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(left, 1) inTextContainer:_textContainer];
 		CGRect r2 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(right, 1) inTextContainer:_textContainer];
 		
-		CGRect r;
-//		if (r1.origin.y != r2.origin.y)
-//			r = CGRectMake(r1.origin.x, r1.origin.y, lineRect.origin.x + lineRect.size.width - r1.origin.x, r1.size.height);
-//		else
-			r = CGRectMake(r1.origin.x, r1.origin.y, r2.origin.x + r2.size.width - r1.origin.x, r1.size.height);
-
+		// Get line region by combining right and left regions.
+		CGRect r = CGRectMake(r1.origin.x, r1.origin.y, r2.origin.x + r2.size.width - r1.origin.x, r1.size.height);
 		CGContextFillRect(context, r);
 		
 		// forward glyph index pointer, i
-		i = effectiveRange.location + effectiveRange.length + 1;
+		i = effectiveRange.location + effectiveRange.length;
 	}
-	
-	// render cursor, for debug
+#if 0
+	// Render start and end cursors, for debug
 	CGRect left_cursol = [_layoutManager boundingRectForGlyphRange:NSMakeRange(start, 1) inTextContainer:_textContainer];
 	CGRect right_cursol = [_layoutManager boundingRectForGlyphRange:NSMakeRange(end, 1) inTextContainer:_textContainer];
 	[[UIColor colorWithRed:0 green:1 blue:0 alpha:0.8] setFill];
 	CGContextFillRect(context, left_cursol);
 	CGContextFillRect(context, right_cursol);
+#endif
 }
 
 - (void)searchLinkAttribute {
-	
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -144,6 +130,12 @@
 	_end = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
 	_isTapping = NO;
 	[self setNeedsDisplay];
+//#if 1
+	// for debug
+	NSUInteger start = _from < _end ? _from : _end;
+	NSUInteger end = _from > _end ? _from : _end;
+	NSLog(@"%@", [[self.attributedString string] substringWithRange:NSMakeRange(start, end - start + 1)]);
+//#endif
 }
 
 - (id)initWithFrame:(CGRect)frame
