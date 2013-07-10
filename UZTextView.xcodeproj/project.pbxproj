@@ -17,6 +17,7 @@
 		14B17A61176D9B3100C7AA83 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B17A60176D9B3100C7AA83 /* ViewController.m */; };
 		14B17A63176D9B3100C7AA83 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14B17A62176D9B3100C7AA83 /* Images.xcassets */; };
 		14B17A81176D9C9700C7AA83 /* UZTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B17A80176D9B5E00C7AA83 /* UZTextView.m */; };
+		14F5DE46178D230400805154 /* UZLoupeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F5DE45178D178F00805154 /* UZLoupeView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,8 @@
 		14B17A62176D9B3100C7AA83 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		14B17A7F176D9B5E00C7AA83 /* UZTextView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UZTextView.h; sourceTree = "<group>"; };
 		14B17A80176D9B5E00C7AA83 /* UZTextView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UZTextView.m; sourceTree = "<group>"; };
+		14F5DE44178D178F00805154 /* UZLoupeView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UZLoupeView.h; sourceTree = "<group>"; };
+		14F5DE45178D178F00805154 /* UZLoupeView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UZLoupeView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +60,8 @@
 			children = (
 				14B17A7F176D9B5E00C7AA83 /* UZTextView.h */,
 				14B17A80176D9B5E00C7AA83 /* UZTextView.m */,
+				14F5DE44178D178F00805154 /* UZLoupeView.h */,
+				14F5DE45178D178F00805154 /* UZLoupeView.m */,
 				14B17A50176D9B3100C7AA83 /* UZTextView */,
 				14B17A49176D9B3100C7AA83 /* Frameworks */,
 				14B17A48176D9B3100C7AA83 /* Products */,
@@ -172,6 +177,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				14B17A61176D9B3100C7AA83 /* ViewController.m in Sources */,
+				14F5DE46178D230400805154 /* UZLoupeView.m in Sources */,
 				14B17A5B176D9B3100C7AA83 /* AppDelegate.m in Sources */,
 				14B17A81176D9C9700C7AA83 /* UZTextView.m in Sources */,
 				14B17A57176D9B3100C7AA83 /* main.m in Sources */,

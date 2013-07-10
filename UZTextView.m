@@ -8,6 +8,8 @@
 
 #import "UZTextView.h"
 
+#import "UZLoupeView.h"
+
 #define NEW_LINE_GLYPH 65535
 
 #define NSLogRect(p) NSLog(@"%f,%f,%f,%f",p.origin.x, p.origin.y, p.size.width, p.size.height)
@@ -119,6 +121,19 @@
 	_isSelecting = YES;
 	_isTapping = NO;
 	[self setNeedsDisplay];
+	
+	// Create UIImage from source view controller's view.
+	float radius = 100;
+	CGPoint p = [touch locationInView:self];
+	UIGraphicsBeginImageContextWithOptions(CGSizeMake(radius, radius), NO, 0);
+	CGContextRef ctx = UIGraphicsGetCurrentContext();
+	CGContextScaleCTM(ctx, 1, 1);
+	CGContextTranslateCTM(ctx, -p.x+radius/2, -p.y+radius/2);
+	// Drawing code
+	[self drawContentWithRect:self.frame];
+	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
+	[_loupeView update:sourceViewImage];
+	[_loupeView setCenter:CGPointMake(p.x, p.y - radius/2)];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -143,6 +158,7 @@
 		_layoutManager = [[NSLayoutManager alloc] init];
 		_textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
 		_textStorage = [[NSTextStorage alloc] init];
+		_loupeView = [[UZLoupeView alloc] init];
 		[_layoutManager addTextContainer:_textContainer];
     }
     return self;
@@ -156,6 +172,8 @@
 		_textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
 		_textStorage = [[NSTextStorage alloc] init];
 		[_layoutManager addTextContainer:_textContainer];
+		_loupeView = [[UZLoupeView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+		[self addSubview:_loupeView];
 	}
 	return self;
 }
@@ -191,64 +209,48 @@
 	[self setNeedsDisplay];
 }
 
-- (void)drawRect:(CGRect)rect {
+- (void)drawContentWithRect:(CGRect)rect {
+	// draw background color
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	[[UIColor whiteColor] setFill];
-	
 	CGContextFillRect(context, rect);
-    // Drawing code
+    
+	// Drawing code
 	[_textContainer setSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
 	[_layoutManager drawGlyphsForGlyphRange:NSMakeRange(0, self.attributedString.length) atPoint:CGPointMake(0, 0)];
 	[self drawSelectedTextFragments];
 	[self drawSelectedLinkFragments];
-	
-	if (_isSelecting) {
-		[[self.tintColor colorWithAlphaComponent:0.5] setStroke];
-		[[UIColor whiteColor] setFill];
-		
-		CGPoint p = [_touch locationInView:self];
-		float radius = 50;
-		float offset = 0;
-		CGContextAddArc(
-						context,
-						p.x,
-						p.y - radius - offset,
-						radius,
-						0,
-						M_PI * 2,
-						0);
-		CGContextClosePath(context);
-		CGContextStrokePath(context);
-		CGContextAddArc(
-						context,
-						p.x,
-						p.y - radius - offset,
-						radius,
-						0,
-						M_PI * 2,
-						0);
-			CGContextClosePath(context);
-			[[UIColor whiteColor] setFill];
-		CGContextFillPath(context);
+}
 
-		CGContextSaveGState(context);
-		CGContextTranslateCTM(context, 0, -offset-radius);
-		CGContextAddArc(
-						context,
-						p.x,
-						p.y,
-						radius,
-						0,
-						M_PI * 2,
-						0);
-		CGContextClosePath(context);
-		CGContextClip(context);
-		
-		[_layoutManager drawGlyphsForGlyphRange:NSMakeRange(0, self.attributedString.length) atPoint:CGPointMake(0, 0)];
-		[self drawSelectedTextFragments];
-		[self drawSelectedLinkFragments];
-		CGContextRestoreGState(context);
-	}
+- (void)drawLoupeWithRect:(CGRect)rect {
+	CGContextRef context = UIGraphicsGetCurrentContext();
+	[[self.tintColor colorWithAlphaComponent:0.75] setStroke];
+	[[UIColor whiteColor] setFill];
+	
+	CGPoint p = [_touch locationInView:self];
+	float radius = 50;
+	float offset = 0;
+	CGContextAddArc(context, p.x, p.y - radius - offset, radius, 0, M_PI * 2, 0);
+	CGContextClosePath(context);
+	CGContextDrawPath(context, kCGPathFillStroke);
+	
+	CGContextSaveGState(context);
+	CGContextTranslateCTM(context, 0, - offset - radius);
+	CGContextAddArc(context, p.x, p.y, radius, 0, M_PI * 2, 0);
+	CGContextClosePath(context);
+	CGContextClip(context);
+	[self drawContentWithRect:rect];
+	CGContextRestoreGState(context);
+}
+
+- (void)drawRect:(CGRect)rect {
+	// draw main content
+	[self drawContentWithRect:rect];
+	
+//	// draw loupe
+//	if (_isSelecting) {
+//		[self drawLoupeWithRect:rect];
+//	}
 }
 
 @end

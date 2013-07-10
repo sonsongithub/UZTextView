@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @class UZTextView;
+@class UZLoupeView;
 
 @protocol UZTextViewDelegate <NSObject>
 
@@ -20,6 +21,8 @@
 	NSLayoutManager *_layoutManager;
 	NSTextContainer *_textContainer;
 	NSTextStorage *_textStorage;
+	
+	UZLoupeView	 *_loupeView;
 	
 	BOOL _isSelecting;
 	BOOL _isTapping;
