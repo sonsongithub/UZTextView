@@ -37,7 +37,12 @@
 	[[self.tintColor colorWithAlphaComponent:0.75] setStroke];
 	
 	float radius = rect.size.width/2;
-
+	
+	CGContextAddArc(context, radius, radius, radius, 0, M_PI * 2, 0);
+	CGContextClosePath(context);
+	[[UIColor blackColor] setFill];
+	CGContextDrawPath(context, kCGPathFill);
+	
 	CGContextSaveGState(context);
 	CGContextAddArc(context, radius, radius, radius, 0, M_PI * 2, 0);
 	CGContextClosePath(context);

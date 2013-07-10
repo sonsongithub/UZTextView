@@ -105,6 +105,37 @@
 - (void)searchLinkAttribute {
 }
 
+- (void)_pushSnapshotToLoupeViewAtLocation:(CGPoint)location {
+	float radius = 100;
+	UIView *v = [[UIScreen mainScreen] snapshotView];
+	UIGraphicsBeginImageContextWithOptions(v.frame.size, NO, 0);
+	CGContextRef ctx = UIGraphicsGetCurrentContext();
+	[[UIColor blackColor] set];
+	CGContextFillRect(ctx, v.frame);
+	CGContextScaleCTM(ctx, 1, 1);
+	CGContextTranslateCTM(ctx, 0, 0);
+	[v.layer renderInContext:ctx];
+	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();
+	[_loupeView update:sourceViewImage];
+	[_loupeView setCenter:CGPointMake(location.x, location.y - radius/2)];
+}
+
+- (void)pushSnapshotToLoupeViewAtLocation:(CGPoint)location {
+	// Create UIImage from source view controller's view.
+	float radius = 100;
+//	CGPoint p = [touch locationInView:self];
+	UIGraphicsBeginImageContextWithOptions(CGSizeMake(radius, radius), NO, 0);
+	CGContextRef ctx = UIGraphicsGetCurrentContext();
+	CGContextScaleCTM(ctx, 1, 1);
+	CGContextTranslateCTM(ctx, -location.x + radius/2, -location.y+radius/2);
+	// Drawing code
+	[self drawContentWithRect:self.frame];
+	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
+	[_loupeView update:sourceViewImage];
+	[_loupeView setCenter:CGPointMake(location.x, location.y - radius/2)];
+}
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [touches anyObject];
 	_touch = touch;
@@ -122,18 +153,8 @@
 	_isTapping = NO;
 	[self setNeedsDisplay];
 	
-	// Create UIImage from source view controller's view.
-	float radius = 100;
-	CGPoint p = [touch locationInView:self];
-	UIGraphicsBeginImageContextWithOptions(CGSizeMake(radius, radius), NO, 0);
-	CGContextRef ctx = UIGraphicsGetCurrentContext();
-	CGContextScaleCTM(ctx, 1, 1);
-	CGContextTranslateCTM(ctx, -p.x+radius/2, -p.y+radius/2);
-	// Drawing code
-	[self drawContentWithRect:self.frame];
-	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
-	[_loupeView update:sourceViewImage];
-	[_loupeView setCenter:CGPointMake(p.x, p.y - radius/2)];
+//	[self _pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+	[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
