@@ -105,32 +105,17 @@
 - (void)searchLinkAttribute {
 }
 
-- (void)_pushSnapshotToLoupeViewAtLocation:(CGPoint)location {
-	float radius = 100;
-	UIView *v = [[UIScreen mainScreen] snapshotView];
-	UIGraphicsBeginImageContextWithOptions(v.frame.size, NO, 0);
-	CGContextRef ctx = UIGraphicsGetCurrentContext();
-	[[UIColor blackColor] set];
-	CGContextFillRect(ctx, v.frame);
-	CGContextScaleCTM(ctx, 1, 1);
-	CGContextTranslateCTM(ctx, 0, 0);
-	[v.layer renderInContext:ctx];
-	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
-	UIGraphicsEndImageContext();
-	[_loupeView update:sourceViewImage];
-	[_loupeView setCenter:CGPointMake(location.x, location.y - radius/2)];
-}
-
 - (void)pushSnapshotToLoupeViewAtLocation:(CGPoint)location {
 	// Create UIImage from source view controller's view.
 	float radius = 100;
-//	CGPoint p = [touch locationInView:self];
 	UIGraphicsBeginImageContextWithOptions(CGSizeMake(radius, radius), NO, 0);
 	CGContextRef ctx = UIGraphicsGetCurrentContext();
+	[[UIColor whiteColor] setFill];
+	CGContextFillRect(ctx, CGRectMake(0, 0, radius, radius));
 	CGContextScaleCTM(ctx, 1, 1);
 	CGContextTranslateCTM(ctx, -location.x + radius/2, -location.y+radius/2);
 	// Drawing code
-	[self drawContentWithRect:self.frame];
+	[self drawContent];
 	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
 	[_loupeView update:sourceViewImage];
 	[_loupeView setCenter:CGPointMake(location.x, location.y - radius/2)];
@@ -153,7 +138,6 @@
 	_isTapping = NO;
 	[self setNeedsDisplay];
 	
-//	[self _pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
 	[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
 }
 
@@ -230,12 +214,7 @@
 	[self setNeedsDisplay];
 }
 
-- (void)drawContentWithRect:(CGRect)rect {
-	// draw background color
-	CGContextRef context = UIGraphicsGetCurrentContext();
-	[[UIColor whiteColor] setFill];
-	CGContextFillRect(context, rect);
-    
+- (void)drawContent {
 	// Drawing code
 	[_textContainer setSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
 	[_layoutManager drawGlyphsForGlyphRange:NSMakeRange(0, self.attributedString.length) atPoint:CGPointMake(0, 0)];
@@ -243,35 +222,14 @@
 	[self drawSelectedLinkFragments];
 }
 
-- (void)drawLoupeWithRect:(CGRect)rect {
-	CGContextRef context = UIGraphicsGetCurrentContext();
-	[[self.tintColor colorWithAlphaComponent:0.75] setStroke];
-	[[UIColor whiteColor] setFill];
-	
-	CGPoint p = [_touch locationInView:self];
-	float radius = 50;
-	float offset = 0;
-	CGContextAddArc(context, p.x, p.y - radius - offset, radius, 0, M_PI * 2, 0);
-	CGContextClosePath(context);
-	CGContextDrawPath(context, kCGPathFillStroke);
-	
-	CGContextSaveGState(context);
-	CGContextTranslateCTM(context, 0, - offset - radius);
-	CGContextAddArc(context, p.x, p.y, radius, 0, M_PI * 2, 0);
-	CGContextClosePath(context);
-	CGContextClip(context);
-	[self drawContentWithRect:rect];
-	CGContextRestoreGState(context);
-}
-
 - (void)drawRect:(CGRect)rect {
-	// draw main content
-	[self drawContentWithRect:rect];
+	// draw background color
+	CGContextRef context = UIGraphicsGetCurrentContext();
+	[[UIColor whiteColor] setFill];
+	CGContextFillRect(context, rect);
 	
-//	// draw loupe
-//	if (_isSelecting) {
-//		[self drawLoupeWithRect:rect];
-//	}
+	// draw main content
+	[self drawContent];
 }
 
 @end
