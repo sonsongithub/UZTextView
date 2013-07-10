@@ -8,10 +8,42 @@
 
 #import "UZTextView.h"
 
+#define NEW_LINE_GLYPH 65535
+
 #define NSLogRect(p) NSLog(@"%f,%f,%f,%f",p.origin.x, p.origin.y, p.size.width, p.size.height)
 #define NSLogRange(p) NSLog(@"%d,%d",p.location, p.length)
 
 @implementation UZTextView
+
+- (NSArray*)fragmentRectsForGlyphFromIndex:(int)fromIndex toIndex:(int)toIndex {
+	// Extracted fragment rects from layout manager
+	NSMutableArray *fragmentRects = [NSMutableArray array];
+	for (int i = fromIndex; i <= toIndex;) {
+		// Get right glyph index and left one on the line
+		NSRange effectiveRange;
+		[_layoutManager lineFragmentRectForGlyphAtIndex:i effectiveRange:(NSRangePointer)&effectiveRange];
+		NSUInteger left = effectiveRange.location >= i ? effectiveRange.location : i;
+		NSUInteger right = effectiveRange.location + effectiveRange.length <= toIndex ? effectiveRange.location + effectiveRange.length - 1 : toIndex;
+		
+		// Skip new line code
+		CGGlyph rightGlyph = [_layoutManager glyphAtIndex:right];
+		if (rightGlyph == NEW_LINE_GLYPH)
+			right--;
+		
+		// Get regions of right and left glyph
+		CGRect r1 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(left, 1) inTextContainer:_textContainer];
+		CGRect r2 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(right, 1) inTextContainer:_textContainer];
+		
+		// Get line region by combining right and left regions.
+		CGRect r = CGRectMake(r1.origin.x, r1.origin.y, r2.origin.x + r2.size.width - r1.origin.x, r1.size.height);
+		
+		[fragmentRects addObject:[NSValue valueWithCGRect:r]];
+		
+		// forward glyph index pointer, i
+		i = effectiveRange.location + effectiveRange.length;
+	}
+	return [NSArray arrayWithArray:fragmentRects];
+}
 
 - (void)drawSelectedLinkFragments {
 	if (_from != _end || !_isTapping)
@@ -26,34 +58,17 @@
 		CGPoint p = [_touch locationInView:self];
 		if (CGRectContainsPoint(glyphrect, p)) {
 			CGContextRef context = UIGraphicsGetCurrentContext();
-			[[UIColor colorWithRed:1 green:0 blue:0 alpha:0.1] setFill];
+			
+			[[self.tintColor colorWithAlphaComponent:0.5] setFill];
 			
 			NSUInteger start = range.location;
 			NSUInteger end = range.location + range.length;
 			
-			// estimate regions to render
-			for (int i = start; i <= end;) {
-				NSRange effectiveRange;
-				CGRect lineRect = [_layoutManager lineFragmentRectForGlyphAtIndex:i effectiveRange:(NSRangePointer)&effectiveRange];
-				
-				NSUInteger left = effectiveRange.location > start ? effectiveRange.location : start;
-				NSUInteger right = effectiveRange.location + effectiveRange.length <= end ? effectiveRange.location + effectiveRange.length : end;
-				
-				CGRect r1 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(left, 1) inTextContainer:_textContainer];
-				CGRect r2 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(right, 1) inTextContainer:_textContainer];
-				
-				CGRect r;
-				if (r1.origin.y != r2.origin.y)
-					r = CGRectMake(r1.origin.x, r1.origin.y, lineRect.origin.x + lineRect.size.width - r1.origin.x, r1.size.height);
-				else
-					r = CGRectMake(r1.origin.x, r1.origin.y, r2.origin.x + r2.size.width - r1.origin.x, r1.size.height);
-				
-				CGContextFillRect(context, r);
-				
-				// forward glyph index pointer, i
-				i = effectiveRange.location + effectiveRange.length + 1;
-			}
+			NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:start toIndex:end];
 			
+			for (NSValue *rectValue in fragmentRects) {
+				CGContextFillRect(context, [rectValue CGRectValue]);
+			}
 		}
 	}
 }
@@ -67,32 +82,13 @@
 	NSUInteger end = _from > _end ? _from : _end;
 	
 	// Set drawing color
-	[[UIColor colorWithRed:0 green:1 blue:0 alpha:0.1] setFill];
+	[[self.tintColor colorWithAlphaComponent:0.5] setFill];
 	CGContextRef context = UIGraphicsGetCurrentContext();
 
-	// Estimate regions to render
-	for (int i = start; i <= end;) {
-		// Get right glyph index and left one on the line
-		NSRange effectiveRange;
-		[_layoutManager lineFragmentRectForGlyphAtIndex:i effectiveRange:(NSRangePointer)&effectiveRange];
-		NSUInteger left = effectiveRange.location >= i ? effectiveRange.location : i;
-		NSUInteger right = effectiveRange.location + effectiveRange.length <= end ? effectiveRange.location + effectiveRange.length - 1 : end;
-		
-		// Skip new line code
-		CGGlyph rightGlyph = [_layoutManager glyphAtIndex:right];
-		if (rightGlyph == 65535)
-			right--;
-		
-		// Get regions of right and left glyph
-		CGRect r1 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(left, 1) inTextContainer:_textContainer];
-		CGRect r2 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(right, 1) inTextContainer:_textContainer];
-		
-		// Get line region by combining right and left regions.
-		CGRect r = CGRectMake(r1.origin.x, r1.origin.y, r2.origin.x + r2.size.width - r1.origin.x, r1.size.height);
-		CGContextFillRect(context, r);
-		
-		// forward glyph index pointer, i
-		i = effectiveRange.location + effectiveRange.length;
+	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:start toIndex:end];
+	
+	for (NSValue *rectValue in fragmentRects) {
+		CGContextFillRect(context, [rectValue CGRectValue]);
 	}
 #if 0
 	// Render start and end cursors, for debug
@@ -129,6 +125,7 @@
 	UITouch *touch = [touches anyObject];
 	_end = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
 	_isTapping = NO;
+	_isSelecting = NO;
 	[self setNeedsDisplay];
 //#if 1
 	// for debug
@@ -195,11 +192,63 @@
 }
 
 - (void)drawRect:(CGRect)rect {
+	CGContextRef context = UIGraphicsGetCurrentContext();
+	[[UIColor whiteColor] setFill];
+	
+	CGContextFillRect(context, rect);
     // Drawing code
 	[_textContainer setSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
 	[_layoutManager drawGlyphsForGlyphRange:NSMakeRange(0, self.attributedString.length) atPoint:CGPointMake(0, 0)];
 	[self drawSelectedTextFragments];
 	[self drawSelectedLinkFragments];
+	
+	if (_isSelecting) {
+		[[self.tintColor colorWithAlphaComponent:0.5] setStroke];
+		[[UIColor whiteColor] setFill];
+		
+		CGPoint p = [_touch locationInView:self];
+		float radius = 50;
+		float offset = 0;
+		CGContextAddArc(
+						context,
+						p.x,
+						p.y - radius - offset,
+						radius,
+						0,
+						M_PI * 2,
+						0);
+		CGContextClosePath(context);
+		CGContextStrokePath(context);
+		CGContextAddArc(
+						context,
+						p.x,
+						p.y - radius - offset,
+						radius,
+						0,
+						M_PI * 2,
+						0);
+			CGContextClosePath(context);
+			[[UIColor whiteColor] setFill];
+		CGContextFillPath(context);
+
+		CGContextSaveGState(context);
+		CGContextTranslateCTM(context, 0, -offset-radius);
+		CGContextAddArc(
+						context,
+						p.x,
+						p.y,
+						radius,
+						0,
+						M_PI * 2,
+						0);
+		CGContextClosePath(context);
+		CGContextClip(context);
+		
+		[_layoutManager drawGlyphsForGlyphRange:NSMakeRange(0, self.attributedString.length) atPoint:CGPointMake(0, 0)];
+		[self drawSelectedTextFragments];
+		[self drawSelectedLinkFragments];
+		CGContextRestoreGState(context);
+	}
 }
 
 @end
