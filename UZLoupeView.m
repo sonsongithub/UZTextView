@@ -45,7 +45,7 @@
 	CAAnimationGroup *group = [CAAnimationGroup animation];
 	group.animations = @[sizeAnimation, yAnimation];
 	group.duration = 0.1;
-	group.removedOnCompletion = YES;
+	group.removedOnCompletion = NO;
 	group.fillMode = kCAFillModeForwards;
 	group.delegate = self;
 	

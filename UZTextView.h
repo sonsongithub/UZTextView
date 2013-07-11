@@ -11,6 +11,14 @@
 @class UZTextView;
 @class UZLoupeView;
 
+typedef enum _UZTextViewStatus {
+	UZTextViewNoSelection			= 0,
+	UZTextViewSelecting				= 1,
+	UZTextViewSelected				= 2,
+	UZTextViewEditingFromSelection	= 3,
+	UZTextViewEditingToSelection	= 4,
+}UZTextViewStatus;
+
 @protocol UZTextViewDelegate <NSObject>
 
 - (void)textView:(UZTextView*)textview didClickLinkAttribute:(id)value;
@@ -18,17 +26,22 @@
 @end
 
 @interface UZTextView : UIView {
-	NSLayoutManager *_layoutManager;
-	NSTextContainer *_textContainer;
-	NSTextStorage *_textStorage;
+	// text manager
+	NSLayoutManager		*_layoutManager;
+	NSTextContainer		*_textContainer;
+	NSTextStorage		*_textStorage;
 	
-	UZLoupeView	 *_loupeView;
+	// parameter
+	UZTextViewStatus	_status;
+	NSUInteger			_from;
+	NSUInteger			_end;
 	
+	// child view
+	UZLoupeView			*_loupeView;
+	
+	// deprecated?
 	BOOL _isSelecting;
 	BOOL _isTapping;
-	
-	NSUInteger _from;
-	NSUInteger _end;
 	UITouch *_touch;
 }
 
