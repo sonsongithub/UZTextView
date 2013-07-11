@@ -10,6 +10,92 @@
 
 @implementation UZLoupeView
 
+- (CAAnimation*)yAnimation {
+	// size
+	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
+	sizeAnimation.values = [NSArray arrayWithObjects:
+							[NSNumber numberWithFloat:self.frame.size.height/2],
+							[NSNumber numberWithFloat:0],
+							nil];
+	sizeAnimation.keyTimes = [NSArray arrayWithObjects:
+							  [NSNumber numberWithFloat:0],
+							  [NSNumber numberWithFloat:1],
+							  nil];
+	return sizeAnimation;
+}
+
+- (CAAnimation*)scaleAnimation {
+	// size
+	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+	sizeAnimation.values = [NSArray arrayWithObjects:
+							[NSNumber numberWithFloat:0],
+							[NSNumber numberWithFloat:1],
+							nil];
+	sizeAnimation.keyTimes = [NSArray arrayWithObjects:
+							  [NSNumber numberWithFloat:0],
+							  [NSNumber numberWithFloat:1],
+							  nil];
+	return sizeAnimation;
+}
+
+- (void)animate {
+	CAAnimation *sizeAnimation = [self scaleAnimation];
+	CAAnimation *yAnimation = [self yAnimation];
+	// make group
+	CAAnimationGroup *group = [CAAnimationGroup animation];
+	group.animations = @[sizeAnimation, yAnimation];
+	group.duration = 0.1;
+	group.removedOnCompletion = YES;
+	group.fillMode = kCAFillModeForwards;
+	group.delegate = self;
+	
+	// commit animation
+	[self.layer addAnimation:group forKey:@"hoge"];
+}
+
+- (CAAnimation*)hideyAnimation {
+	// size
+	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
+	sizeAnimation.values = [NSArray arrayWithObjects:
+							[NSNumber numberWithFloat:0],
+							[NSNumber numberWithFloat:self.frame.size.height/2],
+							nil];
+	sizeAnimation.keyTimes = [NSArray arrayWithObjects:
+							  [NSNumber numberWithFloat:0],
+							  [NSNumber numberWithFloat:1],
+							  nil];
+	return sizeAnimation;
+}
+
+- (CAAnimation*)hidescaleAnimation {
+	// size
+	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+	sizeAnimation.values = [NSArray arrayWithObjects:
+							[NSNumber numberWithFloat:1],
+							[NSNumber numberWithFloat:0],
+							nil];
+	sizeAnimation.keyTimes = [NSArray arrayWithObjects:
+							  [NSNumber numberWithFloat:0],
+							  [NSNumber numberWithFloat:1],
+							  nil];
+	return sizeAnimation;
+}
+
+- (void)hideanimate {
+	CAAnimation *sizeAnimation = [self hidescaleAnimation];
+	CAAnimation *yAnimation = [self hideyAnimation];
+	// make group
+	CAAnimationGroup *group = [CAAnimationGroup animation];
+	group.animations = @[sizeAnimation, yAnimation];
+	group.duration = 0.1;
+	group.removedOnCompletion = NO;
+	group.fillMode = kCAFillModeForwards;
+	group.delegate = self;
+	
+	// commit animation
+	[self.layer addAnimation:group forKey:@"hoge"];
+}
+
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];

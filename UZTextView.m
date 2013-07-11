@@ -134,10 +134,12 @@
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [touches anyObject];
 	_end = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
+	
+	if (!_isSelecting)
+		 [_loupeView animate];
 	_isSelecting = YES;
 	_isTapping = NO;
 	[self setNeedsDisplay];
-	
 	[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
 }
 
@@ -147,6 +149,7 @@
 	_isTapping = NO;
 	_isSelecting = NO;
 	[self setNeedsDisplay];
+	[_loupeView hideanimate];
 //#if 1
 	// for debug
 	NSUInteger start = _from < _end ? _from : _end;
