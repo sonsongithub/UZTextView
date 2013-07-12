@@ -319,6 +319,7 @@ typedef enum _UZTextViewCursorDirection {
 }
 
 - (void)copy:(id)sender {
+	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:NSMakeRange(_from, _end)];
 }
 
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
