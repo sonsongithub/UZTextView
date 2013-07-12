@@ -232,6 +232,7 @@ typedef enum _UZTextViewCursorDirection {
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [touches anyObject];
 	[self setNeedsDisplay];
+	[[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
 	
 	if (_status == UZTextViewSelected) {
 		if ([self clickFromAtPoint:[touch locationInView:self]]) {
@@ -300,12 +301,31 @@ typedef enum _UZTextViewCursorDirection {
 		_from = start;
 		_end = end;
 		_status = UZTextViewSelected;
+		
+		NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:start toIndex:end];
+		CGRect r = [[fragmentRects objectAtIndex:0] CGRectValue];
+		for (NSValue *rectValue in fragmentRects) {
+			r = CGRectUnion(r, [rectValue CGRectValue]);
+		}
+		[self becomeFirstResponder];
+		[[UIMenuController sharedMenuController] setTargetRect:r inView:self];
+		[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
 	}
 	[self setNeedsDisplay];
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
 	
+}
+
+- (void)copy:(id)sender {
+}
+
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
+	if (action == @selector(copy:)) {
+		return YES;
+	}
+	return NO;
 }
 
 #pragma mark - initialize
@@ -349,6 +369,10 @@ typedef enum _UZTextViewCursorDirection {
 	
 	// draw main content
 	[self drawContent];
+}
+
+- (BOOL)canBecomeFirstResponder {
+	return YES;
 }
 
 @end
