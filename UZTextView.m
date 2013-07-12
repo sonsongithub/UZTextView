@@ -133,30 +133,32 @@ typedef enum _UZTextViewCursorDirection {
 
 #pragma mark - Draw
 
-//- (void)drawSelectedLinkFragments {
-//	NSRange range;
-//	NSDictionary *dict = [self.attributedString attributesAtIndex:_from effectiveRange:&range];
-//	if (dict[NSLinkAttributeName]) {
-//		NSLogRange(range);
-//		CGRect glyphrect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(_from, 1) inTextContainer:_textContainer];
-//		
-//		CGPoint p = [_touch locationInView:self];
-//		if (CGRectContainsPoint(glyphrect, p)) {
-//			CGContextRef context = UIGraphicsGetCurrentContext();
-//			
-//			[[self.tintColor colorWithAlphaComponent:0.5] setFill];
-//			
-//			NSUInteger start = range.location;
-//			NSUInteger end = range.location + range.length;
-//			
-//			NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:start toIndex:end];
-//			
-//			for (NSValue *rectValue in fragmentRects) {
-//				CGContextFillRect(context, [rectValue CGRectValue]);
-//			}
-//		}
-//	}
-//}
+- (void)drawSelectedLinkFragments {
+	NSRange range;
+	if (CGPointEqualToPoint(_locationWhenTapBegan, CGPointZero))
+		return;
+	int tappedIndex = [_layoutManager glyphIndexForPoint:_locationWhenTapBegan inTextContainer:_textContainer];
+	NSDictionary *dict = [self.attributedString attributesAtIndex:tappedIndex effectiveRange:&range];
+	if (dict[NSLinkAttributeName]) {
+		NSLogRange(range);
+		CGRect glyphrect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(tappedIndex, 1) inTextContainer:_textContainer];
+
+		if (CGRectContainsPoint(glyphrect, _locationWhenTapBegan)) {
+			CGContextRef context = UIGraphicsGetCurrentContext();
+
+			[[self.tintColor colorWithAlphaComponent:0.5] setFill];
+
+			NSUInteger start = range.location;
+			NSUInteger end = range.location + range.length;
+
+			NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:start toIndex:end];
+
+			for (NSValue *rectValue in fragmentRects) {
+				CGContextFillRect(context, [rectValue CGRectValue]);
+			}
+		}
+	}
+}
 
 - (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex {
 	// Set drawing color
@@ -214,6 +216,8 @@ typedef enum _UZTextViewCursorDirection {
 		[self drawSelectedTextFragmentRectsFromIndex:fromToRender toIndex:toToRender];
 		[self drawCursorsAtFromIndex:fromToRender atToIndex:toToRender];
 	}
+	if (_status == UZTextViewNoSelection)
+		[self drawSelectedLinkFragments];
 }
 
 #pragma mark - Touch event
@@ -283,6 +287,14 @@ typedef enum _UZTextViewCursorDirection {
 	
 	if (_status == UZTextViewNoSelection) {
 		// clicked
+		int tappedIndex = [_layoutManager glyphIndexForPoint:_locationWhenTapBegan inTextContainer:_textContainer];
+		NSDictionary *dict = [self.attributedString attributesAtIndex:tappedIndex effectiveRange:NULL];
+		if (dict[NSLinkAttributeName]) {
+			CGRect glyphrect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(tappedIndex, 1) inTextContainer:_textContainer];
+			if (CGRectContainsPoint(glyphrect, _locationWhenTapBegan)) {
+				NSLog(@"%@", dict);
+			}
+		}
 	}
 	else {
 		// dragged
@@ -296,11 +308,12 @@ typedef enum _UZTextViewCursorDirection {
 		[[UIMenuController sharedMenuController] setTargetRect:[self selectedStringRectFromIndex:_from toIndex:_end] inView:self];
 		[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
 	}
+	_locationWhenTapBegan = CGPointZero;
 	[self setNeedsDisplay];
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
-	
+	[self touchesEnded:touches withEvent:event];
 }
 
 #pragma mark - for UIMenuController
