@@ -233,11 +233,13 @@ typedef enum _UZTextViewCursorDirection {
 		if (CGRectContainsPoint([self rectToTapAtIndex:_from side:UZTextViewLeftEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingFromSelection;
 			[_loupeView animate];
+			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
 			return;
 		}
 		if (CGRectContainsPoint([self rectToTapAtIndex:_end side:UZTextViewRightEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingToSelection;
 			[_loupeView animate];
+			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
 			return;
 		}
 	}
