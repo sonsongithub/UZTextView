@@ -120,7 +120,7 @@
 
 - (void)drawRect:(CGRect)rect {
 	CGContextRef context = UIGraphicsGetCurrentContext();
-	[[self.tintColor colorWithAlphaComponent:0.75] setStroke];
+	[[self.tintColor colorWithAlphaComponent:1] setStroke];
 	
 	float radius = rect.size.width/2;
 	
@@ -136,9 +136,12 @@
 	[_image drawAtPoint:CGPointZero];
 	CGContextRestoreGState(context);
 	
-	CGContextAddArc(context, radius, radius, radius, 0, M_PI * 2, 0);
+	CGContextSaveGState(context);
+	CGContextSetLineWidth(context, 2);
+	CGContextAddArc(context, radius, radius, radius-1, 0, M_PI * 2, 0);
 	CGContextClosePath(context);
 	CGContextDrawPath(context, kCGPathStroke);
+	CGContextRestoreGState(context);
 }
 
 @end
