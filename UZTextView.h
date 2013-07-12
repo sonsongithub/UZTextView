@@ -39,10 +39,8 @@ typedef enum _UZTextViewStatus {
 	// child view
 	UZLoupeView			*_loupeView;
 	
-	// deprecated?
-	BOOL _isSelecting;
-	BOOL _isTapping;
-	UITouch *_touch;
+	// tap event control
+	CGPoint				_locationWhenTapBegan;
 }
 
 @property (nonatomic, assign) id <UZTextViewDelegate> delegate;
