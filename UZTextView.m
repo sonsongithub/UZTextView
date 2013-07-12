@@ -15,16 +15,39 @@
 #define NSLogRect(p) NSLog(@"%f,%f,%f,%f",p.origin.x, p.origin.y, p.size.width, p.size.height)
 #define NSLogRange(p) NSLog(@"%d,%d",p.location, p.length)
 
+typedef enum _UZTextViewGlyphEdgeType {
+	UZTextViewLeftEdge		= 0,
+	UZTextViewRightEdge		= 1
+}UZTextViewGlyphEdgeType;
+
+typedef enum _UZTextViewCursorDirection {
+	UZTextViewUpCursor		= 0,
+	UZTextViewDownCursor	= 1
+}UZTextViewCursorDirection;
+
 @implementation UZTextView
 
+- (CGRect)rectToTapAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side {
+	if (side == UZTextViewLeftEdge) {
+		CGRect rect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(index, 1) inTextContainer:_textContainer];
+		rect.size.width = 0;
+		return CGRectInset(rect, -10, -10);
+	}
+	else {
+		CGRect rect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(index, 1) inTextContainer:_textContainer];
+		if ([_layoutManager glyphAtIndex:index] != NEW_LINE_GLYPH)
+			rect.origin.x += rect.size.width;
+		rect.size.width = 0;
+		return CGRectInset(rect, -10, -10);
+	}
+}
+
 - (BOOL)clickFromAtPoint:(CGPoint)point {
-	CGRect left_cursol = [_layoutManager boundingRectForGlyphRange:NSMakeRange(_from, 1) inTextContainer:_textContainer];
-	return CGRectContainsPoint(left_cursol, point);
+	return CGRectContainsPoint([self rectToTapAtIndex:_from side:UZTextViewLeftEdge], point);
 }
 
 - (BOOL)clickEndAtPoint:(CGPoint)point {
-	CGRect right_cursol = [_layoutManager boundingRectForGlyphRange:NSMakeRange(_end, 1) inTextContainer:_textContainer];
-	return CGRectContainsPoint(right_cursol, point);
+	return CGRectContainsPoint([self rectToTapAtIndex:_end side:UZTextViewRightEdge], point);
 }
 
 #pragma mark - Touch event
@@ -98,10 +121,7 @@
 	_from = start;
 	_end = end;
 	
-	if (abs(_from - _end) > 0)
-		_status = UZTextViewSelected;
-	else
-		_status = UZTextViewNoSelection;
+	_status = UZTextViewSelected;
 	
 	[self updateSelecting];
 	[_loupeView hideanimate];
@@ -115,7 +135,7 @@
 #pragma mark - Layout
 
 - (NSArray*)fragmentRectsForGlyphFromIndex:(int)fromIndex toIndex:(int)toIndex {
-	if (!(fromIndex < toIndex && fromIndex >=0 && toIndex >=0))
+	if (!(fromIndex <= toIndex && fromIndex >=0 && toIndex >=0))
 		return @[];
 	
 	// Extracted fragment rects from layout manager
@@ -196,64 +216,38 @@
 #endif
 }
 
-- (void)drawCursor {
+- (void)drawCursorInsideRect:(CGRect)rect direction:(UZTextViewCursorDirection)direction {
 	CGContextRef context = UIGraphicsGetCurrentContext();
+	float radius = 4;
+	float width = 2;
+	CGRect lineRect;
+	CGPoint circleCenter;
 	
+	if (direction == UZTextViewUpCursor) {
+		circleCenter = CGPointMake(CGRectGetMidX(rect), rect.origin.y + radius);
+		lineRect = CGRectMake(circleCenter.x - width/2, circleCenter.y + radius, width, rect.size.height - radius * 3);
+	}
+	else {
+		circleCenter = CGPointMake(CGRectGetMidX(rect), rect.origin.y + rect.size.height - radius);
+		lineRect = CGRectMake(circleCenter.x - width/2, rect.origin.y + radius, width, rect.size.height - radius * 3);
+	}
+	CGContextAddArc(context, circleCenter.x, circleCenter.y, radius, 0, 2 * M_PI, 0);
+	CGContextClosePath(context);
+	[[self.tintColor colorWithAlphaComponent:1] setFill];
+	CGContextFillPath(context);
+	CGContextFillRect(context, lineRect);
+}
+
+- (void)drawCursor {
 	// Re-order start and end index.
 	NSUInteger start = _from < _end ? _from : _end;
 	NSUInteger end = _from > _end ? _from : _end;
 	
-	// Render start and end cursors, for debug
-	CGRect left_cursol = [_layoutManager boundingRectForGlyphRange:NSMakeRange(start, 1) inTextContainer:_textContainer];
-	CGRect right_cursol = [_layoutManager boundingRectForGlyphRange:NSMakeRange(end, 1) inTextContainer:_textContainer];
-	[[UIColor colorWithRed:0 green:1 blue:0 alpha:0.8] setFill];
+	CGRect startRect = [self rectToTapAtIndex:start side:UZTextViewLeftEdge];
+	CGRect endRect = [self rectToTapAtIndex:end side:UZTextViewRightEdge];
 	
-	{
-		UIColor* fillColor = [UIColor colorWithRed: 1 green: 1 blue: 1 alpha: 1];
-		UIColor* strokeColor = [UIColor colorWithRed: 0 green: 0 blue: 0 alpha: 1];
-		UIBezierPath* path = [UIBezierPath bezierPath];
-		CGContextSaveGState(context);
-		CGContextTranslateCTM(context, left_cursol.origin.x - 6, left_cursol.origin.y);
-		[path moveToPoint: CGPointMake(12,-6)];
-		[path addCurveToPoint: CGPointMake(6,-12) controlPoint1: CGPointMake(12,-9) controlPoint2: CGPointMake(9,-12)];
-		[path addCurveToPoint: CGPointMake(0,-6) controlPoint1: CGPointMake(2,-12) controlPoint2: CGPointMake(0,-9)];
-		[path addCurveToPoint: CGPointMake(4,0) controlPoint1: CGPointMake(0,-3) controlPoint2: CGPointMake(2,0)];
-		[path addLineToPoint: CGPointMake(4,32)];
-		[path addLineToPoint: CGPointMake(7,32)];
-		[path addLineToPoint: CGPointMake(7,0)];
-		[path addCurveToPoint: CGPointMake(12,-6) controlPoint1: CGPointMake(10,0) controlPoint2: CGPointMake(12,-3)];
-		[fillColor setFill];
-		[path fill];
-		[strokeColor setStroke];
-		path.lineWidth = 1;
-		[path stroke];
-		CGContextRestoreGState(context);
-	}
-	{
-		UIColor* fillColor = [UIColor colorWithRed: 1 green: 1 blue: 1 alpha: 1];
-		UIColor* strokeColor = [UIColor colorWithRed: 0 green: 0 blue: 0 alpha: 1];
-		UIBezierPath* path = [UIBezierPath bezierPath];
-		CGContextSaveGState(context);
-		if ([_layoutManager glyphAtIndex:end] == NEW_LINE_GLYPH)
-			CGContextTranslateCTM(context, right_cursol.origin.x - 6, right_cursol.origin.y);
-		else
-			CGContextTranslateCTM(context, right_cursol.origin.x + right_cursol.size.width - 6, right_cursol.origin.y);
-		[path moveToPoint: CGPointMake(0,38)];
-		[path addCurveToPoint: CGPointMake(6,44) controlPoint1: CGPointMake(0,41) controlPoint2: CGPointMake(2,44)];
-		[path addCurveToPoint: CGPointMake(12,38) controlPoint1: CGPointMake(9,44) controlPoint2: CGPointMake(12,41)];
-		[path addCurveToPoint: CGPointMake(7,31) controlPoint1: CGPointMake(12,35) controlPoint2: CGPointMake(10,32)];
-		[path addLineToPoint: CGPointMake(7,0)];
-		[path addLineToPoint: CGPointMake(4,0)];
-		[path addLineToPoint: CGPointMake(4,31)];
-		[path addCurveToPoint: CGPointMake(0,38) controlPoint1: CGPointMake(2,32) controlPoint2: CGPointMake(0,35)];
-		[fillColor setFill];
-		[path fill];
-		[strokeColor setStroke];
-		path.lineWidth = 1;
-		[path stroke];
-		CGContextRestoreGState(context);
-	}
-
+	[self drawCursorInsideRect:startRect direction:UZTextViewUpCursor];
+	[self drawCursorInsideRect:endRect direction:UZTextViewDownCursor];
 }
 
 - (void)searchLinkAttribute {
