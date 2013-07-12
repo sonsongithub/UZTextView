@@ -27,39 +27,37 @@ typedef enum _UZTextViewCursorDirection {
 
 @implementation UZTextView
 
+#pragma mark - Instance method
+
 - (CGRect)rectToTapAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side {
 	if (side == UZTextViewLeftEdge) {
 		CGRect rect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(index, 1) inTextContainer:_textContainer];
 		rect.size.width = 0;
-		return CGRectInset(rect, -10, -10);
+		return CGRectInset(rect, -_cursorMargin, -_cursorMargin);
 	}
 	else {
 		CGRect rect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(index, 1) inTextContainer:_textContainer];
 		if ([_layoutManager glyphAtIndex:index] != NEW_LINE_GLYPH)
 			rect.origin.x += rect.size.width;
 		rect.size.width = 0;
-		return CGRectInset(rect, -10, -10);
+		return CGRectInset(rect, -_cursorMargin, -_cursorMargin);
 	}
-}
-
-- (void)searchLinkAttribute {
 }
 
 - (void)pushSnapshotToLoupeViewAtLocation:(CGPoint)location {
 	// Create UIImage from source view controller's view.
-	float radius = 100;
-	UIGraphicsBeginImageContextWithOptions(CGSizeMake(radius, radius), NO, 0);
+	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius, _loupeRadius), NO, 0);
 	CGContextRef ctx = UIGraphicsGetCurrentContext();
 	[[UIColor whiteColor] setFill];
-	CGContextFillRect(ctx, CGRectMake(0, 0, radius, radius));
+	CGContextFillRect(ctx, CGRectMake(0, 0, _loupeRadius, _loupeRadius));
 	CGContextScaleCTM(ctx, 1, 1);
-	CGContextTranslateCTM(ctx, -location.x + radius/2, -location.y+radius/2);
+	CGContextTranslateCTM(ctx, -location.x + _loupeRadius/2, -location.y+_loupeRadius/2);
 	// Drawing code
 	[self drawContent];
 	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
 	[_loupeView update:sourceViewImage];
 	UIGraphicsEndImageContext();
-	[_loupeView setCenter:CGPointMake(location.x, location.y - radius/2)];
+	[_loupeView setCenter:CGPointMake(location.x, location.y - _loupeRadius/2)];
 }
 
 - (void)setAttributedString:(NSAttributedString *)attributedString {
@@ -71,14 +69,7 @@ typedef enum _UZTextViewCursorDirection {
 	
 	[_textStorage addLayoutManager:_layoutManager];
 	
-	NSRange range = [_layoutManager glyphRangeForTextContainer:_textContainer];
-	
-	for (int i = range.location; i < range.location + range.length; i++) {
-		NSLog(@"%d->%d", i, [_layoutManager glyphAtIndex:i]);
-	}
-	
 	CGRect r = [_layoutManager lineFragmentRectForGlyphAtIndex:self.attributedString.length-1 effectiveRange:NULL];
-	NSLog(@"%f,%f, %f,%f", r.origin.x, r.origin.y, r.size.width, r.size.height);
 	
 	CGRect currentRect = self.frame;
 	currentRect.size = CGSizeMake(r.size.width, r.size.height + r.origin.y);
@@ -146,7 +137,7 @@ typedef enum _UZTextViewCursorDirection {
 		if (CGRectContainsPoint(glyphrect, _locationWhenTapBegan)) {
 			CGContextRef context = UIGraphicsGetCurrentContext();
 
-			[[self.tintColor colorWithAlphaComponent:0.5] setFill];
+			[[self.tintColor colorWithAlphaComponent:_tintAlpha] setFill];
 
 			NSUInteger start = range.location;
 			NSUInteger end = range.location + range.length;
@@ -162,7 +153,7 @@ typedef enum _UZTextViewCursorDirection {
 
 - (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex {
 	// Set drawing color
-	[[self.tintColor colorWithAlphaComponent:0.5] setFill];
+	[[self.tintColor colorWithAlphaComponent:_tintAlpha] setFill];
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:fromIndex toIndex:toIndex];
 	for (NSValue *rectValue in fragmentRects)
@@ -171,20 +162,24 @@ typedef enum _UZTextViewCursorDirection {
 
 - (void)drawCursorInsideRect:(CGRect)rect direction:(UZTextViewCursorDirection)direction {
 	CGContextRef context = UIGraphicsGetCurrentContext();
-	float radius = 6;
-	float width = 2;
 	CGRect lineRect;
 	CGPoint circleCenter;
 	
 	if (direction == UZTextViewUpCursor) {
-		circleCenter = CGPointMake(CGRectGetMidX(rect), rect.origin.y + radius);
-		lineRect = CGRectMake(circleCenter.x - width/2, circleCenter.y, width, rect.size.height - radius * 2);
+		circleCenter = CGPointMake(CGRectGetMidX(rect), rect.origin.y + _cursorCirclrRadius);
+		lineRect = CGRectMake(
+							  circleCenter.x - _cursorLineWidth/2, circleCenter.y,
+							  _cursorLineWidth, rect.size.height - _cursorCirclrRadius * 2
+							  );
 	}
 	else {
-		circleCenter = CGPointMake(CGRectGetMidX(rect), rect.origin.y + rect.size.height - radius);
-		lineRect = CGRectMake(circleCenter.x - width/2, rect.origin.y + radius, width, rect.size.height - radius * 2);
+		circleCenter = CGPointMake(CGRectGetMidX(rect), rect.origin.y + rect.size.height - _cursorCirclrRadius);
+		lineRect = CGRectMake(
+							  circleCenter.x - _cursorLineWidth/2, rect.origin.y + _cursorCirclrRadius,
+							  _cursorLineWidth, rect.size.height - _cursorCirclrRadius * 2
+							  );
 	}
-	CGContextAddArc(context, circleCenter.x, circleCenter.y, radius, 0, 2 * M_PI, 0);
+	CGContextAddArc(context, circleCenter.x, circleCenter.y, _cursorCirclrRadius, 0, 2 * M_PI, 0);
 	CGContextClosePath(context);
 	[[self.tintColor colorWithAlphaComponent:1] setFill];
 	CGContextFillPath(context);
@@ -340,12 +335,19 @@ typedef enum _UZTextViewCursorDirection {
 #pragma mark - initialize
 
 - (void)prepareForInit {
+	// init invaliables
+	_loupeRadius = 100;
+	_cursorMargin = 14;
+	_tintAlpha = 0.5;
+	_cursorCirclrRadius = 6;
+	_cursorLineWidth = 2;
+	
 	// Initialization code
 	_layoutManager = [[NSLayoutManager alloc] init];
 	_textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
 	_textStorage = [[NSTextStorage alloc] init];
 	[_layoutManager addTextContainer:_textContainer];
-	_loupeView = [[UZLoupeView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+	_loupeView = [[UZLoupeView alloc] initWithFrame:CGRectMake(0, 0, _loupeRadius, _loupeRadius)];
 	[self addSubview:_loupeView];
 }
 

@@ -43,6 +43,13 @@ typedef enum _UZTextViewStatus {
 	
 	// tap event control
 	CGPoint				_locationWhenTapBegan;
+	
+	// invaliables
+	float				_loupeRadius;
+	float				_cursorMargin;
+	float				_tintAlpha;
+	float				_cursorCirclrRadius;
+	float				_cursorLineWidth;
 }
 
 @property (nonatomic, assign) id <UZTextViewDelegate> delegate;
