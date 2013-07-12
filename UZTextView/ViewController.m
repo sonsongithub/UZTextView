@@ -26,6 +26,16 @@
 	[attributedString addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleNone) range:NSMakeRange(10, 22)];
 	
 	self.textView.attributedString = attributedString;
+	self.textView.delegate = self;
+}
+
+- (void)textView:(UZTextView *)textview didClickLinkAttribute:(id)value {
+	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Clicked"
+														message:[value objectForKey:@"NSLink"]
+													   delegate:nil
+											  cancelButtonTitle:nil
+											  otherButtonTitles:@"OK", nil];
+	[alertView show];
 }
 
 @end

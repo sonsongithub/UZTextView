@@ -292,7 +292,9 @@ typedef enum _UZTextViewCursorDirection {
 		if (dict[NSLinkAttributeName]) {
 			CGRect glyphrect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(tappedIndex, 1) inTextContainer:_textContainer];
 			if (CGRectContainsPoint(glyphrect, _locationWhenTapBegan)) {
-				NSLog(@"%@", dict);
+				if ([self.delegate respondsToSelector:@selector(textView:didClickLinkAttribute:)]) {
+					[self.delegate textView:self didClickLinkAttribute:dict];
+				}
 			}
 		}
 	}

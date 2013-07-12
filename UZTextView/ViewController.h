@@ -8,9 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@class UZTextView;
+#import "UZTextView.h"
 
-@interface ViewController : UIViewController
+@interface ViewController : UIViewController <UZTextViewDelegate>
 
 @property (nonatomic, strong) IBOutlet UZTextView *textView;
 
