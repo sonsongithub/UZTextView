@@ -158,41 +158,6 @@ typedef enum _UZTextViewCursorDirection {
 //	}
 //}
 
-- (void)drawSelectedTextFragments __attribute__((deprecated(""))) {
-	// Re-order start and end index.
-	NSUInteger start = _from < _end ? _from : _end;
-	NSUInteger end = _from > _end ? _from : _end;
-	
-	// Set drawing color
-	[[self.tintColor colorWithAlphaComponent:0.5] setFill];
-	CGContextRef context = UIGraphicsGetCurrentContext();
-	
-	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:start toIndex:end];
-	
-	for (NSValue *rectValue in fragmentRects) {
-		CGContextFillRect(context, [rectValue CGRectValue]);
-	}
-}
-
-- (CGRect)selectedStringRect __attribute__((deprecated(""))) {
-	NSUInteger start = _from < _end ? _from : _end;
-	NSUInteger end = _from > _end ? _from : _end;
-	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:start toIndex:end];
-	CGRect unifiedRect = [[fragmentRects objectAtIndex:0] CGRectValue];
-	for (NSValue *rectValue in fragmentRects) {
-		unifiedRect = CGRectUnion(unifiedRect, [rectValue CGRectValue]);
-	}
-	return unifiedRect;
-}
-
-- (void)drawCursor __attribute__((deprecated(""))) {
-	// Re-order start and end index.
-	NSUInteger start = _from < _end ? _from : _end;
-	NSUInteger end = _from > _end ? _from : _end;
-	[self drawCursorAtIndex:start side:UZTextViewLeftEdge direction:UZTextViewUpCursor];
-	[self drawCursorAtIndex:end side:UZTextViewRightEdge direction:UZTextViewDownCursor];
-}
-
 - (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex {
 	// Set drawing color
 	[[self.tintColor colorWithAlphaComponent:0.5] setFill];
