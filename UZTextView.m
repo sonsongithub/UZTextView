@@ -232,13 +232,13 @@ typedef enum _UZTextViewCursorDirection {
 		_endWhenBegan = _end;
 		if (CGRectContainsPoint([self rectToTapAtIndex:_from side:UZTextViewLeftEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingFromSelection;
-			[_loupeView animate];
+			[_loupeView setVisible:YES animated:YES];
 			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
 			return;
 		}
 		if (CGRectContainsPoint([self rectToTapAtIndex:_end side:UZTextViewRightEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingToSelection;
-			[_loupeView animate];
+			[_loupeView setVisible:YES animated:YES];
 			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
 			return;
 		}
@@ -255,7 +255,7 @@ typedef enum _UZTextViewCursorDirection {
 		if (fabs(_locationWhenTapBegan.x - [touch locationInView:self].y) + fabs(_locationWhenTapBegan.y - [touch locationInView:self].y) > 4) {
 			_from = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
 			_end = _from;
-			[_loupeView animate];
+			[_loupeView setVisible:YES animated:YES];
 			_status = UZTextViewSelecting;
 		}
 	}
@@ -285,7 +285,7 @@ typedef enum _UZTextViewCursorDirection {
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	[_loupeView hideanimate];
+	[_loupeView setVisible:NO animated:YES];
 	
 	if (_status == UZTextViewNoSelection) {
 		// clicked

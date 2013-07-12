@@ -16,6 +16,5 @@
 	UIImage		*_image;
 }
 - (void)update:(UIImage*)image;
-- (void)animate;
-- (void)hideanimate;
+- (void)setVisible:(BOOL)visible animated:(BOOL)animated;
 @end

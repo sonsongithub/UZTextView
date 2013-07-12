@@ -10,8 +10,9 @@
 
 @implementation UZLoupeView
 
-- (CAAnimation*)yAnimation {
-	// size
+#pragma mark - Create Core Animation objects
+
+- (CAAnimation*)translationYAnimationWhileAppearing {
 	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
 	sizeAnimation.values = [NSArray arrayWithObjects:
 							[NSNumber numberWithFloat:self.frame.size.height/2],
@@ -24,8 +25,7 @@
 	return sizeAnimation;
 }
 
-- (CAAnimation*)scaleAnimation {
-	// size
+- (CAAnimation*)transformScaleAnimationWhileAppearing {
 	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
 	sizeAnimation.values = [NSArray arrayWithObjects:
 							[NSNumber numberWithFloat:0],
@@ -38,16 +38,44 @@
 	return sizeAnimation;
 }
 
-- (void)animate {
+- (CAAnimation*)translationYAnimationWhileDisappearing {
+	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
+	sizeAnimation.values = [NSArray arrayWithObjects:
+							[NSNumber numberWithFloat:0],
+							[NSNumber numberWithFloat:self.frame.size.height/2],
+							nil];
+	sizeAnimation.keyTimes = [NSArray arrayWithObjects:
+							  [NSNumber numberWithFloat:0],
+							  [NSNumber numberWithFloat:1],
+							  nil];
+	return sizeAnimation;
+}
+
+- (CAAnimation*)transformScaleAnimationWhileDisapearing {
+	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+	sizeAnimation.values = [NSArray arrayWithObjects:
+							[NSNumber numberWithFloat:1],
+							[NSNumber numberWithFloat:0],
+							nil];
+	sizeAnimation.keyTimes = [NSArray arrayWithObjects:
+							  [NSNumber numberWithFloat:0],
+							  [NSNumber numberWithFloat:1],
+							  nil];
+	return sizeAnimation;
+}
+
+#pragma mark - Animate
+
+- (void)animateForAppearingWithDuration:(float)duration {
+	// decide whether animation should be started or not
 	if (!self.hidden)
 		return;
 	self.hidden = NO;
-	CAAnimation *sizeAnimation = [self scaleAnimation];
-	CAAnimation *yAnimation = [self yAnimation];
-	// make group
+	
+	// make animation group
 	CAAnimationGroup *group = [CAAnimationGroup animation];
-	group.animations = @[sizeAnimation, yAnimation];
-	group.duration = 0.1;
+	group.animations = @[[self transformScaleAnimationWhileAppearing], [self translationYAnimationWhileAppearing]];
+	group.duration = duration;
 	group.removedOnCompletion = NO;
 	group.fillMode = kCAFillModeForwards;
 	group.delegate = self;
@@ -55,6 +83,21 @@
 	// commit animation
 	[self.layer addAnimation:group forKey:@"appear"];
 }
+
+- (void)animateForDisappearingWithDuration:(float)duration {
+	// make group
+	CAAnimationGroup *group = [CAAnimationGroup animation];
+	group.animations = @[[self translationYAnimationWhileDisappearing], [self transformScaleAnimationWhileDisapearing]];
+	group.duration = duration;
+	group.removedOnCompletion = NO;
+	group.fillMode = kCAFillModeForwards;
+	group.delegate = self;
+	
+	// commit animation
+	[self.layer addAnimation:group forKey:@"disappear"];
+}
+
+#pragma mark - Core Animation callback
 
 - (void)animationDidStop:(CAAnimation*)animation finished:(BOOL)flag {
 	if (animation == [self.layer animationForKey:@"appear"]) {
@@ -64,51 +107,24 @@
 	}
 }
 
-- (CAAnimation*)hideyAnimation {
-	// size
-	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
-	sizeAnimation.values = [NSArray arrayWithObjects:
-							[NSNumber numberWithFloat:0],
-							[NSNumber numberWithFloat:self.frame.size.height/2],
-							nil];
-	sizeAnimation.keyTimes = [NSArray arrayWithObjects:
-							  [NSNumber numberWithFloat:0],
-							  [NSNumber numberWithFloat:1],
-							  nil];
-	return sizeAnimation;
+#pragma mark - Public
+
+- (void)setVisible:(BOOL)visible animated:(BOOL)animated {
+	float duration = animated ? 0.1 : 0.00001;
+	if (visible)
+		[self animateForAppearingWithDuration:duration];
+	else
+		[self animateForDisappearingWithDuration:duration];
 }
 
-- (CAAnimation*)hidescaleAnimation {
-	// size
-	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-	sizeAnimation.values = [NSArray arrayWithObjects:
-							[NSNumber numberWithFloat:1],
-							[NSNumber numberWithFloat:0],
-							nil];
-	sizeAnimation.keyTimes = [NSArray arrayWithObjects:
-							  [NSNumber numberWithFloat:0],
-							  [NSNumber numberWithFloat:1],
-							  nil];
-	return sizeAnimation;
+- (void)update:(UIImage*)image {
+	_image = image;
+	[self setNeedsDisplay];
 }
 
-- (void)hideanimate {
-	CAAnimation *sizeAnimation = [self hidescaleAnimation];
-	CAAnimation *yAnimation = [self hideyAnimation];
-	// make group
-	CAAnimationGroup *group = [CAAnimationGroup animation];
-	group.animations = @[sizeAnimation, yAnimation];
-	group.duration = 0.1;
-	group.removedOnCompletion = NO;
-	group.fillMode = kCAFillModeForwards;
-	group.delegate = self;
-	
-	// commit animation
-	[self.layer addAnimation:group forKey:@"disappear"];
-}
+#pragma mark - Override
 
-- (id)initWithFrame:(CGRect)frame
-{
+- (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
 		[self setBackgroundColor:[UIColor clearColor]];
@@ -117,22 +133,18 @@
     return self;
 }
 
-- (void)update:(UIImage*)image {
-	_image = image;
-	[self setNeedsDisplay];
-}
-
 - (void)drawRect:(CGRect)rect {
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	[[self.tintColor colorWithAlphaComponent:1] setStroke];
 	
+	// draw back ground fill
 	float radius = rect.size.width/2;
-	
 	CGContextAddArc(context, radius, radius, radius, 0, M_PI * 2, 0);
 	CGContextClosePath(context);
 	[[UIColor blackColor] setFill];
 	CGContextDrawPath(context, kCGPathFill);
 	
+	// draw captured UZTextView bitmap
 	CGContextSaveGState(context);
 	CGContextAddArc(context, radius, radius, radius, 0, M_PI * 2, 0);
 	CGContextClosePath(context);
@@ -140,6 +152,7 @@
 	[_image drawAtPoint:CGPointZero];
 	CGContextRestoreGState(context);
 	
+	// draw outline stroke
 	CGContextSaveGState(context);
 	CGContextSetLineWidth(context, 2);
 	CGContextAddArc(context, radius, radius, radius-1, 0, M_PI * 2, 0);
