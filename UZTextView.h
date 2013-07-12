@@ -35,6 +35,8 @@ typedef enum _UZTextViewStatus {
 	UZTextViewStatus	_status;
 	NSUInteger			_from;
 	NSUInteger			_end;
+	NSUInteger			_fromWhenBegan;
+	NSUInteger			_endWhenBegan;
 	
 	// child view
 	UZLoupeView			*_loupeView;

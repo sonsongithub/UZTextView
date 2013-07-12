@@ -174,19 +174,11 @@ typedef enum _UZTextViewCursorDirection {
 	for (NSValue *rectValue in fragmentRects) {
 		CGContextFillRect(context, [rectValue CGRectValue]);
 	}
-#if 0
-	// Render start and end cursors, for debug
-	CGRect left_cursol = [_layoutManager boundingRectForGlyphRange:NSMakeRange(start, 1) inTextContainer:_textContainer];
-	CGRect right_cursol = [_layoutManager boundingRectForGlyphRange:NSMakeRange(end, 1) inTextContainer:_textContainer];
-	[[UIColor colorWithRed:0 green:1 blue:0 alpha:0.8] setFill];
-	CGContextFillRect(context, left_cursol);
-	CGContextFillRect(context, right_cursol);
-#endif
 }
 
 - (void)drawCursorInsideRect:(CGRect)rect direction:(UZTextViewCursorDirection)direction {
 	CGContextRef context = UIGraphicsGetCurrentContext();
-	float radius = 4;
+	float radius = 6;
 	float width = 2;
 	CGRect lineRect;
 	CGPoint circleCenter;
@@ -240,6 +232,8 @@ typedef enum _UZTextViewCursorDirection {
 	[[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
 	
 	if (_status == UZTextViewSelected) {
+		_fromWhenBegan = _from;
+		_endWhenBegan = _end;
 		if (CGRectContainsPoint([self rectToTapAtIndex:_from side:UZTextViewLeftEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingFromSelection;
 			[_loupeView animate];
@@ -272,11 +266,21 @@ typedef enum _UZTextViewCursorDirection {
 		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
 	}
 	else if (_status == UZTextViewEditingFromSelection) {
+		int prev_from = _from;
 		_from = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
+		if (prev_from <= _end && _from > _end)
+			_end = _endWhenBegan + 1;
+		else if (prev_from >= _end && _from < _end)
+			_end = _endWhenBegan;
 		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
 	}
 	else if (_status == UZTextViewEditingToSelection) {
+		int prev_end = _end;
 		_end = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
+		if (prev_end >= _from && _from > _end)
+			_from = _fromWhenBegan - 1;
+		else if (prev_end <= _from && _from < _end)
+			_from = _fromWhenBegan;
 		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
 	}
 	[self setNeedsDisplay];
@@ -325,7 +329,7 @@ typedef enum _UZTextViewCursorDirection {
 }
 
 - (void)copy:(id)sender {
-	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:NSMakeRange(_from, _end)];
+	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:NSMakeRange(_from, _end - _from)];
 }
 
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
