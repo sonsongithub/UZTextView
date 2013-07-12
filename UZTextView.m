@@ -122,10 +122,8 @@ typedef enum _UZTextViewCursorDirection {
 	return [NSArray arrayWithArray:fragmentRects];
 }
 
-- (CGRect)selectedStringRect {
-	NSUInteger start = _from < _end ? _from : _end;
-	NSUInteger end = _from > _end ? _from : _end;
-	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:start toIndex:end];
+- (CGRect)selectedStringRectFromIndex:(int)fromIndex toIndex:(int)toIndex {
+	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:fromIndex toIndex:toIndex];
 	CGRect unifiedRect = [[fragmentRects objectAtIndex:0] CGRectValue];
 	for (NSValue *rectValue in fragmentRects) {
 		unifiedRect = CGRectUnion(unifiedRect, [rectValue CGRectValue]);
@@ -160,7 +158,7 @@ typedef enum _UZTextViewCursorDirection {
 //	}
 //}
 
-- (void)drawSelectedTextFragments {
+- (void)drawSelectedTextFragments __attribute__((deprecated(""))) {
 	// Re-order start and end index.
 	NSUInteger start = _from < _end ? _from : _end;
 	NSUInteger end = _from > _end ? _from : _end;
@@ -176,6 +174,34 @@ typedef enum _UZTextViewCursorDirection {
 	}
 }
 
+- (CGRect)selectedStringRect __attribute__((deprecated(""))) {
+	NSUInteger start = _from < _end ? _from : _end;
+	NSUInteger end = _from > _end ? _from : _end;
+	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:start toIndex:end];
+	CGRect unifiedRect = [[fragmentRects objectAtIndex:0] CGRectValue];
+	for (NSValue *rectValue in fragmentRects) {
+		unifiedRect = CGRectUnion(unifiedRect, [rectValue CGRectValue]);
+	}
+	return unifiedRect;
+}
+
+- (void)drawCursor __attribute__((deprecated(""))) {
+	// Re-order start and end index.
+	NSUInteger start = _from < _end ? _from : _end;
+	NSUInteger end = _from > _end ? _from : _end;
+	[self drawCursorAtIndex:start side:UZTextViewLeftEdge direction:UZTextViewUpCursor];
+	[self drawCursorAtIndex:end side:UZTextViewRightEdge direction:UZTextViewDownCursor];
+}
+
+- (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex {
+	// Set drawing color
+	[[self.tintColor colorWithAlphaComponent:0.5] setFill];
+	CGContextRef context = UIGraphicsGetCurrentContext();
+	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:fromIndex toIndex:toIndex];
+	for (NSValue *rectValue in fragmentRects)
+		CGContextFillRect(context, [rectValue CGRectValue]);
+}
+
 - (void)drawCursorInsideRect:(CGRect)rect direction:(UZTextViewCursorDirection)direction {
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	float radius = 6;
@@ -185,11 +211,11 @@ typedef enum _UZTextViewCursorDirection {
 	
 	if (direction == UZTextViewUpCursor) {
 		circleCenter = CGPointMake(CGRectGetMidX(rect), rect.origin.y + radius);
-		lineRect = CGRectMake(circleCenter.x - width/2, circleCenter.y + radius, width, rect.size.height - radius * 3);
+		lineRect = CGRectMake(circleCenter.x - width/2, circleCenter.y, width, rect.size.height - radius * 2);
 	}
 	else {
 		circleCenter = CGPointMake(CGRectGetMidX(rect), rect.origin.y + rect.size.height - radius);
-		lineRect = CGRectMake(circleCenter.x - width/2, rect.origin.y + radius, width, rect.size.height - radius * 3);
+		lineRect = CGRectMake(circleCenter.x - width/2, rect.origin.y + radius, width, rect.size.height - radius * 2);
 	}
 	CGContextAddArc(context, circleCenter.x, circleCenter.y, radius, 0, 2 * M_PI, 0);
 	CGContextClosePath(context);
@@ -198,16 +224,14 @@ typedef enum _UZTextViewCursorDirection {
 	CGContextFillRect(context, lineRect);
 }
 
-- (void)drawCursor {
-	// Re-order start and end index.
-	NSUInteger start = _from < _end ? _from : _end;
-	NSUInteger end = _from > _end ? _from : _end;
-	
-	CGRect startRect = [self rectToTapAtIndex:start side:UZTextViewLeftEdge];
-	CGRect endRect = [self rectToTapAtIndex:end side:UZTextViewRightEdge];
-	
-	[self drawCursorInsideRect:startRect direction:UZTextViewUpCursor];
-	[self drawCursorInsideRect:endRect direction:UZTextViewDownCursor];
+- (void)drawCursorAtIndex:(int)index side:(UZTextViewGlyphEdgeType)edgeType direction:(UZTextViewCursorDirection)direction {
+	CGRect rect = [self rectToTapAtIndex:index side:edgeType];
+	[self drawCursorInsideRect:rect direction:direction];
+}
+
+- (void)drawCursorsAtFromIndex:(int)fromIndex atToIndex:(int)toIndex {
+	[self drawCursorAtIndex:fromIndex side:UZTextViewLeftEdge direction:UZTextViewUpCursor];
+	[self drawCursorAtIndex:toIndex side:UZTextViewRightEdge direction:UZTextViewDownCursor];
 }
 
 - (void)drawContent {
@@ -215,12 +239,15 @@ typedef enum _UZTextViewCursorDirection {
 	[_textContainer setSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
 	[_layoutManager drawGlyphsForGlyphRange:NSMakeRange(0, self.attributedString.length) atPoint:CGPointMake(0, 0)];
 	
+	int fromToRender = _from < _end ? _from : _end;
+	int toToRender = _from < _end ? _end : _from;
+	
 	if (_status == UZTextViewSelecting) {
-		[self drawSelectedTextFragments];
+		[self drawSelectedTextFragmentRectsFromIndex:fromToRender toIndex:toToRender];
 	}
 	if (_status == UZTextViewSelected || _status == UZTextViewEditingToSelection || _status == UZTextViewEditingFromSelection) {
-		[self drawSelectedTextFragments];
-		[self drawCursor];
+		[self drawSelectedTextFragmentRectsFromIndex:fromToRender toIndex:toToRender];
+		[self drawCursorsAtFromIndex:fromToRender atToIndex:toToRender];
 	}
 }
 
@@ -287,24 +314,13 @@ typedef enum _UZTextViewCursorDirection {
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	UITouch *touch = [touches anyObject];
-	
-	if (_status == UZTextViewSelecting) {
-		_end = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
-		[_loupeView hideanimate];
-	}
-	else if (_status == UZTextViewEditingFromSelection) {
-		_from = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
-		[_loupeView hideanimate];
-	}
-	else if (_status == UZTextViewEditingToSelection) {
-		_end = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
-		[_loupeView hideanimate];
-	}
+	[_loupeView hideanimate];
 	
 	if (_status == UZTextViewNoSelection) {
+		// clicked
 	}
 	else {
+		// dragged
 		NSUInteger start = _from < _end ? _from : _end;
 		NSUInteger end = _from > _end ? _from : _end;
 		_from = start;
@@ -312,7 +328,7 @@ typedef enum _UZTextViewCursorDirection {
 		_status = UZTextViewSelected;
 		
 		[self becomeFirstResponder];
-		[[UIMenuController sharedMenuController] setTargetRect:[self selectedStringRect] inView:self];
+		[[UIMenuController sharedMenuController] setTargetRect:[self selectedStringRectFromIndex:_from toIndex:_end] inView:self];
 		[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
 	}
 	[self setNeedsDisplay];
