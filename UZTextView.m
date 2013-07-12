@@ -42,14 +42,6 @@ typedef enum _UZTextViewCursorDirection {
 	}
 }
 
-- (BOOL)clickFromAtPoint:(CGPoint)point {
-	return CGRectContainsPoint([self rectToTapAtIndex:_from side:UZTextViewLeftEdge], point);
-}
-
-- (BOOL)clickEndAtPoint:(CGPoint)point {
-	return CGRectContainsPoint([self rectToTapAtIndex:_end side:UZTextViewRightEdge], point);
-}
-
 - (void)searchLinkAttribute {
 }
 
@@ -95,7 +87,7 @@ typedef enum _UZTextViewCursorDirection {
 	[self setNeedsDisplay];
 }
 
-#pragma mark - Draw
+#pragma mark - Layout information
 
 - (NSArray*)fragmentRectsForGlyphFromIndex:(int)fromIndex toIndex:(int)toIndex {
 	if (!(fromIndex <= toIndex && fromIndex >=0 && toIndex >=0))
@@ -129,6 +121,19 @@ typedef enum _UZTextViewCursorDirection {
 	}
 	return [NSArray arrayWithArray:fragmentRects];
 }
+
+- (CGRect)selectedStringRect {
+	NSUInteger start = _from < _end ? _from : _end;
+	NSUInteger end = _from > _end ? _from : _end;
+	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:start toIndex:end];
+	CGRect unifiedRect = [[fragmentRects objectAtIndex:0] CGRectValue];
+	for (NSValue *rectValue in fragmentRects) {
+		unifiedRect = CGRectUnion(unifiedRect, [rectValue CGRectValue]);
+	}
+	return unifiedRect;
+}
+
+#pragma mark - Draw
 
 //- (void)drawSelectedLinkFragments {
 //	NSRange range;
@@ -235,12 +240,12 @@ typedef enum _UZTextViewCursorDirection {
 	[[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
 	
 	if (_status == UZTextViewSelected) {
-		if ([self clickFromAtPoint:[touch locationInView:self]]) {
+		if (CGRectContainsPoint([self rectToTapAtIndex:_from side:UZTextViewLeftEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingFromSelection;
 			[_loupeView animate];
 			return;
 		}
-		if ([self clickEndAtPoint:[touch locationInView:self]]) {
+		if (CGRectContainsPoint([self rectToTapAtIndex:_end side:UZTextViewRightEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingToSelection;
 			[_loupeView animate];
 			return;
@@ -302,13 +307,8 @@ typedef enum _UZTextViewCursorDirection {
 		_end = end;
 		_status = UZTextViewSelected;
 		
-		NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:start toIndex:end];
-		CGRect r = [[fragmentRects objectAtIndex:0] CGRectValue];
-		for (NSValue *rectValue in fragmentRects) {
-			r = CGRectUnion(r, [rectValue CGRectValue]);
-		}
 		[self becomeFirstResponder];
-		[[UIMenuController sharedMenuController] setTargetRect:r inView:self];
+		[[UIMenuController sharedMenuController] setTargetRect:[self selectedStringRect] inView:self];
 		[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
 	}
 	[self setNeedsDisplay];
@@ -316,6 +316,12 @@ typedef enum _UZTextViewCursorDirection {
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
 	
+}
+
+#pragma mark - for UIMenuController
+
+- (BOOL)canBecomeFirstResponder {
+	return YES;
 }
 
 - (void)copy:(id)sender {
@@ -370,10 +376,6 @@ typedef enum _UZTextViewCursorDirection {
 	
 	// draw main content
 	[self drawContent];
-}
-
-- (BOOL)canBecomeFirstResponder {
-	return YES;
 }
 
 @end
