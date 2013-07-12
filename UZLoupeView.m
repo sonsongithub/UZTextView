@@ -39,6 +39,9 @@
 }
 
 - (void)animate {
+	if (!self.hidden)
+		return;
+	self.hidden = NO;
 	CAAnimation *sizeAnimation = [self scaleAnimation];
 	CAAnimation *yAnimation = [self yAnimation];
 	// make group
@@ -50,7 +53,15 @@
 	group.delegate = self;
 	
 	// commit animation
-	[self.layer addAnimation:group forKey:@"hoge"];
+	[self.layer addAnimation:group forKey:@"appear"];
+}
+
+- (void)animationDidStop:(CAAnimation*)animation finished:(BOOL)flag {
+	if (animation == [self.layer animationForKey:@"appear"]) {
+	}
+	if (animation == [self.layer animationForKey:@"disappear"]) {
+		self.hidden = YES;
+	}
 }
 
 - (CAAnimation*)hideyAnimation {
@@ -93,7 +104,7 @@
 	group.delegate = self;
 	
 	// commit animation
-	[self.layer addAnimation:group forKey:@"hoge"];
+	[self.layer addAnimation:group forKey:@"disappear"];
 }
 
 - (id)initWithFrame:(CGRect)frame
@@ -101,16 +112,9 @@
     self = [super initWithFrame:frame];
     if (self) {
 		[self setBackgroundColor:[UIColor clearColor]];
+		self.hidden = YES;
     }
     return self;
-}
-
-- (id)initWithCoder:(NSCoder *)aDecoder {
-	self = [super initWithCoder:aDecoder];
-	if (self) {
-		[self setBackgroundColor:[UIColor clearColor]];
-	}
-	return self;
 }
 
 - (void)update:(UIImage*)image {
