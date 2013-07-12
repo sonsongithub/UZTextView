@@ -8,6 +8,10 @@
 
 #import "UZLoupeView.h"
 
+#define UZ_LOUPE_NO_ANIMATION_DUARTION	0.0001
+#define UZ_LOUPE_ANIMATION_DUARTION		0.1
+#define UZ_LOUPE_OUTLINE_STROKE_WIDTH	2
+
 @implementation UZLoupeView
 
 #pragma mark - Create Core Animation objects
@@ -110,7 +114,7 @@
 #pragma mark - Public
 
 - (void)setVisible:(BOOL)visible animated:(BOOL)animated {
-	float duration = animated ? 0.1 : 0.00001;
+	float duration = animated ? UZ_LOUPE_ANIMATION_DUARTION : UZ_LOUPE_NO_ANIMATION_DUARTION;
 	if (visible)
 		[self animateForAppearingWithDuration:duration];
 	else
@@ -154,7 +158,7 @@
 	
 	// draw outline stroke
 	CGContextSaveGState(context);
-	CGContextSetLineWidth(context, 2);
+	CGContextSetLineWidth(context, UZ_LOUPE_OUTLINE_STROKE_WIDTH);
 	CGContextAddArc(context, radius, radius, radius-1, 0, M_PI * 2, 0);
 	CGContextClosePath(context);
 	CGContextDrawPath(context, kCGPathStroke);
