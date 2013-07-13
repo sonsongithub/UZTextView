@@ -218,6 +218,7 @@ typedef enum _UZTextViewCursorDirection {
 #pragma mark - Touch event
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	NSLog(@"touchesBegan");
 	UITouch *touch = [touches anyObject];
 	[self setNeedsDisplay];
 	[[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
@@ -229,12 +230,16 @@ typedef enum _UZTextViewCursorDirection {
 			_status = UZTextViewEditingFromSelection;
 			[_loupeView setVisible:YES animated:YES];
 			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
+				[self.delegate selectionDidBeginTextView:self];
 			return;
 		}
 		if (CGRectContainsPoint([self rectToTapAtIndex:_end side:UZTextViewRightEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingToSelection;
 			[_loupeView setVisible:YES animated:YES];
 			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
+				[self.delegate selectionDidBeginTextView:self];
 			return;
 		}
 	}
@@ -244,6 +249,7 @@ typedef enum _UZTextViewCursorDirection {
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+	NSLog(@"touchesMoved");
 	UITouch *touch = [touches anyObject];
 	
 	if (_status == UZTextViewNoSelection) {
@@ -252,6 +258,8 @@ typedef enum _UZTextViewCursorDirection {
 			_end = _from;
 			[_loupeView setVisible:YES animated:YES];
 			_status = UZTextViewSelecting;
+			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
+				[self.delegate selectionDidBeginTextView:self];
 		}
 	}
 	if (_status == UZTextViewSelecting) {
@@ -280,7 +288,11 @@ typedef enum _UZTextViewCursorDirection {
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+	NSLog(@"touchesEnded");
 	[_loupeView setVisible:NO animated:YES];
+	
+	if ([self.delegate respondsToSelector:@selector(selectionDidEndTextView:)])
+		[self.delegate selectionDidEndTextView:self];
 	
 	if (_status == UZTextViewNoSelection) {
 		// clicked
@@ -312,6 +324,7 @@ typedef enum _UZTextViewCursorDirection {
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+	NSLog(@"touchesCancelled");
 	[self touchesEnded:touches withEvent:event];
 }
 

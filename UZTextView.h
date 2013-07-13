@@ -23,6 +23,10 @@ typedef enum _UZTextViewStatus {
 
 - (void)textView:(UZTextView*)textview didClickLinkAttribute:(id)value;
 
+- (void)selectionDidBeginTextView:(UZTextView*)textView;
+
+- (void)selectionDidEndTextView:(UZTextView*)textView;
+
 @end
 
 @interface UZTextView : UIView {

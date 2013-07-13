@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1445D05E1790B3C700045A8E /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1445D05D1790B33300045A8E /* RootViewController.m */; };
+		1445D0611790B4BD00045A8E /* TextCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1445D0601790B44000045A8E /* TextCell.m */; };
 		14B17A4B176D9B3100C7AA83 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14B17A4A176D9B3100C7AA83 /* Foundation.framework */; };
 		14B17A4D176D9B3100C7AA83 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14B17A4C176D9B3100C7AA83 /* CoreGraphics.framework */; };
 		14B17A4F176D9B3100C7AA83 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14B17A4E176D9B3100C7AA83 /* UIKit.framework */; };
@@ -21,6 +23,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1445D05C1790B33300045A8E /* RootViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RootViewController.h; sourceTree = "<group>"; };
+		1445D05D1790B33300045A8E /* RootViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RootViewController.m; sourceTree = "<group>"; };
+		1445D05F1790B44000045A8E /* TextCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextCell.h; sourceTree = "<group>"; };
+		1445D0601790B44000045A8E /* TextCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextCell.m; sourceTree = "<group>"; };
 		14B17A47176D9B3100C7AA83 /* UZTextView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UZTextView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		14B17A4A176D9B3100C7AA83 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		14B17A4C176D9B3100C7AA83 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -89,6 +95,10 @@
 		14B17A50176D9B3100C7AA83 /* UZTextView */ = {
 			isa = PBXGroup;
 			children = (
+				1445D05F1790B44000045A8E /* TextCell.h */,
+				1445D0601790B44000045A8E /* TextCell.m */,
+				1445D05C1790B33300045A8E /* RootViewController.h */,
+				1445D05D1790B33300045A8E /* RootViewController.m */,
 				14B17A59176D9B3100C7AA83 /* AppDelegate.h */,
 				14B17A5A176D9B3100C7AA83 /* AppDelegate.m */,
 				14B17A5C176D9B3100C7AA83 /* Main.storyboard */,
@@ -178,6 +188,8 @@
 			files = (
 				14B17A61176D9B3100C7AA83 /* ViewController.m in Sources */,
 				14F5DE46178D230400805154 /* UZLoupeView.m in Sources */,
+				1445D0611790B4BD00045A8E /* TextCell.m in Sources */,
+				1445D05E1790B3C700045A8E /* RootViewController.m in Sources */,
 				14B17A5B176D9B3100C7AA83 /* AppDelegate.m in Sources */,
 				14B17A81176D9C9700C7AA83 /* UZTextView.m in Sources */,
 				14B17A57176D9B3100C7AA83 /* main.m in Sources */,
