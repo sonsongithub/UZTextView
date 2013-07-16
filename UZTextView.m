@@ -215,9 +215,32 @@ typedef enum _UZTextViewCursorDirection {
 		[self drawSelectedLinkFragments];
 }
 
+- (void)prepareForReuse {
+	_status = UZTextViewNoSelection;
+	_from = 0;
+	_end = 0;
+	_fromWhenBegan = 0;
+	_endWhenBegan = 0;
+	
+	[_tapDurationTimer invalidate];
+	_tapDurationTimer = nil;
+	_locationWhenTapBegan = CGPointZero;
+}
+
+#pragma mark - NSTimer callbacks
+
+- (void)tapDurationTimerFired:(NSTimer*)timer {
+	[_loupeView setVisible:YES animated:YES];
+	[self pushSnapshotToLoupeViewAtLocation:_locationWhenTapBegan];
+	if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
+		[self.delegate selectionDidBeginTextView:self];
+	_tapDurationTimer = nil;
+}
+
 #pragma mark - Touch event
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	NSLog(@"touchesBegan");
 	UITouch *touch = [touches anyObject];
 	[self setNeedsDisplay];
 	[[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
@@ -229,21 +252,26 @@ typedef enum _UZTextViewCursorDirection {
 			_status = UZTextViewEditingFromSelection;
 			[_loupeView setVisible:YES animated:YES];
 			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
+				[self.delegate selectionDidBeginTextView:self];
 			return;
 		}
 		if (CGRectContainsPoint([self rectToTapAtIndex:_end side:UZTextViewRightEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingToSelection;
 			[_loupeView setVisible:YES animated:YES];
 			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
+				[self.delegate selectionDidBeginTextView:self];
 			return;
 		}
 	}
 	_status = UZTextViewNoSelection;
 	_locationWhenTapBegan = [touch locationInView:self];
-	[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+	_tapDurationTimer = [NSTimer scheduledTimerWithTimeInterval:_durationToCancelSuperViewScrolling target:self selector:@selector(tapDurationTimerFired:) userInfo:nil repeats:NO];
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+	NSLog(@"touchesMoved");
 	UITouch *touch = [touches anyObject];
 	
 	if (_status == UZTextViewNoSelection) {
@@ -252,6 +280,8 @@ typedef enum _UZTextViewCursorDirection {
 			_end = _from;
 			[_loupeView setVisible:YES animated:YES];
 			_status = UZTextViewSelecting;
+			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
+				[self.delegate selectionDidBeginTextView:self];
 		}
 	}
 	if (_status == UZTextViewSelecting) {
@@ -280,7 +310,13 @@ typedef enum _UZTextViewCursorDirection {
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+	NSLog(@"touchesEnded");
+	[_tapDurationTimer invalidate];
+	_tapDurationTimer = nil;
 	[_loupeView setVisible:NO animated:YES];
+	
+	if ([self.delegate respondsToSelector:@selector(selectionDidEndTextView:)])
+		[self.delegate selectionDidEndTextView:self];
 	
 	if (_status == UZTextViewNoSelection) {
 		// clicked
@@ -312,6 +348,7 @@ typedef enum _UZTextViewCursorDirection {
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+	NSLog(@"touchesCancelled");
 	[self touchesEnded:touches withEvent:event];
 }
 
@@ -341,6 +378,7 @@ typedef enum _UZTextViewCursorDirection {
 	_tintAlpha = 0.5;
 	_cursorCirclrRadius = 6;
 	_cursorLineWidth = 2;
+	_durationToCancelSuperViewScrolling = 0.25;
 	
 	// Initialization code
 	_layoutManager = [[NSLayoutManager alloc] init];

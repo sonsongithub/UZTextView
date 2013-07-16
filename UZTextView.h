@@ -23,6 +23,10 @@ typedef enum _UZTextViewStatus {
 
 - (void)textView:(UZTextView*)textview didClickLinkAttribute:(id)value;
 
+- (void)selectionDidBeginTextView:(UZTextView*)textView;
+
+- (void)selectionDidEndTextView:(UZTextView*)textView;
+
 @end
 
 @interface UZTextView : UIView {
@@ -38,6 +42,9 @@ typedef enum _UZTextViewStatus {
 	NSUInteger			_fromWhenBegan;
 	NSUInteger			_endWhenBegan;
 	
+	//
+	NSTimer				*_tapDurationTimer;
+	
 	// child view
 	UZLoupeView			*_loupeView;
 	
@@ -50,9 +57,12 @@ typedef enum _UZTextViewStatus {
 	float				_tintAlpha;
 	float				_cursorCirclrRadius;
 	float				_cursorLineWidth;
+	float				_durationToCancelSuperViewScrolling;
 }
 
 @property (nonatomic, assign) id <UZTextViewDelegate> delegate;
 @property (nonatomic, strong) NSAttributedString *attributedString;
+
+- (void)prepareForReuse;
 
 @end
