@@ -8,6 +8,8 @@
 
 #import "TextCell.h"
 
+#import "UZTextView.h"
+
 @implementation TextCell
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
@@ -17,6 +19,11 @@
         // Initialization code
     }
     return self;
+}
+
+- (void)prepareForReuse {
+	[super prepareForReuse];
+	[self.textView prepareForReuse];
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated

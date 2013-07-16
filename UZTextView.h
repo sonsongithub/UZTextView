@@ -57,9 +57,12 @@ typedef enum _UZTextViewStatus {
 	float				_tintAlpha;
 	float				_cursorCirclrRadius;
 	float				_cursorLineWidth;
+	float				_durationToCancelSuperViewScrolling;
 }
 
 @property (nonatomic, assign) id <UZTextViewDelegate> delegate;
 @property (nonatomic, strong) NSAttributedString *attributedString;
+
+- (void)prepareForReuse;
 
 @end

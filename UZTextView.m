@@ -215,6 +215,28 @@ typedef enum _UZTextViewCursorDirection {
 		[self drawSelectedLinkFragments];
 }
 
+- (void)prepareForReuse {
+	_status = UZTextViewNoSelection;
+	_from = 0;
+	_end = 0;
+	_fromWhenBegan = 0;
+	_endWhenBegan = 0;
+	
+	[_tapDurationTimer invalidate];
+	_tapDurationTimer = nil;
+	_locationWhenTapBegan = CGPointZero;
+}
+
+#pragma mark - NSTimer callbacks
+
+- (void)tapDurationTimerFired:(NSTimer*)timer {
+	[_loupeView setVisible:YES animated:YES];
+	[self pushSnapshotToLoupeViewAtLocation:_locationWhenTapBegan];
+	if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
+		[self.delegate selectionDidBeginTextView:self];
+	_tapDurationTimer = nil;
+}
+
 #pragma mark - Touch event
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -245,15 +267,7 @@ typedef enum _UZTextViewCursorDirection {
 	}
 	_status = UZTextViewNoSelection;
 	_locationWhenTapBegan = [touch locationInView:self];
-	_tapDurationTimer = [NSTimer scheduledTimerWithTimeInterval:0.25 target:self selector:@selector(tapDurationTimerFired:) userInfo:nil repeats:NO];
-}
-
-- (void)tapDurationTimerFired:(NSTimer*)timer {
-	[_loupeView setVisible:YES animated:YES];
-	[self pushSnapshotToLoupeViewAtLocation:_locationWhenTapBegan];
-	if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
-		[self.delegate selectionDidBeginTextView:self];
-	_tapDurationTimer = nil;
+	_tapDurationTimer = [NSTimer scheduledTimerWithTimeInterval:_durationToCancelSuperViewScrolling target:self selector:@selector(tapDurationTimerFired:) userInfo:nil repeats:NO];
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -364,6 +378,7 @@ typedef enum _UZTextViewCursorDirection {
 	_tintAlpha = 0.5;
 	_cursorCirclrRadius = 6;
 	_cursorLineWidth = 2;
+	_durationToCancelSuperViewScrolling = 0.25;
 	
 	// Initialization code
 	_layoutManager = [[NSLayoutManager alloc] init];
