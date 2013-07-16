@@ -62,7 +62,9 @@ typedef enum _UZTextViewStatus {
 
 @property (nonatomic, assign) id <UZTextViewDelegate> delegate;
 @property (nonatomic, strong) NSAttributedString *attributedString;
+@property (nonatomic, readonly) CGSize contentSize;
 
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width;
 - (void)prepareForReuse;
 
 @end

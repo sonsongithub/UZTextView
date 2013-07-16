@@ -27,6 +27,22 @@ typedef enum _UZTextViewCursorDirection {
 
 @implementation UZTextView
 
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width {
+	NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
+	NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(width, CGFLOAT_MAX)];
+	NSTextStorage *textStorage = [[NSTextStorage alloc] init];
+	[layoutManager addTextContainer:textContainer];
+	
+	[textStorage setAttributedString:attributedString];
+	
+	[layoutManager setTextStorage:textStorage];
+	
+	[textStorage addLayoutManager:layoutManager];
+	
+	CGRect r = [layoutManager lineFragmentRectForGlyphAtIndex:attributedString.length-1 effectiveRange:NULL];
+	return CGSizeMake(width, r.size.height + r.origin.y);
+}
+
 #pragma mark - Instance method
 
 - (CGRect)rectToTapAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side {
@@ -61,6 +77,12 @@ typedef enum _UZTextViewCursorDirection {
 }
 
 - (void)setAttributedString:(NSAttributedString *)attributedString {
+	
+	_layoutManager = [[NSLayoutManager alloc] init];
+	_textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
+	_textStorage = [[NSTextStorage alloc] init];
+	[_layoutManager addTextContainer:_textContainer];
+	
 	_attributedString = attributedString;
 	
 	[_textStorage setAttributedString:attributedString];
@@ -72,8 +94,9 @@ typedef enum _UZTextViewCursorDirection {
 	CGRect r = [_layoutManager lineFragmentRectForGlyphAtIndex:self.attributedString.length-1 effectiveRange:NULL];
 	
 	CGRect currentRect = self.frame;
-	currentRect.size = CGSizeMake(r.size.width, r.size.height + r.origin.y);
+	currentRect.size = CGSizeMake(self.frame.size.width, r.size.height + r.origin.y);
 	self.frame = currentRect;
+	_contentSize = currentRect.size;
 	[self setNeedsLayout];
 	[self setNeedsDisplay];
 }
@@ -381,10 +404,6 @@ typedef enum _UZTextViewCursorDirection {
 	_durationToCancelSuperViewScrolling = 0.25;
 	
 	// Initialization code
-	_layoutManager = [[NSLayoutManager alloc] init];
-	_textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
-	_textStorage = [[NSTextStorage alloc] init];
-	[_layoutManager addTextContainer:_textContainer];
 	_loupeView = [[UZLoupeView alloc] initWithFrame:CGRectMake(0, 0, _loupeRadius, _loupeRadius)];
 	[self addSubview:_loupeView];
 }
