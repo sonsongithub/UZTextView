@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface RootViewController : UITableViewController
+#import "UZTextView.h"
+
+@interface RootViewController : UITableViewController <UZTextViewDelegate>
 
 @end

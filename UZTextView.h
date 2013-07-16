@@ -42,6 +42,9 @@ typedef enum _UZTextViewStatus {
 	NSUInteger			_fromWhenBegan;
 	NSUInteger			_endWhenBegan;
 	
+	//
+	NSTimer				*_tapDurationTimer;
+	
 	// child view
 	UZLoupeView			*_loupeView;
 	

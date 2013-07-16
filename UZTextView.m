@@ -245,7 +245,15 @@ typedef enum _UZTextViewCursorDirection {
 	}
 	_status = UZTextViewNoSelection;
 	_locationWhenTapBegan = [touch locationInView:self];
-	[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+	_tapDurationTimer = [NSTimer scheduledTimerWithTimeInterval:0.25 target:self selector:@selector(tapDurationTimerFired:) userInfo:nil repeats:NO];
+}
+
+- (void)tapDurationTimerFired:(NSTimer*)timer {
+	[_loupeView setVisible:YES animated:YES];
+	[self pushSnapshotToLoupeViewAtLocation:_locationWhenTapBegan];
+	if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
+		[self.delegate selectionDidBeginTextView:self];
+	_tapDurationTimer = nil;
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -289,6 +297,8 @@ typedef enum _UZTextViewCursorDirection {
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
 	NSLog(@"touchesEnded");
+	[_tapDurationTimer invalidate];
+	_tapDurationTimer = nil;
 	[_loupeView setVisible:NO animated:YES];
 	
 	if ([self.delegate respondsToSelector:@selector(selectionDidEndTextView:)])
