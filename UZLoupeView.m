@@ -16,62 +16,63 @@
 
 #pragma mark - Create Core Animation objects
 
-- (CAAnimation*)translationYAnimationWhileAppearing {
+- (CAAnimation*)translationAnimationWhileAppearing {
 	UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
+	
 	if (UIInterfaceOrientationIsPortrait(orientation)) {
-		CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
-		sizeAnimation.keyTimes = @[@(0), @(1)];
+		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
+		animation.keyTimes = @[@(0), @(1)];
 		if (orientation == UIInterfaceOrientationPortrait)
-			sizeAnimation.values = @[@(self.frame.size.height/2), @(0)];
+			animation.values = @[@(self.frame.size.height/2), @(0)];
 		else
-			sizeAnimation.values = @[@(-self.frame.size.height/2), @(0)];
-		return sizeAnimation;
+			animation.values = @[@(-self.frame.size.height/2), @(0)];
+		return animation;
 	}
 	else {
-		CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.x"];
-		sizeAnimation.keyTimes = @[@(0), @(1)];
+		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.x"];
+		animation.keyTimes = @[@(0), @(1)];
 		if (orientation == UIInterfaceOrientationLandscapeLeft)
-			sizeAnimation.values = @[@(self.frame.size.width/2), @(0)];
+			animation.values = @[@(self.frame.size.width/2), @(0)];
 		else
-			sizeAnimation.values = @[@(-self.frame.size.width/2), @(0)];
-		return sizeAnimation;
+			animation.values = @[@(-self.frame.size.width/2), @(0)];
+		return animation;
 	}
 }
 
 - (CAAnimation*)transformScaleAnimationWhileAppearing {
-	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-	sizeAnimation.values = @[@(0), @(1)];
-	sizeAnimation.keyTimes = @[@(0), @(1)];
-	return sizeAnimation;
+	CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+	animation.values = @[@(0), @(1)];
+	animation.keyTimes = @[@(0), @(1)];
+	return animation;
 }
 
-- (CAAnimation*)translationYAnimationWhileDisappearing {
+- (CAAnimation*)translationAnimationWhileDisappearing {
 	UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
 	if (UIInterfaceOrientationIsPortrait(orientation)) {
-		CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
-		sizeAnimation.keyTimes = @[@(0), @(1)];
+		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
+		animation.keyTimes = @[@(0), @(1)];
 		if (orientation == UIInterfaceOrientationPortrait)
-			sizeAnimation.values = @[@(0), @(self.frame.size.height/2)];
+			animation.values = @[@(0), @(self.frame.size.height/2)];
 		else
-			sizeAnimation.values = @[@(0), @(-self.frame.size.height/2)];
-		return sizeAnimation;
+			animation.values = @[@(0), @(-self.frame.size.height/2)];
+		return animation;
 	}
 	else {
-		CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.x"];
-		sizeAnimation.keyTimes = @[@(0), @(1)];
+		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.x"];
+		animation.keyTimes = @[@(0), @(1)];
 		if (orientation == UIInterfaceOrientationLandscapeLeft)
-			sizeAnimation.values = @[@(0), @(self.frame.size.width/2)];
+			animation.values = @[@(0), @(self.frame.size.width/2)];
 		else
-			sizeAnimation.values = @[@(0), @(-self.frame.size.width/2)];
-		return sizeAnimation;
+			animation.values = @[@(0), @(-self.frame.size.width/2)];
+		return animation;
 	}
 }
 
 - (CAAnimation*)transformScaleAnimationWhileDisapearing {
-	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-	sizeAnimation.values = @[@(1), @(0)];
-	sizeAnimation.keyTimes = @[@(0), @(1)];
-	return sizeAnimation;
+	CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+	animation.values = @[@(1), @(0)];
+	animation.keyTimes = @[@(0), @(1)];
+	return animation;
 }
 
 #pragma mark - Animate
@@ -84,7 +85,7 @@
 	
 	// make animation group
 	CAAnimationGroup *group = [CAAnimationGroup animation];
-	group.animations = @[[self transformScaleAnimationWhileAppearing], [self translationYAnimationWhileAppearing]];
+	group.animations = @[[self transformScaleAnimationWhileAppearing], [self translationAnimationWhileAppearing]];
 	group.duration = duration;
 	group.removedOnCompletion = NO;
 	group.fillMode = kCAFillModeForwards;
@@ -97,7 +98,7 @@
 - (void)animateForDisappearingWithDuration:(float)duration {
 	// make group
 	CAAnimationGroup *group = [CAAnimationGroup animation];
-	group.animations = @[[self translationYAnimationWhileDisappearing], [self transformScaleAnimationWhileDisapearing]];
+	group.animations = @[[self translationAnimationWhileDisappearing], [self transformScaleAnimationWhileDisapearing]];
 	group.duration = duration;
 	group.removedOnCompletion = NO;
 	group.fillMode = kCAFillModeForwards;
