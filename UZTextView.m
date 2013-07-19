@@ -10,6 +10,51 @@
 
 #import "UZLoupeView.h"
 
+@implementation UIApplication(UZTextView)
+
+- (void)currentInterfaceOrientation {
+	switch (self.statusBarOrientation) {
+		case UIInterfaceOrientationLandscapeLeft:
+			NSLog(@"UIInterfaceOrientationLandscapeLeft");
+			break;
+		case UIInterfaceOrientationLandscapeRight:
+			NSLog(@"UIInterfaceOrientationLandscapeRight");
+			break;
+		case UIInterfaceOrientationPortrait:
+			NSLog(@"UIInterfaceOrientationPortrait");
+			break;
+		case UIInterfaceOrientationPortraitUpsideDown:
+			NSLog(@"UIInterfaceOrientationPortraitUpsideDown");
+			break;
+	}
+}
+
+@end
+
+@implementation UIDevice(UZTextView)
+
++ (void)currentOrientaionLog {
+	switch ([UIDevice currentDevice].orientation) {
+		case UIDeviceOrientationPortrait:
+			NSLog(@"UIDeviceOrientationPortrait");
+			break;
+		case UIDeviceOrientationPortraitUpsideDown:
+			NSLog(@"UIDeviceOrientationPortraitUpsideDown");
+			break;
+		case UIDeviceOrientationLandscapeLeft:
+			NSLog(@"UIDeviceOrientationLandscapeLeft");
+			break;
+		case UIDeviceOrientationLandscapeRight:
+			NSLog(@"UIDeviceOrientationLandscapeRight");
+			break;
+		default:
+			NSLog(@"Orientation not supported?");
+			break;
+	}
+}
+
+@end
+
 #define NEW_LINE_GLYPH 65535
 
 #define NSLogRect(p) NSLog(@"%f,%f,%f,%f",p.origin.x, p.origin.y, p.size.width, p.size.height)
@@ -60,20 +105,53 @@ typedef enum _UZTextViewCursorDirection {
 	}
 }
 
+- (UIInterfaceOrientation)currentOrientation {
+	return [[UIApplication sharedApplication] statusBarOrientation];
+}
+
 - (void)pushSnapshotToLoupeViewAtLocation:(CGPoint)location {
+	CGPoint c = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointMake(location.x, location.y /*- _loupeRadius/2*/) fromView:self];
+	
+	_loupeView.hidden = YES;
+	
 	// Create UIImage from source view controller's view.
 	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius, _loupeRadius), NO, 0);
 	CGContextRef ctx = UIGraphicsGetCurrentContext();
 	[[UIColor whiteColor] setFill];
 	CGContextFillRect(ctx, CGRectMake(0, 0, _loupeRadius, _loupeRadius));
 	CGContextScaleCTM(ctx, 1, 1);
-	CGContextTranslateCTM(ctx, -location.x + _loupeRadius/2, -location.y+_loupeRadius/2);
+	CGContextTranslateCTM(ctx, -c.x + _loupeRadius/2, -c.y + _loupeRadius/2);
+	
 	// Drawing code
-	[self drawContent];
+	[[UIApplication sharedApplication].keyWindow.layer renderInContext:ctx];
+	
 	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
 	[_loupeView update:sourceViewImage];
 	UIGraphicsEndImageContext();
-	[_loupeView setCenter:CGPointMake(location.x, location.y - _loupeRadius/2)];
+	
+	_loupeView.hidden = NO;
+	
+	float offset = _loupeRadius/2 + _cursorMargin;
+	
+	switch ([UIApplication sharedApplication].statusBarOrientation) {
+		case UIInterfaceOrientationLandscapeLeft:
+			c.x -= offset;
+			break;
+		case UIInterfaceOrientationLandscapeRight:
+			c.x += offset;
+			break;
+		case UIInterfaceOrientationPortrait:
+			c.y -= offset;
+			break;
+		case UIInterfaceOrientationPortraitUpsideDown:
+			c.y -= offset;
+			break;
+	}
+
+	[_loupeView setCenter:c];
+	[[UIApplication sharedApplication].keyWindow addSubview:_loupeView];
+	
+	[[UIApplication sharedApplication] currentInterfaceOrientation];
 }
 
 - (void)setAttributedString:(NSAttributedString *)attributedString {

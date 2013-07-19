@@ -17,54 +17,60 @@
 #pragma mark - Create Core Animation objects
 
 - (CAAnimation*)translationYAnimationWhileAppearing {
-	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
-	sizeAnimation.values = [NSArray arrayWithObjects:
-							[NSNumber numberWithFloat:self.frame.size.height/2],
-							[NSNumber numberWithFloat:0],
-							nil];
-	sizeAnimation.keyTimes = [NSArray arrayWithObjects:
-							  [NSNumber numberWithFloat:0],
-							  [NSNumber numberWithFloat:1],
-							  nil];
-	return sizeAnimation;
+	UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
+	if (UIInterfaceOrientationIsPortrait(orientation)) {
+		CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
+		sizeAnimation.keyTimes = @[@(0), @(1)];
+		if (orientation == UIInterfaceOrientationPortrait)
+			sizeAnimation.values = @[@(self.frame.size.height/2), @(0)];
+		else
+			sizeAnimation.values = @[@(-self.frame.size.height/2), @(0)];
+		return sizeAnimation;
+	}
+	else {
+		CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.x"];
+		sizeAnimation.keyTimes = @[@(0), @(1)];
+		if (orientation == UIInterfaceOrientationLandscapeLeft)
+			sizeAnimation.values = @[@(self.frame.size.width/2), @(0)];
+		else
+			sizeAnimation.values = @[@(-self.frame.size.width/2), @(0)];
+		return sizeAnimation;
+	}
 }
 
 - (CAAnimation*)transformScaleAnimationWhileAppearing {
 	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-	sizeAnimation.values = [NSArray arrayWithObjects:
-							[NSNumber numberWithFloat:0],
-							[NSNumber numberWithFloat:1],
-							nil];
-	sizeAnimation.keyTimes = [NSArray arrayWithObjects:
-							  [NSNumber numberWithFloat:0],
-							  [NSNumber numberWithFloat:1],
-							  nil];
+	sizeAnimation.values = @[@(0), @(1)];
+	sizeAnimation.keyTimes = @[@(0), @(1)];
 	return sizeAnimation;
 }
 
 - (CAAnimation*)translationYAnimationWhileDisappearing {
-	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
-	sizeAnimation.values = [NSArray arrayWithObjects:
-							[NSNumber numberWithFloat:0],
-							[NSNumber numberWithFloat:self.frame.size.height/2],
-							nil];
-	sizeAnimation.keyTimes = [NSArray arrayWithObjects:
-							  [NSNumber numberWithFloat:0],
-							  [NSNumber numberWithFloat:1],
-							  nil];
-	return sizeAnimation;
+	UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
+	if (UIInterfaceOrientationIsPortrait(orientation)) {
+		CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
+		sizeAnimation.keyTimes = @[@(0), @(1)];
+		if (orientation == UIInterfaceOrientationPortrait)
+			sizeAnimation.values = @[@(0), @(self.frame.size.height/2)];
+		else
+			sizeAnimation.values = @[@(0), @(-self.frame.size.height/2)];
+		return sizeAnimation;
+	}
+	else {
+		CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.x"];
+		sizeAnimation.keyTimes = @[@(0), @(1)];
+		if (orientation == UIInterfaceOrientationLandscapeLeft)
+			sizeAnimation.values = @[@(0), @(self.frame.size.width/2)];
+		else
+			sizeAnimation.values = @[@(0), @(-self.frame.size.width/2)];
+		return sizeAnimation;
+	}
 }
 
 - (CAAnimation*)transformScaleAnimationWhileDisapearing {
 	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-	sizeAnimation.values = [NSArray arrayWithObjects:
-							[NSNumber numberWithFloat:1],
-							[NSNumber numberWithFloat:0],
-							nil];
-	sizeAnimation.keyTimes = [NSArray arrayWithObjects:
-							  [NSNumber numberWithFloat:0],
-							  [NSNumber numberWithFloat:1],
-							  nil];
+	sizeAnimation.values = @[@(1), @(0)];
+	sizeAnimation.keyTimes = @[@(0), @(1)];
 	return sizeAnimation;
 }
 
