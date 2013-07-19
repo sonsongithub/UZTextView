@@ -101,9 +101,7 @@ typedef enum _UZTextViewStatus {
 }
 
 - (void)pushSnapshotToLoupeViewAtLocation:(CGPoint)location {
-	CGPoint c = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointMake(location.x, location.y /*- _loupeRadius/2*/) fromView:self];
-	
-	_loupeView.hidden = YES;
+	CGPoint c = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointMake(location.x, location.y) fromView:self];
 	
 	// Create UIImage from source view controller's view.
 	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius, _loupeRadius), NO, 0);
@@ -114,14 +112,14 @@ typedef enum _UZTextViewStatus {
 	CGContextTranslateCTM(ctx, -c.x + _loupeRadius/2, -c.y + _loupeRadius/2);
 	
 	// Drawing code
+	_loupeView.hidden = YES;
 	[[UIApplication sharedApplication].keyWindow.layer renderInContext:ctx];
-	
-	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
-	[_loupeView update:sourceViewImage];
-	UIGraphicsEndImageContext();
-	
 	_loupeView.hidden = NO;
 	
+	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
+	[_loupeView updateLoupeWithImage:sourceViewImage];
+	UIGraphicsEndImageContext();
+		
 	float offset = _loupeRadius/2 + _cursorMargin;
 	
 	switch ([UIApplication sharedApplication].statusBarOrientation) {
@@ -297,6 +295,11 @@ typedef enum _UZTextViewStatus {
 	_tapDurationTimer = nil;
 }
 
+- (void)invalidateTapDurationTimer {
+	[_tapDurationTimer invalidate];
+	_tapDurationTimer = nil;
+}
+
 #pragma mark - Touch event
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -336,6 +339,8 @@ typedef enum _UZTextViewStatus {
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 	NSLog(@"touchesMoved");
 	UITouch *touch = [touches anyObject];
+	
+	[self invalidateTapDurationTimer];
 	
 	if (_status == UZTextViewNoSelection) {
 		if (fabs(_locationWhenTapBegan.x - [touch locationInView:self].y) + fabs(_locationWhenTapBegan.y - [touch locationInView:self].y) > 4) {
@@ -377,9 +382,8 @@ typedef enum _UZTextViewStatus {
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	NSLog(@"touchesEnded");
-	[_tapDurationTimer invalidate];
-	_tapDurationTimer = nil;
+	[self invalidateTapDurationTimer];
+	
 	[_loupeView setVisible:NO animated:YES];
 	
 	if ([self.delegate respondsToSelector:@selector(selectionDidEndTextView:)])
@@ -417,7 +421,6 @@ typedef enum _UZTextViewStatus {
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
-	NSLog(@"touchesCancelled");
 	[self touchesEnded:touches withEvent:event];
 }
 
