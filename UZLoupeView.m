@@ -12,9 +12,29 @@
 #define UZ_LOUPE_ANIMATION_DUARTION		0.1
 #define UZ_LOUPE_OUTLINE_STROKE_WIDTH	2
 
+#define UZLoupeViewAppearingAnimation (NSString*)_UZLoupeViewAppearingAnimation
+#define UZLoupeViewDisappearingAnimation (NSString*)_UZLoupeViewDisappearingAnimation
+
+const NSString *_UZLoupeViewAppearingAnimation = @"_UZLoupeViewAppearingAnimation";
+const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAnimation";
+
 @implementation UZLoupeView
 
-#pragma mark - Create Core Animation objects
+#pragma mark - Create Core Animation objects for appearing
+
+- (CAAnimation*)alphaAnimationWhileAppearing {
+	CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
+	animation.values	= @[@(0), @(0.97), @(1)];
+	animation.keyTimes	= @[@(0), @(0.7), @(1)];
+	return animation;
+}
+
+- (CAAnimation*)transformScaleAnimationWhileAppearing {
+	CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+	animation.values	= @[@(0), @(1)];
+	animation.keyTimes	= @[@(0), @(1)];
+	return animation;
+}
 
 - (CAAnimation*)translationAnimationWhileAppearing {
 	UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
@@ -39,10 +59,19 @@
 	}
 }
 
-- (CAAnimation*)transformScaleAnimationWhileAppearing {
+#pragma mark - Create Core Animation objects for disappearing
+
+- (CAAnimation*)alphaAnimationWhileDisappearing {
+	CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
+	animation.values	= @[@(1.0), @(0.97), @(0)];
+	animation.keyTimes	= @[@(0), @(0.7), @(1)];
+	return animation;
+}
+
+- (CAAnimation*)transformScaleAnimationWhileDisapearing {
 	CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-	animation.values = @[@(0), @(1)];
-	animation.keyTimes = @[@(0), @(1)];
+	animation.values	= @[@(1), @(0)];
+	animation.keyTimes	= @[@(0), @(1)];
 	return animation;
 }
 
@@ -68,13 +97,6 @@
 	}
 }
 
-- (CAAnimation*)transformScaleAnimationWhileDisapearing {
-	CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-	animation.values = @[@(1), @(0)];
-	animation.keyTimes = @[@(0), @(1)];
-	return animation;
-}
-
 #pragma mark - Animate
 
 - (void)animateForAppearingWithDuration:(float)duration {
@@ -85,36 +107,39 @@
 	
 	// make animation group
 	CAAnimationGroup *group = [CAAnimationGroup animation];
-	group.animations = @[[self transformScaleAnimationWhileAppearing], [self translationAnimationWhileAppearing]];
+	group.animations = @[[self transformScaleAnimationWhileAppearing], [self translationAnimationWhileAppearing], [self alphaAnimationWhileAppearing]];
 	group.duration = duration;
 	group.removedOnCompletion = NO;
 	group.fillMode = kCAFillModeForwards;
 	group.delegate = self;
 	
 	// commit animation
-	[self.layer addAnimation:group forKey:@"appear"];
+	[group setValue:UZLoupeViewAppearingAnimation forKey:@"name"];
+	[self.layer addAnimation:group forKey:UZLoupeViewAppearingAnimation];
 }
 
 - (void)animateForDisappearingWithDuration:(float)duration {
 	// make group
 	CAAnimationGroup *group = [CAAnimationGroup animation];
-	group.animations = @[[self translationAnimationWhileDisappearing], [self transformScaleAnimationWhileDisapearing]];
+	group.animations = @[[self translationAnimationWhileDisappearing], [self transformScaleAnimationWhileDisapearing], [self alphaAnimationWhileDisappearing]];
 	group.duration = duration;
 	group.removedOnCompletion = NO;
 	group.fillMode = kCAFillModeForwards;
 	group.delegate = self;
 	
 	// commit animation
-	[self.layer addAnimation:group forKey:@"disappear"];
+	[group setValue:UZLoupeViewDisappearingAnimation forKey:@"name"];
+	[self.layer addAnimation:group forKey:UZLoupeViewDisappearingAnimation];
 }
 
 #pragma mark - Core Animation callback
 
 - (void)animationDidStop:(CAAnimation*)animation finished:(BOOL)flag {
-	if (animation == [self.layer animationForKey:@"appear"]) {
+	if ([[animation valueForKey:@"name"] isEqualToString:UZLoupeViewAppearingAnimation]) {
 	}
-	if (animation == [self.layer animationForKey:@"disappear"]) {
+	if ([[animation valueForKey:@"name"] isEqualToString:UZLoupeViewDisappearingAnimation]) {
 		self.hidden = YES;
+		self.layer.transform = CATransform3DIdentity;
 	}
 }
 
@@ -128,7 +153,7 @@
 		[self animateForDisappearingWithDuration:duration];
 }
 
-- (void)update:(UIImage*)image {
+- (void)updateLoupeWithImage:(UIImage*)image {
 	_image = image;
 	[self setNeedsDisplay];
 }

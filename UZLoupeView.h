@@ -8,13 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@class UZTextView;
-
 @interface UZLoupeView : UIView {
-	UZTextView	*_textView;
-	float		_radius;
 	UIImage		*_image;
 }
-- (void)update:(UIImage*)image;
+- (void)updateLoupeWithImage:(UIImage*)image;
 - (void)setVisible:(BOOL)visible animated:(BOOL)animated;
 @end
