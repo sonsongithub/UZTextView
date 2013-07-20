@@ -12,60 +12,91 @@
 #define UZ_LOUPE_ANIMATION_DUARTION		0.1
 #define UZ_LOUPE_OUTLINE_STROKE_WIDTH	2
 
+#define UZCoreAnimationName (NSString*)_UZCoreAnimationName
+#define UZLoupeViewAppearingAnimation (NSString*)_UZLoupeViewAppearingAnimation
+#define UZLoupeViewDisappearingAnimation (NSString*)_UZLoupeViewDisappearingAnimation
+
+const NSString *_UZCoreAnimationName = @"_UZCoreAnimationName";
+const NSString *_UZLoupeViewAppearingAnimation = @"_UZLoupeViewAppearingAnimation";
+const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAnimation";
+
 @implementation UZLoupeView
 
-#pragma mark - Create Core Animation objects
+#pragma mark - Create Core Animation objects for appearing
 
-- (CAAnimation*)translationYAnimationWhileAppearing {
-	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
-	sizeAnimation.values = [NSArray arrayWithObjects:
-							[NSNumber numberWithFloat:self.frame.size.height/2],
-							[NSNumber numberWithFloat:0],
-							nil];
-	sizeAnimation.keyTimes = [NSArray arrayWithObjects:
-							  [NSNumber numberWithFloat:0],
-							  [NSNumber numberWithFloat:1],
-							  nil];
-	return sizeAnimation;
+- (CAAnimation*)alphaAnimationWhileAppearing {
+	CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
+	animation.values	= @[@(0), @(0.97), @(1)];
+	animation.keyTimes	= @[@(0), @(0.7), @(1)];
+	return animation;
 }
 
 - (CAAnimation*)transformScaleAnimationWhileAppearing {
-	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-	sizeAnimation.values = [NSArray arrayWithObjects:
-							[NSNumber numberWithFloat:0],
-							[NSNumber numberWithFloat:1],
-							nil];
-	sizeAnimation.keyTimes = [NSArray arrayWithObjects:
-							  [NSNumber numberWithFloat:0],
-							  [NSNumber numberWithFloat:1],
-							  nil];
-	return sizeAnimation;
+	CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+	animation.values	= @[@(0), @(1)];
+	animation.keyTimes	= @[@(0), @(1)];
+	return animation;
 }
 
-- (CAAnimation*)translationYAnimationWhileDisappearing {
-	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
-	sizeAnimation.values = [NSArray arrayWithObjects:
-							[NSNumber numberWithFloat:0],
-							[NSNumber numberWithFloat:self.frame.size.height/2],
-							nil];
-	sizeAnimation.keyTimes = [NSArray arrayWithObjects:
-							  [NSNumber numberWithFloat:0],
-							  [NSNumber numberWithFloat:1],
-							  nil];
-	return sizeAnimation;
+- (CAAnimation*)translationAnimationWhileAppearing {
+	UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
+	
+	if (UIInterfaceOrientationIsPortrait(orientation)) {
+		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
+		animation.keyTimes = @[@(0), @(1)];
+		if (orientation == UIInterfaceOrientationPortrait)
+			animation.values = @[@(self.frame.size.height/2), @(0)];
+		else
+			animation.values = @[@(-self.frame.size.height/2), @(0)];
+		return animation;
+	}
+	else {
+		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.x"];
+		animation.keyTimes = @[@(0), @(1)];
+		if (orientation == UIInterfaceOrientationLandscapeLeft)
+			animation.values = @[@(self.frame.size.width/2), @(0)];
+		else
+			animation.values = @[@(-self.frame.size.width/2), @(0)];
+		return animation;
+	}
+}
+
+#pragma mark - Create Core Animation objects for disappearing
+
+- (CAAnimation*)alphaAnimationWhileDisappearing {
+	CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
+	animation.values	= @[@(1.0), @(0.97), @(0)];
+	animation.keyTimes	= @[@(0), @(0.7), @(1)];
+	return animation;
 }
 
 - (CAAnimation*)transformScaleAnimationWhileDisapearing {
-	CAKeyframeAnimation *sizeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-	sizeAnimation.values = [NSArray arrayWithObjects:
-							[NSNumber numberWithFloat:1],
-							[NSNumber numberWithFloat:0],
-							nil];
-	sizeAnimation.keyTimes = [NSArray arrayWithObjects:
-							  [NSNumber numberWithFloat:0],
-							  [NSNumber numberWithFloat:1],
-							  nil];
-	return sizeAnimation;
+	CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+	animation.values	= @[@(1), @(0)];
+	animation.keyTimes	= @[@(0), @(1)];
+	return animation;
+}
+
+- (CAAnimation*)translationAnimationWhileDisappearing {
+	UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
+	if (UIInterfaceOrientationIsPortrait(orientation)) {
+		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
+		animation.keyTimes = @[@(0), @(1)];
+		if (orientation == UIInterfaceOrientationPortrait)
+			animation.values = @[@(0), @(self.frame.size.height/2)];
+		else
+			animation.values = @[@(0), @(-self.frame.size.height/2)];
+		return animation;
+	}
+	else {
+		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.x"];
+		animation.keyTimes = @[@(0), @(1)];
+		if (orientation == UIInterfaceOrientationLandscapeLeft)
+			animation.values = @[@(0), @(self.frame.size.width/2)];
+		else
+			animation.values = @[@(0), @(-self.frame.size.width/2)];
+		return animation;
+	}
 }
 
 #pragma mark - Animate
@@ -78,36 +109,39 @@
 	
 	// make animation group
 	CAAnimationGroup *group = [CAAnimationGroup animation];
-	group.animations = @[[self transformScaleAnimationWhileAppearing], [self translationYAnimationWhileAppearing]];
+	group.animations = @[[self transformScaleAnimationWhileAppearing], [self translationAnimationWhileAppearing], [self alphaAnimationWhileAppearing]];
 	group.duration = duration;
 	group.removedOnCompletion = NO;
 	group.fillMode = kCAFillModeForwards;
 	group.delegate = self;
 	
 	// commit animation
-	[self.layer addAnimation:group forKey:@"appear"];
+	[group setValue:UZLoupeViewAppearingAnimation forKey:UZCoreAnimationName];
+	[self.layer addAnimation:group forKey:UZLoupeViewAppearingAnimation];
 }
 
 - (void)animateForDisappearingWithDuration:(float)duration {
 	// make group
 	CAAnimationGroup *group = [CAAnimationGroup animation];
-	group.animations = @[[self translationYAnimationWhileDisappearing], [self transformScaleAnimationWhileDisapearing]];
+	group.animations = @[[self translationAnimationWhileDisappearing], [self transformScaleAnimationWhileDisapearing], [self alphaAnimationWhileDisappearing]];
 	group.duration = duration;
 	group.removedOnCompletion = NO;
 	group.fillMode = kCAFillModeForwards;
 	group.delegate = self;
 	
 	// commit animation
-	[self.layer addAnimation:group forKey:@"disappear"];
+	[group setValue:UZLoupeViewDisappearingAnimation forKey:UZCoreAnimationName];
+	[self.layer addAnimation:group forKey:UZLoupeViewDisappearingAnimation];
 }
 
 #pragma mark - Core Animation callback
 
 - (void)animationDidStop:(CAAnimation*)animation finished:(BOOL)flag {
-	if (animation == [self.layer animationForKey:@"appear"]) {
+	if ([[animation valueForKey:UZCoreAnimationName] isEqualToString:UZLoupeViewAppearingAnimation]) {
 	}
-	if (animation == [self.layer animationForKey:@"disappear"]) {
+	if ([[animation valueForKey:UZCoreAnimationName] isEqualToString:UZLoupeViewDisappearingAnimation]) {
 		self.hidden = YES;
+		self.layer.transform = CATransform3DIdentity;
 	}
 }
 
@@ -121,7 +155,7 @@
 		[self animateForDisappearingWithDuration:duration];
 }
 
-- (void)update:(UIImage*)image {
+- (void)updateLoupeWithImage:(UIImage*)image {
 	_image = image;
 	[self setNeedsDisplay];
 }
