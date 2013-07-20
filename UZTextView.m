@@ -271,8 +271,9 @@ typedef enum _UZTextViewStatus {
 	_fromWhenBegan = 0;
 	_endWhenBegan = 0;
 	
-	[_tapDurationTimer invalidate];
-	_tapDurationTimer = nil;
+	[self invalidateTapDurationTimer];
+	_leftCursor.hidden = YES;
+	_rightCursor.hidden = YES;
 	_locationWhenTapBegan = CGPointZero;
 }
 
