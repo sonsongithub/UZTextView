@@ -12,9 +12,11 @@
 #define UZ_LOUPE_ANIMATION_DUARTION		0.1
 #define UZ_LOUPE_OUTLINE_STROKE_WIDTH	2
 
+#define UZCoreAnimationName (NSString*)_UZCoreAnimationName
 #define UZLoupeViewAppearingAnimation (NSString*)_UZLoupeViewAppearingAnimation
 #define UZLoupeViewDisappearingAnimation (NSString*)_UZLoupeViewDisappearingAnimation
 
+const NSString *_UZCoreAnimationName = @"_UZCoreAnimationName";
 const NSString *_UZLoupeViewAppearingAnimation = @"_UZLoupeViewAppearingAnimation";
 const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAnimation";
 
@@ -114,7 +116,7 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 	group.delegate = self;
 	
 	// commit animation
-	[group setValue:UZLoupeViewAppearingAnimation forKey:@"name"];
+	[group setValue:UZLoupeViewAppearingAnimation forKey:UZCoreAnimationName];
 	[self.layer addAnimation:group forKey:UZLoupeViewAppearingAnimation];
 }
 
@@ -128,16 +130,16 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 	group.delegate = self;
 	
 	// commit animation
-	[group setValue:UZLoupeViewDisappearingAnimation forKey:@"name"];
+	[group setValue:UZLoupeViewDisappearingAnimation forKey:UZCoreAnimationName];
 	[self.layer addAnimation:group forKey:UZLoupeViewDisappearingAnimation];
 }
 
 #pragma mark - Core Animation callback
 
 - (void)animationDidStop:(CAAnimation*)animation finished:(BOOL)flag {
-	if ([[animation valueForKey:@"name"] isEqualToString:UZLoupeViewAppearingAnimation]) {
+	if ([[animation valueForKey:UZCoreAnimationName] isEqualToString:UZLoupeViewAppearingAnimation]) {
 	}
-	if ([[animation valueForKey:@"name"] isEqualToString:UZLoupeViewDisappearingAnimation]) {
+	if ([[animation valueForKey:UZCoreAnimationName] isEqualToString:UZLoupeViewDisappearingAnimation]) {
 		self.hidden = YES;
 		self.layer.transform = CATransform3DIdentity;
 	}
