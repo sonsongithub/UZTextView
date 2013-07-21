@@ -181,21 +181,22 @@ typedef enum _UZTextViewStatus {
 		[_layoutManager lineFragmentRectForGlyphAtIndex:i effectiveRange:(NSRangePointer)&effectiveRange];
 		NSUInteger left = effectiveRange.location >= i ? effectiveRange.location : i;
 		NSUInteger right = effectiveRange.location + effectiveRange.length <= toIndex ? effectiveRange.location + effectiveRange.length - 1 : toIndex;
-		
+	
 		// Skip new line code
 		CGGlyph rightGlyph = [_layoutManager glyphAtIndex:right];
 		if (rightGlyph == NEW_LINE_GLYPH)
 			right--;
 		
-		// Get regions of right and left glyph
-		CGRect r1 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(left, 1) inTextContainer:_textContainer];
-		CGRect r2 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(right, 1) inTextContainer:_textContainer];
-		
-		// Get line region by combining right and left regions.
-		CGRect r = CGRectMake(r1.origin.x, r1.origin.y, r2.origin.x + r2.size.width - r1.origin.x, r1.size.height);
-		
-		[fragmentRects addObject:[NSValue valueWithCGRect:r]];
-		
+		if (left < right) {
+			// Get regions of right and left glyph
+			CGRect r1 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(left, 1) inTextContainer:_textContainer];
+			CGRect r2 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(right, 1) inTextContainer:_textContainer];
+			
+			// Get line region by combining right and left regions.
+			CGRect r = CGRectMake(r1.origin.x, r1.origin.y, r2.origin.x + r2.size.width - r1.origin.x, r1.size.height);
+			
+			[fragmentRects addObject:[NSValue valueWithCGRect:r]];
+		}
 		// forward glyph index pointer, i
 		i = effectiveRange.location + effectiveRange.length;
 	}
