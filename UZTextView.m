@@ -81,7 +81,7 @@ typedef enum _UZTextViewStatus {
 
 #pragma mark - Instance method
 
-- (CGRect)rectToTapAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side {
+- (CGRect)fragmentRectForCursorAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side {
 	if (side == UZTextViewLeftEdge) {
 		CGRect rect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(index, 1) inTextContainer:_textContainer];
 		rect.size.width = 0;
@@ -203,7 +203,7 @@ typedef enum _UZTextViewStatus {
 	return [NSArray arrayWithArray:fragmentRects];
 }
 
-- (CGRect)selectedStringRectFromIndex:(int)fromIndex toIndex:(int)toIndex {
+- (CGRect)fragmentRectForSelectedStringFromIndex:(int)fromIndex toIndex:(int)toIndex {
 	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:fromIndex toIndex:toIndex];
 	CGRect unifiedRect = [[fragmentRects objectAtIndex:0] CGRectValue];
 	for (NSValue *rectValue in fragmentRects) {
@@ -281,8 +281,8 @@ typedef enum _UZTextViewStatus {
 - (void)setCursorHidden:(BOOL)hidden {
 	int fromToRender = _from < _end ? _from : _end;
 	int toToRender = _from < _end ? _end : _from;
-	[_leftCursor setFrame:[self rectToTapAtIndex:fromToRender side:UZTextViewLeftEdge]];
-	[_rightCursor setFrame:[self rectToTapAtIndex:toToRender side:UZTextViewRightEdge]];
+	[_leftCursor setFrame:[self fragmentRectForCursorAtIndex:fromToRender side:UZTextViewLeftEdge]];
+	[_rightCursor setFrame:[self fragmentRectForCursorAtIndex:toToRender side:UZTextViewRightEdge]];
 	_leftCursor.hidden = hidden;
 	_rightCursor.hidden = hidden;
 }
@@ -313,7 +313,7 @@ typedef enum _UZTextViewStatus {
 	if (_status == UZTextViewSelected) {
 		_fromWhenBegan = _from;
 		_endWhenBegan = _end;
-		if (CGRectContainsPoint([self rectToTapAtIndex:_from side:UZTextViewLeftEdge], [touch locationInView:self])) {
+		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_from side:UZTextViewLeftEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingFromSelection;
 			[_loupeView setVisible:YES animated:YES];
 			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
@@ -322,7 +322,7 @@ typedef enum _UZTextViewStatus {
 			[self setCursorHidden:NO];
 			return;
 		}
-		if (CGRectContainsPoint([self rectToTapAtIndex:_end side:UZTextViewRightEdge], [touch locationInView:self])) {
+		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_end side:UZTextViewRightEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingToSelection;
 			[_loupeView setVisible:YES animated:YES];
 			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
@@ -415,7 +415,7 @@ typedef enum _UZTextViewStatus {
 		[self setCursorHidden:NO];
 		
 		[self becomeFirstResponder];
-		[[UIMenuController sharedMenuController] setTargetRect:[self selectedStringRectFromIndex:_from toIndex:_end] inView:self];
+		[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_from toIndex:_end] inView:self];
 		[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
 	}
 	_locationWhenTapBegan = CGPointZero;
@@ -467,6 +467,20 @@ typedef enum _UZTextViewStatus {
 
 #pragma mark - Override
 
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    if (CGRectContainsPoint(self.bounds, point)) {
+		NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:0 toIndex:self.attributedString.length-1];
+		for (NSValue *rectValue in fragmentRects) {
+			if (CGRectContainsPoint([rectValue CGRectValue], point))
+				return [super hitTest:point withEvent:event];
+		}
+		[self setCursorHidden:YES];
+		_status = UZTextViewNoSelection;
+		[self setNeedsDisplay];
+    }
+    return nil;
+}
+
 - (void)layoutSubviews {
 	[super layoutSubviews];
 	[self setNeedsDisplay];
@@ -488,9 +502,9 @@ typedef enum _UZTextViewStatus {
 
 - (void)drawRect:(CGRect)rect {
 	// draw background color
-	CGContextRef context = UIGraphicsGetCurrentContext();
-	[[UIColor whiteColor] setFill];
-	CGContextFillRect(context, rect);
+//	CGContextRef context = UIGraphicsGetCurrentContext();
+//	[[UIColor whiteColor] setFill];
+//	CGContextFillRect(context, rect);
 	
 	// draw main content
 	[self drawContent];
