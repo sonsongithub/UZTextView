@@ -55,10 +55,8 @@
 - (void)updateWithData:(NSData*)data {
 	NSError *parseError = nil;
 	NSDictionary *result = [NSJSONSerialization JSONObjectWithData:data options:0 error:&parseError];
-	NSLog(@"%@", result);
 	NSMutableArray *buf = [NSMutableArray array];
 	for (id obj in result) {
-		NSLog(@"%@", obj[@"text"]);
 		Tweet *tweet = [[Tweet alloc] init];
 		[buf addObject:tweet];
 		tweet.text = obj[@"text"];
