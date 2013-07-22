@@ -22,6 +22,17 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 
 @implementation UZLoupeView
 
+#pragma mark - Update own content
+
+- (void)updateUsingSuperViewAtLocationOnSuperview:(CGPoint)location {
+}
+
+- (void)updateUsingKeyWindowAtLocationOnSuperview:(CGPoint)location {
+}
+
+- (void)updateAtLocationOnSuperview:(CGPoint)location {
+}
+
 #pragma mark - Create Core Animation objects for appearing
 
 - (CAAnimation*)alphaAnimationWhileAppearing {
