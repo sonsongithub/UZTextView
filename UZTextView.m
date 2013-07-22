@@ -82,7 +82,7 @@ typedef enum _UZTextViewStatus {
 #pragma mark - Instance method
 
 - (void)updateLoupeViewAtLocation:(CGPoint)location {
-	[_loupeView updateAtLocationOnSuperview:location];
+	[_loupeView updateAtLocation:location textView:self];
 }
 
 - (void)pushSnapshotToLoupeViewAtLocation:(CGPoint)location __attribute__((deprecated())) {
@@ -325,7 +325,8 @@ typedef enum _UZTextViewStatus {
 
 - (void)tapDurationTimerFired:(NSTimer*)timer {
 	[_loupeView setVisible:YES animated:YES];
-	[self pushSnapshotToLoupeViewAtLocation:_locationWhenTapBegan];
+	[self updateLoupeViewAtLocation:_locationWhenTapBegan];
+	// [self pushSnapshotToLoupeViewAtLocation:_locationWhenTapBegan];
 	if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 		[self.delegate selectionDidBeginTextView:self];
 	_tapDurationTimer = nil;
@@ -366,7 +367,8 @@ typedef enum _UZTextViewStatus {
 		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_from side:UZTextViewLeftEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingFromSelection;
 			[_loupeView setVisible:YES animated:YES];
-			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+//			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+			[self updateLoupeViewAtLocation:[touch locationInView:self]];
 			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 				[self.delegate selectionDidBeginTextView:self];
 			[self setCursorHidden:NO];
@@ -375,7 +377,8 @@ typedef enum _UZTextViewStatus {
 		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_end side:UZTextViewRightEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingToSelection;
 			[_loupeView setVisible:YES animated:YES];
-			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+//			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+			[self updateLoupeViewAtLocation:[touch locationInView:self]];
 			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 				[self.delegate selectionDidBeginTextView:self];
 			[self setCursorHidden:NO];
@@ -406,7 +409,8 @@ typedef enum _UZTextViewStatus {
 	}
 	if (_status == UZTextViewSelecting) {
 		_end = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
-		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+//		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+		[self updateLoupeViewAtLocation:[touch locationInView:self]];
 	}
 	else if (_status == UZTextViewEditingFromSelection) {
 		[self setCursorHidden:NO];
@@ -416,7 +420,8 @@ typedef enum _UZTextViewStatus {
 			_end = _endWhenBegan + 1;
 		else if (prev_from >= _end && _from < _end)
 			_end = _endWhenBegan;
-		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+//		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+		[self updateLoupeViewAtLocation:[touch locationInView:self]];
 	}
 	else if (_status == UZTextViewEditingToSelection) {
 		[self setCursorHidden:NO];
@@ -426,7 +431,8 @@ typedef enum _UZTextViewStatus {
 			_from = _fromWhenBegan - 1;
 		else if (prev_end <= _from && _from < _end)
 			_from = _fromWhenBegan;
-		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+//		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+		[self updateLoupeViewAtLocation:[touch locationInView:self]];
 	}
 	
 	[self setNeedsDisplay];

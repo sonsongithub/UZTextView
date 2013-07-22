@@ -9,9 +9,11 @@
 #import <UIKit/UIKit.h>
 
 @interface UZLoupeView : UIView {
+	UIImage		*_windowImage;
+	CGPoint		_windowImageOffset;
 	UIImage		*_image;
 }
-- (void)updateAtLocationOnSuperview:(CGPoint)location;
+- (void)updateAtLocation:(CGPoint)location textView:(UIView*)textView;
 - (void)updateLoupeWithImage:(UIImage*)image;
 - (void)setVisible:(BOOL)visible animated:(BOOL)animated;
 @end
