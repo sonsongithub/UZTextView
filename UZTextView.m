@@ -81,16 +81,19 @@ typedef enum _UZTextViewStatus {
 
 #pragma mark - Instance method
 
-- (void)pushSnapshotToLoupeViewAtLocation:(CGPoint)location {
+- (void)updateLoupeViewAtLocation:(CGPoint)location {
+	[_loupeView updateAtLocationOnSuperview:location];
+}
+
+- (void)pushSnapshotToLoupeViewAtLocation:(CGPoint)location __attribute__((deprecated())) {
 	CGPoint c = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointMake(location.x, location.y) fromView:self];
 	
+#if 0
 	// Create UIImage from source view controller's view.
-	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius, _loupeRadius), NO, 0);
+	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius * 2, _loupeRadius * 2), NO, 0);
 	CGContextRef ctx = UIGraphicsGetCurrentContext();
-	[[UIColor whiteColor] setFill];
-	CGContextFillRect(ctx, CGRectMake(0, 0, _loupeRadius, _loupeRadius));
 	CGContextScaleCTM(ctx, 1, 1);
-	CGContextTranslateCTM(ctx, -c.x + _loupeRadius/2, -c.y + _loupeRadius/2);
+	CGContextTranslateCTM(ctx, -c.x + _loupeRadius, -c.y + _loupeRadius);
 	
 	// Drawing code
 	_loupeView.hidden = YES;
@@ -100,8 +103,21 @@ typedef enum _UZTextViewStatus {
 	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
 	[_loupeView updateLoupeWithImage:sourceViewImage];
 	UIGraphicsEndImageContext();
-		
-	float offset = _loupeRadius/2 + _cursorMargin;
+#else
+	// Create UIImage from source view controller's view.
+	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius * 2, _loupeRadius * 2), NO, 0);
+	CGContextRef ctx = UIGraphicsGetCurrentContext();
+	CGContextTranslateCTM(ctx, -location.x + _loupeRadius, -location.y + _loupeRadius);
+	// Drawing code
+	_loupeView.hidden = YES;
+	[self.layer renderInContext:ctx];
+	_loupeView.hidden = NO;
+	
+	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
+	[_loupeView updateLoupeWithImage:sourceViewImage];
+	UIGraphicsEndImageContext();
+#endif
+	float offset = _loupeRadius + _cursorMargin;
 	
 	switch ([UIApplication sharedApplication].statusBarOrientation) {
 		case UIInterfaceOrientationLandscapeLeft:
@@ -117,7 +133,7 @@ typedef enum _UZTextViewStatus {
 			c.y -= offset;
 			break;
 	}
-
+	[_loupeView setBounds:CGRectMake(0, 0, _loupeRadius * 2, _loupeRadius * 2)];
 	[_loupeView setCenter:c];
 	[[UIApplication sharedApplication].keyWindow addSubview:_loupeView];
 }
@@ -274,7 +290,7 @@ typedef enum _UZTextViewStatus {
 
 - (void)prepareForInitialization {
 	// init invaliables
-	_loupeRadius = 160;
+	_loupeRadius = 50;
 	_cursorMargin = 14;
 	_tintAlpha = 0.5;
 	_durationToCancelSuperViewScrolling = 0.25;

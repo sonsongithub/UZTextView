@@ -11,6 +11,7 @@
 @interface UZLoupeView : UIView {
 	UIImage		*_image;
 }
+- (void)updateAtLocationOnSuperview:(CGPoint)location;
 - (void)updateLoupeWithImage:(UIImage*)image;
 - (void)setVisible:(BOOL)visible animated:(BOOL)animated;
 @end
