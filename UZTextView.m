@@ -80,63 +80,6 @@ typedef enum _UZTextViewStatus {
 
 #pragma mark - Instance method
 
-- (void)updateLoupeViewAtLocation:(CGPoint)location {
-	[_loupeView updateAtLocation:location textView:self];
-}
-
-- (void)pushSnapshotToLoupeViewAtLocation:(CGPoint)location __attribute__((deprecated())) {
-#if 0
-	CGPoint c = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointMake(location.x, location.y) fromView:self];
-	
-	// Create UIImage from source view controller's view.
-	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius * 2, _loupeRadius * 2), NO, 0);
-	CGContextRef ctx = UIGraphicsGetCurrentContext();
-	CGContextScaleCTM(ctx, 1, 1);
-	CGContextTranslateCTM(ctx, -c.x + _loupeRadius, -c.y + _loupeRadius);
-	
-	// Drawing code
-	_loupeView.hidden = YES;
-	[[UIApplication sharedApplication].keyWindow.layer renderInContext:ctx];
-	_loupeView.hidden = NO;
-	
-	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
-	[_loupeView updateLoupeWithImage:sourceViewImage];
-	UIGraphicsEndImageContext();
-	
-	// Create UIImage from source view controller's view.
-	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius * 2, _loupeRadius * 2), NO, 0);
-	CGContextRef ctx = UIGraphicsGetCurrentContext();
-	CGContextTranslateCTM(ctx, -location.x + _loupeRadius, -location.y + _loupeRadius);
-	// Drawing code
-	_loupeView.hidden = YES;
-	[self.layer renderInContext:ctx];
-	_loupeView.hidden = NO;
-	
-	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
-	[_loupeView updateLoupeWithImage:sourceViewImage];
-	UIGraphicsEndImageContext();
-	float offset = _loupeRadius + _cursorMargin;
-	
-	switch ([UIApplication sharedApplication].statusBarOrientation) {
-		case UIInterfaceOrientationLandscapeLeft:
-			c.x -= offset;
-			break;
-		case UIInterfaceOrientationLandscapeRight:
-			c.x += offset;
-			break;
-		case UIInterfaceOrientationPortrait:
-			c.y -= offset;
-			break;
-		case UIInterfaceOrientationPortraitUpsideDown:
-			c.y -= offset;
-			break;
-	}
-	[_loupeView setBounds:CGRectMake(0, 0, _loupeRadius * 2, _loupeRadius * 2)];
-	[_loupeView setCenter:c];
-	[[UIApplication sharedApplication].keyWindow addSubview:_loupeView];
-#endif
-}
-
 - (void)setAttributedString:(NSAttributedString *)attributedString {
 	[self prepareForReuse];
 	
@@ -323,8 +266,7 @@ typedef enum _UZTextViewStatus {
 
 - (void)tapDurationTimerFired:(NSTimer*)timer {
 	[_loupeView setVisible:YES animated:YES];
-	[self updateLoupeViewAtLocation:_locationWhenTapBegan];
-	// [self pushSnapshotToLoupeViewAtLocation:_locationWhenTapBegan];
+	[_loupeView updateAtLocation:_locationWhenTapBegan textView:self];
 	if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 		[self.delegate selectionDidBeginTextView:self];
 	_tapDurationTimer = nil;
@@ -365,8 +307,7 @@ typedef enum _UZTextViewStatus {
 		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_from side:UZTextViewLeftEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingFromSelection;
 			[_loupeView setVisible:YES animated:YES];
-//			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
-			[self updateLoupeViewAtLocation:[touch locationInView:self]];
+			[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 				[self.delegate selectionDidBeginTextView:self];
 			[self setCursorHidden:NO];
@@ -375,8 +316,7 @@ typedef enum _UZTextViewStatus {
 		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_end side:UZTextViewRightEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingToSelection;
 			[_loupeView setVisible:YES animated:YES];
-//			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
-			[self updateLoupeViewAtLocation:[touch locationInView:self]];
+			[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 				[self.delegate selectionDidBeginTextView:self];
 			[self setCursorHidden:NO];
@@ -407,8 +347,7 @@ typedef enum _UZTextViewStatus {
 	}
 	if (_status == UZTextViewSelecting) {
 		_end = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
-//		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
-		[self updateLoupeViewAtLocation:[touch locationInView:self]];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 	}
 	else if (_status == UZTextViewEditingFromSelection) {
 		[self setCursorHidden:NO];
@@ -418,8 +357,7 @@ typedef enum _UZTextViewStatus {
 			_end = _endWhenBegan + 1;
 		else if (prev_from >= _end && _from < _end)
 			_end = _endWhenBegan;
-//		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
-		[self updateLoupeViewAtLocation:[touch locationInView:self]];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 	}
 	else if (_status == UZTextViewEditingToSelection) {
 		[self setCursorHidden:NO];
@@ -429,8 +367,7 @@ typedef enum _UZTextViewStatus {
 			_from = _fromWhenBegan - 1;
 		else if (prev_end <= _from && _from < _end)
 			_from = _fromWhenBegan;
-//		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
-		[self updateLoupeViewAtLocation:[touch locationInView:self]];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 	}
 	
 	[self setNeedsDisplay];
