@@ -10,6 +10,8 @@
 
 #import "UZTextView.h"
 
-@interface RootViewController : UITableViewController <UZTextViewDelegate>
+@interface RootViewController : UITableViewController <UZTextViewDelegate> {
+	NSArray *_tweets;
+}
 
 @end

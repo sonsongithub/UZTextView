@@ -8,8 +8,12 @@
 
 #import "RootViewController.h"
 
+#import <Accounts/Accounts.h>
+#import <Social/Social.h>
+
 #import "TextCell.h"
 #import "UZTextView.h"
+#import "Tweet.h"
 
 @interface RootViewController ()
 
@@ -42,14 +46,57 @@
     return self;
 }
 
+- (NSString*)path {
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *documentsDirectory = [paths objectAtIndex:0];
+	return [NSString stringWithFormat:@"%@/tweets.json", documentsDirectory];
+}
+
+- (void)updateWithData:(NSData*)data {
+	NSError *parseError = nil;
+	NSDictionary *result = [NSJSONSerialization JSONObjectWithData:data options:0 error:&parseError];
+	NSMutableArray *buf = [NSMutableArray array];
+	for (id obj in result) {
+		Tweet *tweet = [[Tweet alloc] init];
+		[buf addObject:tweet];
+		tweet.text = obj[@"text"];
+		tweet.attributedString = [[NSMutableAttributedString alloc] initWithString:tweet.text];
+		tweet.height = [UZTextView sizeForAttributedString:tweet.attributedString withBoundWidth:320].height;
+	}
+	_tweets = [NSArray arrayWithArray:buf];
+	[self.tableView reloadData];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
-
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
- 
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+	
+	if ([[NSFileManager defaultManager] isReadableFileAtPath:[self path]]) {
+		NSData *data = [NSData dataWithContentsOfFile:[self path]];
+		[self updateWithData:data];
+	}
+	else {
+		ACAccountStore *accountStore = [[ACAccountStore alloc]init];
+		ACAccountType *accountType = [accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
+		[accountStore requestAccessToAccountsWithType:accountType options:nil completion:^(BOOL granted, NSError *error) {
+			if (granted) {
+				NSArray *accounts = [accountStore accountsWithAccountType:accountType];
+				if (accounts.count > 0) {
+					ACAccount *account = accounts[0];
+					NSURL *requestURL = [NSURL URLWithString:@"https://api.twitter.com/1/statuses/home_timeline.json"];
+					NSDictionary *params = @{@"count": @"200", @"include_entities": @"true"};
+					SLRequest *request = [SLRequest requestForServiceType:SLServiceTypeTwitter
+												 requestMethod:SLRequestMethodGET
+														   URL:requestURL
+													parameters:params];
+					request.account = account;
+					[request performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) {
+						[self updateWithData:responseData];
+						[responseData writeToFile:[self path] atomically:NO];
+					}];
+				}
+			}
+		}];
+	}
 }
 
 - (void)didReceiveMemoryWarning {
@@ -64,23 +111,22 @@
     return 1;
 }
 
+- (float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+	Tweet *tweet = [_tweets objectAtIndex:indexPath.row];
+	return tweet.height;
+}
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return 10;
+    return [_tweets count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     static NSString *CellIdentifier = @"Cell";
     TextCell *cell = (TextCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
     
+	Tweet *tweet = [_tweets objectAtIndex:indexPath.row];
 	
-	NSString *string = @"hoge\rhoge\rhttp://www.yahoo.co.jp\r\rあれから吉田悠一012345678901234567890123456789012345678901234567890123456789hoge>>190";
-	NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:string];
-	[attributedString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"Arial"size:20] range:NSMakeRange(0, string.length)];
-	
-	[attributedString addAttribute:NSLinkAttributeName value:@"http://www.yahoo.co.jp" range:NSMakeRange(10, 22)];
-	[attributedString addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleNone) range:NSMakeRange(10, 22)];
-	
-	cell.textView.attributedString = attributedString;
+	cell.textView.attributedString = tweet.attributedString;
 	cell.textView.delegate = self;
 	
     return cell;

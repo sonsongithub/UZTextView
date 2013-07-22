@@ -9,6 +9,7 @@
 #import "UZTextView.h"
 
 #import "UZLoupeView.h"
+#import "UZCursorView.h"
 
 #define NEW_LINE_GLYPH 65535
 
@@ -20,16 +21,94 @@ typedef enum _UZTextViewGlyphEdgeType {
 	UZTextViewRightEdge		= 1
 }UZTextViewGlyphEdgeType;
 
-typedef enum _UZTextViewCursorDirection {
-	UZTextViewUpCursor		= 0,
-	UZTextViewDownCursor	= 1
-}UZTextViewCursorDirection;
+typedef enum _UZTextViewStatus {
+	UZTextViewNoSelection			= 0,
+	UZTextViewSelecting				= 1,
+	UZTextViewSelected				= 2,
+	UZTextViewEditingFromSelection	= 3,
+	UZTextViewEditingToSelection	= 4,
+}UZTextViewStatus;
+
+@interface UZTextView() {
+	// text manager
+	NSLayoutManager		*_layoutManager;
+	NSTextContainer		*_textContainer;
+	NSTextStorage		*_textStorage;
+	
+	// parameter
+	NSUInteger			_from;
+	NSUInteger			_end;
+	NSUInteger			_fromWhenBegan;
+	NSUInteger			_endWhenBegan;
+	
+	UZTextViewStatus	_status;
+	//
+	NSTimer				*_tapDurationTimer;
+	
+	// child view
+	UZLoupeView			*_loupeView;
+	UZCursorView		*_leftCursor;
+	UZCursorView		*_rightCursor;
+	
+	// tap event control
+	CGPoint				_locationWhenTapBegan;
+	
+	// invaliables
+	float				_cursorMargin;
+	float				_tintAlpha;
+	float				_durationToCancelSuperViewScrolling;
+}
+@end
 
 @implementation UZTextView
 
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width {
+	NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
+	NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(width, CGFLOAT_MAX)];
+	NSTextStorage *textStorage = [[NSTextStorage alloc] init];
+	[layoutManager addTextContainer:textContainer];
+	
+	[textStorage setAttributedString:attributedString];
+	
+	[layoutManager setTextStorage:textStorage];
+	
+	[textStorage addLayoutManager:layoutManager];
+	
+	CGRect r = [layoutManager lineFragmentRectForGlyphAtIndex:attributedString.length-1 effectiveRange:NULL];
+	return CGSizeMake(width, r.size.height + r.origin.y);
+}
+
 #pragma mark - Instance method
 
-- (CGRect)rectToTapAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side {
+- (void)setAttributedString:(NSAttributedString *)attributedString {
+	[self prepareForReuse];
+	
+	_layoutManager = [[NSLayoutManager alloc] init];
+	_textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
+	_textStorage = [[NSTextStorage alloc] init];
+	[_layoutManager addTextContainer:_textContainer];
+	
+	_attributedString = attributedString;
+	
+	[_textStorage setAttributedString:attributedString];
+	
+	[_layoutManager setTextStorage:_textStorage];
+	
+	[_textStorage addLayoutManager:_layoutManager];
+	
+	CGRect r = [_layoutManager lineFragmentRectForGlyphAtIndex:self.attributedString.length-1 effectiveRange:NULL];
+	
+	CGRect currentRect = self.frame;
+	currentRect.size = CGSizeMake(self.frame.size.width, r.size.height + r.origin.y);
+	self.frame = currentRect;
+	_contentSize = currentRect.size;
+	[self setNeedsLayout];
+	[self setNeedsDisplay];
+}
+
+#pragma mark - Layout information
+
+- (CGRect)fragmentRectForCursorAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side {
 	if (side == UZTextViewLeftEdge) {
 		CGRect rect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(index, 1) inTextContainer:_textContainer];
 		rect.size.width = 0;
@@ -44,42 +123,6 @@ typedef enum _UZTextViewCursorDirection {
 	}
 }
 
-- (void)pushSnapshotToLoupeViewAtLocation:(CGPoint)location {
-	// Create UIImage from source view controller's view.
-	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius, _loupeRadius), NO, 0);
-	CGContextRef ctx = UIGraphicsGetCurrentContext();
-	[[UIColor whiteColor] setFill];
-	CGContextFillRect(ctx, CGRectMake(0, 0, _loupeRadius, _loupeRadius));
-	CGContextScaleCTM(ctx, 1, 1);
-	CGContextTranslateCTM(ctx, -location.x + _loupeRadius/2, -location.y+_loupeRadius/2);
-	// Drawing code
-	[self drawContent];
-	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
-	[_loupeView update:sourceViewImage];
-	UIGraphicsEndImageContext();
-	[_loupeView setCenter:CGPointMake(location.x, location.y - _loupeRadius/2)];
-}
-
-- (void)setAttributedString:(NSAttributedString *)attributedString {
-	_attributedString = attributedString;
-	
-	[_textStorage setAttributedString:attributedString];
-	
-	[_layoutManager setTextStorage:_textStorage];
-	
-	[_textStorage addLayoutManager:_layoutManager];
-	
-	CGRect r = [_layoutManager lineFragmentRectForGlyphAtIndex:self.attributedString.length-1 effectiveRange:NULL];
-	
-	CGRect currentRect = self.frame;
-	currentRect.size = CGSizeMake(r.size.width, r.size.height + r.origin.y);
-	self.frame = currentRect;
-	[self setNeedsLayout];
-	[self setNeedsDisplay];
-}
-
-#pragma mark - Layout information
-
 - (NSArray*)fragmentRectsForGlyphFromIndex:(int)fromIndex toIndex:(int)toIndex {
 	if (!(fromIndex <= toIndex && fromIndex >=0 && toIndex >=0))
 		return @[];
@@ -92,28 +135,29 @@ typedef enum _UZTextViewCursorDirection {
 		[_layoutManager lineFragmentRectForGlyphAtIndex:i effectiveRange:(NSRangePointer)&effectiveRange];
 		NSUInteger left = effectiveRange.location >= i ? effectiveRange.location : i;
 		NSUInteger right = effectiveRange.location + effectiveRange.length <= toIndex ? effectiveRange.location + effectiveRange.length - 1 : toIndex;
-		
+	
 		// Skip new line code
 		CGGlyph rightGlyph = [_layoutManager glyphAtIndex:right];
 		if (rightGlyph == NEW_LINE_GLYPH)
 			right--;
 		
-		// Get regions of right and left glyph
-		CGRect r1 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(left, 1) inTextContainer:_textContainer];
-		CGRect r2 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(right, 1) inTextContainer:_textContainer];
-		
-		// Get line region by combining right and left regions.
-		CGRect r = CGRectMake(r1.origin.x, r1.origin.y, r2.origin.x + r2.size.width - r1.origin.x, r1.size.height);
-		
-		[fragmentRects addObject:[NSValue valueWithCGRect:r]];
-		
+		if (left <= right) {
+			// Get regions of right and left glyph
+			CGRect r1 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(left, 1) inTextContainer:_textContainer];
+			CGRect r2 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(right, 1) inTextContainer:_textContainer];
+			
+			// Get line region by combining right and left regions.
+			CGRect r = CGRectMake(r1.origin.x, r1.origin.y, r2.origin.x + r2.size.width - r1.origin.x, r1.size.height);
+			
+			[fragmentRects addObject:[NSValue valueWithCGRect:r]];
+		}
 		// forward glyph index pointer, i
 		i = effectiveRange.location + effectiveRange.length;
 	}
 	return [NSArray arrayWithArray:fragmentRects];
 }
 
-- (CGRect)selectedStringRectFromIndex:(int)fromIndex toIndex:(int)toIndex {
+- (CGRect)fragmentRectForSelectedStringFromIndex:(int)fromIndex toIndex:(int)toIndex {
 	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:fromIndex toIndex:toIndex];
 	CGRect unifiedRect = [[fragmentRects objectAtIndex:0] CGRectValue];
 	for (NSValue *rectValue in fragmentRects) {
@@ -160,42 +204,6 @@ typedef enum _UZTextViewCursorDirection {
 		CGContextFillRect(context, [rectValue CGRectValue]);
 }
 
-- (void)drawCursorInsideRect:(CGRect)rect direction:(UZTextViewCursorDirection)direction {
-	CGContextRef context = UIGraphicsGetCurrentContext();
-	CGRect lineRect;
-	CGPoint circleCenter;
-	
-	if (direction == UZTextViewUpCursor) {
-		circleCenter = CGPointMake(CGRectGetMidX(rect), rect.origin.y + _cursorCirclrRadius);
-		lineRect = CGRectMake(
-							  circleCenter.x - _cursorLineWidth/2, circleCenter.y,
-							  _cursorLineWidth, rect.size.height - _cursorCirclrRadius * 2
-							  );
-	}
-	else {
-		circleCenter = CGPointMake(CGRectGetMidX(rect), rect.origin.y + rect.size.height - _cursorCirclrRadius);
-		lineRect = CGRectMake(
-							  circleCenter.x - _cursorLineWidth/2, rect.origin.y + _cursorCirclrRadius,
-							  _cursorLineWidth, rect.size.height - _cursorCirclrRadius * 2
-							  );
-	}
-	CGContextAddArc(context, circleCenter.x, circleCenter.y, _cursorCirclrRadius, 0, 2 * M_PI, 0);
-	CGContextClosePath(context);
-	[[self.tintColor colorWithAlphaComponent:1] setFill];
-	CGContextFillPath(context);
-	CGContextFillRect(context, lineRect);
-}
-
-- (void)drawCursorAtIndex:(int)index side:(UZTextViewGlyphEdgeType)edgeType direction:(UZTextViewCursorDirection)direction {
-	CGRect rect = [self rectToTapAtIndex:index side:edgeType];
-	[self drawCursorInsideRect:rect direction:direction];
-}
-
-- (void)drawCursorsAtFromIndex:(int)fromIndex atToIndex:(int)toIndex {
-	[self drawCursorAtIndex:fromIndex side:UZTextViewLeftEdge direction:UZTextViewUpCursor];
-	[self drawCursorAtIndex:toIndex side:UZTextViewRightEdge direction:UZTextViewDownCursor];
-}
-
 - (void)drawContent {
 	// Drawing code
 	[_textContainer setSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
@@ -204,15 +212,41 @@ typedef enum _UZTextViewCursorDirection {
 	int fromToRender = _from < _end ? _from : _end;
 	int toToRender = _from < _end ? _end : _from;
 	
-	if (_status == UZTextViewSelecting) {
+	if (_status == UZTextViewSelecting || _status == UZTextViewSelected || _status == UZTextViewEditingToSelection || _status == UZTextViewEditingFromSelection) {
 		[self drawSelectedTextFragmentRectsFromIndex:fromToRender toIndex:toToRender];
-	}
-	if (_status == UZTextViewSelected || _status == UZTextViewEditingToSelection || _status == UZTextViewEditingFromSelection) {
-		[self drawSelectedTextFragmentRectsFromIndex:fromToRender toIndex:toToRender];
-		[self drawCursorsAtFromIndex:fromToRender atToIndex:toToRender];
 	}
 	if (_status == UZTextViewNoSelection)
 		[self drawSelectedLinkFragments];
+}
+
+- (void)setCursorHidden:(BOOL)hidden {
+	int fromToRender = _from < _end ? _from : _end;
+	int toToRender = _from < _end ? _end : _from;
+	[_leftCursor setFrame:[self fragmentRectForCursorAtIndex:fromToRender side:UZTextViewLeftEdge]];
+	[_rightCursor setFrame:[self fragmentRectForCursorAtIndex:toToRender side:UZTextViewRightEdge]];
+	_leftCursor.hidden = hidden;
+	_rightCursor.hidden = hidden;
+}
+
+#pragma mark - Preparation
+
+- (void)prepareForInitialization {
+	// init invaliables
+	_cursorMargin = 14;
+	_tintAlpha = 0.5;
+	_durationToCancelSuperViewScrolling = 0.25;
+	
+	// Initialization code
+	_loupeView = [[UZLoupeView alloc] initWithRadius:60];
+	[self addSubview:_loupeView];
+	
+	_leftCursor = [[UZCursorView alloc] initWithCursorDirection:UZTextViewUpCursor];
+	_leftCursor.userInteractionEnabled = NO;
+	[self addSubview:_leftCursor];
+	
+	_rightCursor = [[UZCursorView alloc] initWithCursorDirection:UZTextViewDownCursor];
+	_rightCursor.userInteractionEnabled = NO;
+	[self addSubview:_rightCursor];
 }
 
 - (void)prepareForReuse {
@@ -222,8 +256,9 @@ typedef enum _UZTextViewCursorDirection {
 	_fromWhenBegan = 0;
 	_endWhenBegan = 0;
 	
-	[_tapDurationTimer invalidate];
-	_tapDurationTimer = nil;
+	[self invalidateTapDurationTimer];
+	_leftCursor.hidden = YES;
+	_rightCursor.hidden = YES;
 	_locationWhenTapBegan = CGPointZero;
 }
 
@@ -231,16 +266,37 @@ typedef enum _UZTextViewCursorDirection {
 
 - (void)tapDurationTimerFired:(NSTimer*)timer {
 	[_loupeView setVisible:YES animated:YES];
-	[self pushSnapshotToLoupeViewAtLocation:_locationWhenTapBegan];
+	[_loupeView updateAtLocation:_locationWhenTapBegan textView:self];
 	if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 		[self.delegate selectionDidBeginTextView:self];
 	_tapDurationTimer = nil;
 }
 
+- (void)invalidateTapDurationTimer {
+	[_tapDurationTimer invalidate];
+	_tapDurationTimer = nil;
+}
+
+#pragma mark - for UIMenuController
+
+- (BOOL)canBecomeFirstResponder {
+	return YES;
+}
+
+- (void)copy:(id)sender {
+	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:NSMakeRange(_from, _end - _from)];
+}
+
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
+	if (action == @selector(copy:)) {
+		return YES;
+	}
+	return NO;
+}
+
 #pragma mark - Touch event
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-	NSLog(@"touchesBegan");
 	UITouch *touch = [touches anyObject];
 	[self setNeedsDisplay];
 	[[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
@@ -248,31 +304,35 @@ typedef enum _UZTextViewCursorDirection {
 	if (_status == UZTextViewSelected) {
 		_fromWhenBegan = _from;
 		_endWhenBegan = _end;
-		if (CGRectContainsPoint([self rectToTapAtIndex:_from side:UZTextViewLeftEdge], [touch locationInView:self])) {
+		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_from side:UZTextViewLeftEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingFromSelection;
 			[_loupeView setVisible:YES animated:YES];
-			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+			[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 				[self.delegate selectionDidBeginTextView:self];
+			[self setCursorHidden:NO];
 			return;
 		}
-		if (CGRectContainsPoint([self rectToTapAtIndex:_end side:UZTextViewRightEdge], [touch locationInView:self])) {
+		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_end side:UZTextViewRightEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingToSelection;
 			[_loupeView setVisible:YES animated:YES];
-			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+			[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 				[self.delegate selectionDidBeginTextView:self];
+			[self setCursorHidden:NO];
 			return;
 		}
 	}
+	[self setCursorHidden:YES];
 	_status = UZTextViewNoSelection;
 	_locationWhenTapBegan = [touch locationInView:self];
 	_tapDurationTimer = [NSTimer scheduledTimerWithTimeInterval:_durationToCancelSuperViewScrolling target:self selector:@selector(tapDurationTimerFired:) userInfo:nil repeats:NO];
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-	NSLog(@"touchesMoved");
 	UITouch *touch = [touches anyObject];
+	
+	[self invalidateTapDurationTimer];
 	
 	if (_status == UZTextViewNoSelection) {
 		if (fabs(_locationWhenTapBegan.x - [touch locationInView:self].y) + fabs(_locationWhenTapBegan.y - [touch locationInView:self].y) > 4) {
@@ -283,36 +343,39 @@ typedef enum _UZTextViewCursorDirection {
 			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 				[self.delegate selectionDidBeginTextView:self];
 		}
+		[self setCursorHidden:YES];
 	}
 	if (_status == UZTextViewSelecting) {
 		_end = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
-		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 	}
 	else if (_status == UZTextViewEditingFromSelection) {
+		[self setCursorHidden:NO];
 		int prev_from = _from;
 		_from = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
 		if (prev_from <= _end && _from > _end)
 			_end = _endWhenBegan + 1;
 		else if (prev_from >= _end && _from < _end)
 			_end = _endWhenBegan;
-		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 	}
 	else if (_status == UZTextViewEditingToSelection) {
+		[self setCursorHidden:NO];
 		int prev_end = _end;
 		_end = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
 		if (prev_end >= _from && _from > _end)
 			_from = _fromWhenBegan - 1;
 		else if (prev_end <= _from && _from < _end)
 			_from = _fromWhenBegan;
-		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 	}
+	
 	[self setNeedsDisplay];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	NSLog(@"touchesEnded");
-	[_tapDurationTimer invalidate];
-	_tapDurationTimer = nil;
+	[self invalidateTapDurationTimer];
+	
 	[_loupeView setVisible:NO animated:YES];
 	
 	if ([self.delegate respondsToSelector:@selector(selectionDidEndTextView:)])
@@ -339,8 +402,10 @@ typedef enum _UZTextViewCursorDirection {
 		_end = end;
 		_status = UZTextViewSelected;
 		
+		[self setCursorHidden:NO];
+		
 		[self becomeFirstResponder];
-		[[UIMenuController sharedMenuController] setTargetRect:[self selectedStringRectFromIndex:_from toIndex:_end] inView:self];
+		[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_from toIndex:_end] inView:self];
 		[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
 	}
 	_locationWhenTapBegan = CGPointZero;
@@ -348,48 +413,30 @@ typedef enum _UZTextViewCursorDirection {
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
-	NSLog(@"touchesCancelled");
 	[self touchesEnded:touches withEvent:event];
 }
 
-#pragma mark - for UIMenuController
-
-- (BOOL)canBecomeFirstResponder {
-	return YES;
-}
-
-- (void)copy:(id)sender {
-	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:NSMakeRange(_from, _end - _from)];
-}
-
-- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
-	if (action == @selector(copy:)) {
-		return YES;
-	}
-	return NO;
-}
-
-#pragma mark - initialize
-
-- (void)prepareForInit {
-	// init invaliables
-	_loupeRadius = 100;
-	_cursorMargin = 14;
-	_tintAlpha = 0.5;
-	_cursorCirclrRadius = 6;
-	_cursorLineWidth = 2;
-	_durationToCancelSuperViewScrolling = 0.25;
-	
-	// Initialization code
-	_layoutManager = [[NSLayoutManager alloc] init];
-	_textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
-	_textStorage = [[NSTextStorage alloc] init];
-	[_layoutManager addTextContainer:_textContainer];
-	_loupeView = [[UZLoupeView alloc] initWithFrame:CGRectMake(0, 0, _loupeRadius, _loupeRadius)];
-	[self addSubview:_loupeView];
-}
-
 #pragma mark - Override
+
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    if (CGRectContainsPoint(self.bounds, point)) {
+		NSMutableArray *rects = [NSMutableArray array];
+		
+		[rects addObjectsFromArray:[self fragmentRectsForGlyphFromIndex:0 toIndex:self.attributedString.length-1]];
+		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_from side:UZTextViewLeftEdge]]];
+		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_end side:UZTextViewRightEdge]]];
+		
+		for (NSValue *rectValue in rects) {
+			if (CGRectContainsPoint([rectValue CGRectValue], point))
+				return [super hitTest:point withEvent:event];
+		}
+		
+		[self setCursorHidden:YES];
+		_status = UZTextViewNoSelection;
+		[self setNeedsDisplay];
+    }
+    return nil;
+}
 
 - (void)layoutSubviews {
 	[super layoutSubviews];
@@ -399,22 +446,22 @@ typedef enum _UZTextViewCursorDirection {
 - (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self)
-		[self prepareForInit];
+		[self prepareForInitialization];
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
 	self = [super initWithCoder:aDecoder];
     if (self)
-		[self prepareForInit];
+		[self prepareForInitialization];
 	return self;
 }
 
 - (void)drawRect:(CGRect)rect {
 	// draw background color
-	CGContextRef context = UIGraphicsGetCurrentContext();
-	[[UIColor whiteColor] setFill];
-	CGContextFillRect(context, rect);
+//	CGContextRef context = UIGraphicsGetCurrentContext();
+//	[[UIColor whiteColor] setFill];
+//	CGContextFillRect(context, rect);
 	
 	// draw main content
 	[self drawContent];
