@@ -81,25 +81,6 @@ typedef enum _UZTextViewStatus {
 
 #pragma mark - Instance method
 
-- (CGRect)fragmentRectForCursorAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side {
-	if (side == UZTextViewLeftEdge) {
-		CGRect rect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(index, 1) inTextContainer:_textContainer];
-		rect.size.width = 0;
-		return CGRectInset(rect, -_cursorMargin, -_cursorMargin);
-	}
-	else {
-		CGRect rect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(index, 1) inTextContainer:_textContainer];
-		if ([_layoutManager glyphAtIndex:index] != NEW_LINE_GLYPH)
-			rect.origin.x += rect.size.width;
-		rect.size.width = 0;
-		return CGRectInset(rect, -_cursorMargin, -_cursorMargin);
-	}
-}
-
-- (UIInterfaceOrientation)currentOrientation {
-	return [[UIApplication sharedApplication] statusBarOrientation];
-}
-
 - (void)pushSnapshotToLoupeViewAtLocation:(CGPoint)location {
 	CGPoint c = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointMake(location.x, location.y) fromView:self];
 	
@@ -169,6 +150,21 @@ typedef enum _UZTextViewStatus {
 
 #pragma mark - Layout information
 
+- (CGRect)fragmentRectForCursorAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side {
+	if (side == UZTextViewLeftEdge) {
+		CGRect rect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(index, 1) inTextContainer:_textContainer];
+		rect.size.width = 0;
+		return CGRectInset(rect, -_cursorMargin, -_cursorMargin);
+	}
+	else {
+		CGRect rect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(index, 1) inTextContainer:_textContainer];
+		if ([_layoutManager glyphAtIndex:index] != NEW_LINE_GLYPH)
+			rect.origin.x += rect.size.width;
+		rect.size.width = 0;
+		return CGRectInset(rect, -_cursorMargin, -_cursorMargin);
+	}
+}
+
 - (NSArray*)fragmentRectsForGlyphFromIndex:(int)fromIndex toIndex:(int)toIndex {
 	if (!(fromIndex <= toIndex && fromIndex >=0 && toIndex >=0))
 		return @[];
@@ -187,7 +183,7 @@ typedef enum _UZTextViewStatus {
 		if (rightGlyph == NEW_LINE_GLYPH)
 			right--;
 		
-		if (left < right) {
+		if (left <= right) {
 			// Get regions of right and left glyph
 			CGRect r1 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(left, 1) inTextContainer:_textContainer];
 			CGRect r2 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(right, 1) inTextContainer:_textContainer];
@@ -265,6 +261,37 @@ typedef enum _UZTextViewStatus {
 		[self drawSelectedLinkFragments];
 }
 
+- (void)setCursorHidden:(BOOL)hidden {
+	int fromToRender = _from < _end ? _from : _end;
+	int toToRender = _from < _end ? _end : _from;
+	[_leftCursor setFrame:[self fragmentRectForCursorAtIndex:fromToRender side:UZTextViewLeftEdge]];
+	[_rightCursor setFrame:[self fragmentRectForCursorAtIndex:toToRender side:UZTextViewRightEdge]];
+	_leftCursor.hidden = hidden;
+	_rightCursor.hidden = hidden;
+}
+
+#pragma mark - Preparation
+
+- (void)prepareForInitialization {
+	// init invaliables
+	_loupeRadius = 160;
+	_cursorMargin = 14;
+	_tintAlpha = 0.5;
+	_durationToCancelSuperViewScrolling = 0.25;
+	
+	// Initialization code
+	_loupeView = [[UZLoupeView alloc] initWithFrame:CGRectMake(0, 0, _loupeRadius, _loupeRadius)];
+	[self addSubview:_loupeView];
+	
+	_leftCursor = [[UZCursorView alloc] initWithCursorDirection:UZTextViewUpCursor];
+	_leftCursor.userInteractionEnabled = NO;
+	[self addSubview:_leftCursor];
+	
+	_rightCursor = [[UZCursorView alloc] initWithCursorDirection:UZTextViewDownCursor];
+	_rightCursor.userInteractionEnabled = NO;
+	[self addSubview:_rightCursor];
+}
+
 - (void)prepareForReuse {
 	_status = UZTextViewNoSelection;
 	_from = 0;
@@ -276,15 +303,6 @@ typedef enum _UZTextViewStatus {
 	_leftCursor.hidden = YES;
 	_rightCursor.hidden = YES;
 	_locationWhenTapBegan = CGPointZero;
-}
-
-- (void)setCursorHidden:(BOOL)hidden {
-	int fromToRender = _from < _end ? _from : _end;
-	int toToRender = _from < _end ? _end : _from;
-	[_leftCursor setFrame:[self fragmentRectForCursorAtIndex:fromToRender side:UZTextViewLeftEdge]];
-	[_rightCursor setFrame:[self fragmentRectForCursorAtIndex:toToRender side:UZTextViewRightEdge]];
-	_leftCursor.hidden = hidden;
-	_rightCursor.hidden = hidden;
 }
 
 #pragma mark - NSTimer callbacks
@@ -302,10 +320,26 @@ typedef enum _UZTextViewStatus {
 	_tapDurationTimer = nil;
 }
 
+#pragma mark - for UIMenuController
+
+- (BOOL)canBecomeFirstResponder {
+	return YES;
+}
+
+- (void)copy:(id)sender {
+	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:NSMakeRange(_from, _end - _from)];
+}
+
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
+	if (action == @selector(copy:)) {
+		return YES;
+	}
+	return NO;
+}
+
 #pragma mark - Touch event
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-	NSLog(@"touchesBegan");
 	UITouch *touch = [touches anyObject];
 	[self setNeedsDisplay];
 	[[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
@@ -339,7 +373,6 @@ typedef enum _UZTextViewStatus {
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-	NSLog(@"touchesMoved");
 	UITouch *touch = [touches anyObject];
 	
 	[self invalidateTapDurationTimer];
@@ -426,45 +459,6 @@ typedef enum _UZTextViewStatus {
 	[self touchesEnded:touches withEvent:event];
 }
 
-#pragma mark - for UIMenuController
-
-- (BOOL)canBecomeFirstResponder {
-	return YES;
-}
-
-- (void)copy:(id)sender {
-	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:NSMakeRange(_from, _end - _from)];
-}
-
-- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
-	if (action == @selector(copy:)) {
-		return YES;
-	}
-	return NO;
-}
-
-#pragma mark - initialize
-
-- (void)prepareForInit {
-	// init invaliables
-	_loupeRadius = 160;
-	_cursorMargin = 14;
-	_tintAlpha = 0.5;
-	_durationToCancelSuperViewScrolling = 0.25;
-	
-	// Initialization code
-	_loupeView = [[UZLoupeView alloc] initWithFrame:CGRectMake(0, 0, _loupeRadius, _loupeRadius)];
-	[self addSubview:_loupeView];
-	
-	_leftCursor = [[UZCursorView alloc] initWithCursorDirection:UZTextViewUpCursor];
-	_leftCursor.userInteractionEnabled = NO;
-	[self addSubview:_leftCursor];
-	
-	_rightCursor = [[UZCursorView alloc] initWithCursorDirection:UZTextViewDownCursor];
-	_rightCursor.userInteractionEnabled = NO;
-	[self addSubview:_rightCursor];
-}
-
 #pragma mark - Override
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
@@ -489,14 +483,14 @@ typedef enum _UZTextViewStatus {
 - (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self)
-		[self prepareForInit];
+		[self prepareForInitialization];
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
 	self = [super initWithCoder:aDecoder];
     if (self)
-		[self prepareForInit];
+		[self prepareForInitialization];
 	return self;
 }
 
