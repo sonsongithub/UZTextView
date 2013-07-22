@@ -54,7 +54,6 @@ typedef enum _UZTextViewStatus {
 	CGPoint				_locationWhenTapBegan;
 	
 	// invaliables
-	float				_loupeRadius;
 	float				_cursorMargin;
 	float				_tintAlpha;
 	float				_durationToCancelSuperViewScrolling;
@@ -80,63 +79,6 @@ typedef enum _UZTextViewStatus {
 }
 
 #pragma mark - Instance method
-
-- (void)updateLoupeViewAtLocation:(CGPoint)location {
-	[_loupeView updateAtLocationOnSuperview:location];
-}
-
-- (void)pushSnapshotToLoupeViewAtLocation:(CGPoint)location __attribute__((deprecated())) {
-	CGPoint c = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointMake(location.x, location.y) fromView:self];
-	
-#if 0
-	// Create UIImage from source view controller's view.
-	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius * 2, _loupeRadius * 2), NO, 0);
-	CGContextRef ctx = UIGraphicsGetCurrentContext();
-	CGContextScaleCTM(ctx, 1, 1);
-	CGContextTranslateCTM(ctx, -c.x + _loupeRadius, -c.y + _loupeRadius);
-	
-	// Drawing code
-	_loupeView.hidden = YES;
-	[[UIApplication sharedApplication].keyWindow.layer renderInContext:ctx];
-	_loupeView.hidden = NO;
-	
-	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
-	[_loupeView updateLoupeWithImage:sourceViewImage];
-	UIGraphicsEndImageContext();
-#else
-	// Create UIImage from source view controller's view.
-	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius * 2, _loupeRadius * 2), NO, 0);
-	CGContextRef ctx = UIGraphicsGetCurrentContext();
-	CGContextTranslateCTM(ctx, -location.x + _loupeRadius, -location.y + _loupeRadius);
-	// Drawing code
-	_loupeView.hidden = YES;
-	[self.layer renderInContext:ctx];
-	_loupeView.hidden = NO;
-	
-	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
-	[_loupeView updateLoupeWithImage:sourceViewImage];
-	UIGraphicsEndImageContext();
-#endif
-	float offset = _loupeRadius + _cursorMargin;
-	
-	switch ([UIApplication sharedApplication].statusBarOrientation) {
-		case UIInterfaceOrientationLandscapeLeft:
-			c.x -= offset;
-			break;
-		case UIInterfaceOrientationLandscapeRight:
-			c.x += offset;
-			break;
-		case UIInterfaceOrientationPortrait:
-			c.y -= offset;
-			break;
-		case UIInterfaceOrientationPortraitUpsideDown:
-			c.y -= offset;
-			break;
-	}
-	[_loupeView setBounds:CGRectMake(0, 0, _loupeRadius * 2, _loupeRadius * 2)];
-	[_loupeView setCenter:c];
-	[[UIApplication sharedApplication].keyWindow addSubview:_loupeView];
-}
 
 - (void)setAttributedString:(NSAttributedString *)attributedString {
 	[self prepareForReuse];
@@ -290,13 +232,12 @@ typedef enum _UZTextViewStatus {
 
 - (void)prepareForInitialization {
 	// init invaliables
-	_loupeRadius = 50;
 	_cursorMargin = 14;
 	_tintAlpha = 0.5;
 	_durationToCancelSuperViewScrolling = 0.25;
 	
 	// Initialization code
-	_loupeView = [[UZLoupeView alloc] initWithFrame:CGRectMake(0, 0, _loupeRadius, _loupeRadius)];
+	_loupeView = [[UZLoupeView alloc] initWithRadius:60];
 	[self addSubview:_loupeView];
 	
 	_leftCursor = [[UZCursorView alloc] initWithCursorDirection:UZTextViewUpCursor];
@@ -325,7 +266,7 @@ typedef enum _UZTextViewStatus {
 
 - (void)tapDurationTimerFired:(NSTimer*)timer {
 	[_loupeView setVisible:YES animated:YES];
-	[self pushSnapshotToLoupeViewAtLocation:_locationWhenTapBegan];
+	[_loupeView updateAtLocation:_locationWhenTapBegan textView:self];
 	if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 		[self.delegate selectionDidBeginTextView:self];
 	_tapDurationTimer = nil;
@@ -366,7 +307,7 @@ typedef enum _UZTextViewStatus {
 		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_from side:UZTextViewLeftEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingFromSelection;
 			[_loupeView setVisible:YES animated:YES];
-			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+			[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 				[self.delegate selectionDidBeginTextView:self];
 			[self setCursorHidden:NO];
@@ -375,7 +316,7 @@ typedef enum _UZTextViewStatus {
 		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_end side:UZTextViewRightEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingToSelection;
 			[_loupeView setVisible:YES animated:YES];
-			[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+			[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 				[self.delegate selectionDidBeginTextView:self];
 			[self setCursorHidden:NO];
@@ -406,7 +347,7 @@ typedef enum _UZTextViewStatus {
 	}
 	if (_status == UZTextViewSelecting) {
 		_end = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
-		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 	}
 	else if (_status == UZTextViewEditingFromSelection) {
 		[self setCursorHidden:NO];
@@ -416,7 +357,7 @@ typedef enum _UZTextViewStatus {
 			_end = _endWhenBegan + 1;
 		else if (prev_from >= _end && _from < _end)
 			_end = _endWhenBegan;
-		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 	}
 	else if (_status == UZTextViewEditingToSelection) {
 		[self setCursorHidden:NO];
@@ -426,7 +367,7 @@ typedef enum _UZTextViewStatus {
 			_from = _fromWhenBegan - 1;
 		else if (prev_end <= _from && _from < _end)
 			_from = _fromWhenBegan;
-		[self pushSnapshotToLoupeViewAtLocation:[touch locationInView:self]];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 	}
 	
 	[self setNeedsDisplay];
@@ -479,11 +420,17 @@ typedef enum _UZTextViewStatus {
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
     if (CGRectContainsPoint(self.bounds, point)) {
-		NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:0 toIndex:self.attributedString.length-1];
-		for (NSValue *rectValue in fragmentRects) {
+		NSMutableArray *rects = [NSMutableArray array];
+		
+		[rects addObjectsFromArray:[self fragmentRectsForGlyphFromIndex:0 toIndex:self.attributedString.length-1]];
+		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_from side:UZTextViewLeftEdge]]];
+		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_end side:UZTextViewRightEdge]]];
+		
+		for (NSValue *rectValue in rects) {
 			if (CGRectContainsPoint([rectValue CGRectValue], point))
 				return [super hitTest:point withEvent:event];
 		}
+		
 		[self setCursorHidden:YES];
 		_status = UZTextViewNoSelection;
 		[self setNeedsDisplay];

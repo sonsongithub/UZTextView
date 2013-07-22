@@ -9,9 +9,11 @@
 #import <UIKit/UIKit.h>
 
 @interface UZLoupeView : UIView {
+	float		_loupeRadius;
 	UIImage		*_image;
 }
-- (void)updateAtLocationOnSuperview:(CGPoint)location;
+- (id)initWithRadius:(float)radius;
+- (void)updateAtLocation:(CGPoint)location textView:(UIView*)textView;
 - (void)updateLoupeWithImage:(UIImage*)image;
 - (void)setVisible:(BOOL)visible animated:(BOOL)animated;
 @end
