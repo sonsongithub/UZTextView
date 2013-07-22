@@ -420,11 +420,17 @@ typedef enum _UZTextViewStatus {
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
     if (CGRectContainsPoint(self.bounds, point)) {
-		NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:0 toIndex:self.attributedString.length-1];
-		for (NSValue *rectValue in fragmentRects) {
+		NSMutableArray *rects = [NSMutableArray array];
+		
+		[rects addObjectsFromArray:[self fragmentRectsForGlyphFromIndex:0 toIndex:self.attributedString.length-1]];
+		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_from side:UZTextViewLeftEdge]]];
+		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_end side:UZTextViewRightEdge]]];
+		
+		for (NSValue *rectValue in rects) {
 			if (CGRectContainsPoint([rectValue CGRectValue], point))
 				return [super hitTest:point withEvent:event];
 		}
+		
 		[self setCursorHidden:YES];
 		_status = UZTextViewNoSelection;
 		[self setNeedsDisplay];
