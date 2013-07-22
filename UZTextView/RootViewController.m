@@ -59,9 +59,10 @@
 	for (id obj in result) {
 		Tweet *tweet = [[Tweet alloc] init];
 		[buf addObject:tweet];
+		tweet.info = obj;
 		tweet.text = obj[@"text"];
 		tweet.attributedString = [[NSMutableAttributedString alloc] initWithString:tweet.text];
-		tweet.height = [UZTextView sizeForAttributedString:tweet.attributedString withBoundWidth:320].height;
+		tweet.height = [UZTextView sizeForAttributedString:tweet.attributedString withBoundWidth:249].height + 36;
 	}
 	_tweets = [NSArray arrayWithArray:buf];
 	[self.tableView reloadData];
@@ -125,7 +126,7 @@
     TextCell *cell = (TextCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
     
 	Tweet *tweet = [_tweets objectAtIndex:indexPath.row];
-	
+	[cell.nameButton setTitle:tweet.info[@"user"][@"screen_name"] forState:UIControlStateNormal];
 	cell.textView.attributedString = tweet.attributedString;
 	cell.textView.delegate = self;
 	
