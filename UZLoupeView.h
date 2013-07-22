@@ -13,7 +13,6 @@
 	UIImage		*_image;
 }
 - (id)initWithRadius:(float)radius;
-- (void)updateAtLocation:(CGPoint)location textView:(UIView*)textView;
-- (void)updateLoupeWithImage:(UIImage*)image;
 - (void)setVisible:(BOOL)visible animated:(BOOL)animated;
+- (void)updateAtLocation:(CGPoint)location textView:(UIView*)textView;
 @end

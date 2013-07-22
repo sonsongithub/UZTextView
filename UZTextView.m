@@ -36,10 +36,10 @@ typedef enum _UZTextViewStatus {
 	NSTextStorage		*_textStorage;
 	
 	// parameter
-	NSUInteger			_from;
-	NSUInteger			_end;
-	NSUInteger			_fromWhenBegan;
-	NSUInteger			_endWhenBegan;
+	NSUInteger			_head;
+	NSUInteger			_tail;
+	NSUInteger			_headWhenBegan;
+	NSUInteger			_tailWhenBegan;
 	
 	UZTextViewStatus	_status;
 	//
@@ -62,6 +62,8 @@ typedef enum _UZTextViewStatus {
 
 @implementation UZTextView
 
+#pragma mark - Class method to estimate attributed string size
+
 + (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width {
 	NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
 	NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(width, CGFLOAT_MAX)];
@@ -79,6 +81,15 @@ typedef enum _UZTextViewStatus {
 }
 
 #pragma mark - Instance method
+
+- (void)setCursorHidden:(BOOL)hidden {
+	int headForRendering = _head < _tail ? _head : _tail;
+	int tailForRendering = _head < _tail ? _tail : _head;
+	[_leftCursor setFrame:[self fragmentRectForCursorAtIndex:headForRendering side:UZTextViewLeftEdge]];
+	[_rightCursor setFrame:[self fragmentRectForCursorAtIndex:tailForRendering side:UZTextViewRightEdge]];
+	_leftCursor.hidden = hidden;
+	_rightCursor.hidden = hidden;
+}
 
 - (void)setAttributedString:(NSAttributedString *)attributedString {
 	[self prepareForReuse];
@@ -183,10 +194,7 @@ typedef enum _UZTextViewStatus {
 
 			[[self.tintColor colorWithAlphaComponent:_tintAlpha] setFill];
 
-			NSUInteger start = range.location;
-			NSUInteger end = range.location + range.length;
-
-			NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:start toIndex:end];
+			NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:range.location toIndex:range.location + range.length];
 
 			for (NSValue *rectValue in fragmentRects) {
 				CGContextFillRect(context, [rectValue CGRectValue]);
@@ -209,23 +217,14 @@ typedef enum _UZTextViewStatus {
 	[_textContainer setSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
 	[_layoutManager drawGlyphsForGlyphRange:NSMakeRange(0, self.attributedString.length) atPoint:CGPointMake(0, 0)];
 	
-	int fromToRender = _from < _end ? _from : _end;
-	int toToRender = _from < _end ? _end : _from;
+	int headForRendering = _head < _tail ? _head : _tail;
+	int tailForRendering = _head < _tail ? _tail : _head;
 	
 	if (_status == UZTextViewSelecting || _status == UZTextViewSelected || _status == UZTextViewEditingToSelection || _status == UZTextViewEditingFromSelection) {
-		[self drawSelectedTextFragmentRectsFromIndex:fromToRender toIndex:toToRender];
+		[self drawSelectedTextFragmentRectsFromIndex:headForRendering toIndex:tailForRendering];
 	}
 	if (_status == UZTextViewNoSelection)
 		[self drawSelectedLinkFragments];
-}
-
-- (void)setCursorHidden:(BOOL)hidden {
-	int fromToRender = _from < _end ? _from : _end;
-	int toToRender = _from < _end ? _end : _from;
-	[_leftCursor setFrame:[self fragmentRectForCursorAtIndex:fromToRender side:UZTextViewLeftEdge]];
-	[_rightCursor setFrame:[self fragmentRectForCursorAtIndex:toToRender side:UZTextViewRightEdge]];
-	_leftCursor.hidden = hidden;
-	_rightCursor.hidden = hidden;
 }
 
 #pragma mark - Preparation
@@ -251,10 +250,10 @@ typedef enum _UZTextViewStatus {
 
 - (void)prepareForReuse {
 	_status = UZTextViewNoSelection;
-	_from = 0;
-	_end = 0;
-	_fromWhenBegan = 0;
-	_endWhenBegan = 0;
+	_head = 0;
+	_tail = 0;
+	_headWhenBegan = 0;
+	_tailWhenBegan = 0;
 	
 	[self invalidateTapDurationTimer];
 	_leftCursor.hidden = YES;
@@ -284,7 +283,7 @@ typedef enum _UZTextViewStatus {
 }
 
 - (void)copy:(id)sender {
-	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:NSMakeRange(_from, _end - _from)];
+	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:NSMakeRange(_head, _tail - _head)];
 }
 
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
@@ -302,9 +301,9 @@ typedef enum _UZTextViewStatus {
 	[[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
 	
 	if (_status == UZTextViewSelected) {
-		_fromWhenBegan = _from;
-		_endWhenBegan = _end;
-		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_from side:UZTextViewLeftEdge], [touch locationInView:self])) {
+		_headWhenBegan = _head;
+		_tailWhenBegan = _tail;
+		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingFromSelection;
 			[_loupeView setVisible:YES animated:YES];
 			[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
@@ -313,7 +312,7 @@ typedef enum _UZTextViewStatus {
 			[self setCursorHidden:NO];
 			return;
 		}
-		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_end side:UZTextViewRightEdge], [touch locationInView:self])) {
+		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge], [touch locationInView:self])) {
 			_status = UZTextViewEditingToSelection;
 			[_loupeView setVisible:YES animated:YES];
 			[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
@@ -336,8 +335,8 @@ typedef enum _UZTextViewStatus {
 	
 	if (_status == UZTextViewNoSelection) {
 		if (fabs(_locationWhenTapBegan.x - [touch locationInView:self].y) + fabs(_locationWhenTapBegan.y - [touch locationInView:self].y) > 4) {
-			_from = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
-			_end = _from;
+			_head = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
+			_tail = _head;
 			[_loupeView setVisible:YES animated:YES];
 			_status = UZTextViewSelecting;
 			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
@@ -346,27 +345,27 @@ typedef enum _UZTextViewStatus {
 		[self setCursorHidden:YES];
 	}
 	if (_status == UZTextViewSelecting) {
-		_end = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
+		_tail = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 	}
 	else if (_status == UZTextViewEditingFromSelection) {
 		[self setCursorHidden:NO];
-		int prev_from = _from;
-		_from = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
-		if (prev_from <= _end && _from > _end)
-			_end = _endWhenBegan + 1;
-		else if (prev_from >= _end && _from < _end)
-			_end = _endWhenBegan;
+		int prev_from = _head;
+		_head = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
+		if (prev_from <= _tail && _head > _tail)
+			_tail = _tailWhenBegan + 1;
+		else if (prev_from >= _tail && _head < _tail)
+			_tail = _tailWhenBegan;
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 	}
 	else if (_status == UZTextViewEditingToSelection) {
 		[self setCursorHidden:NO];
-		int prev_end = _end;
-		_end = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
-		if (prev_end >= _from && _from > _end)
-			_from = _fromWhenBegan - 1;
-		else if (prev_end <= _from && _from < _end)
-			_from = _fromWhenBegan;
+		int prev_end = _tail;
+		_tail = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
+		if (prev_end >= _head && _head > _tail)
+			_head = _headWhenBegan - 1;
+		else if (prev_end <= _head && _head < _tail)
+			_head = _headWhenBegan;
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 	}
 	
@@ -396,16 +395,16 @@ typedef enum _UZTextViewStatus {
 	}
 	else {
 		// dragged
-		NSUInteger start = _from < _end ? _from : _end;
-		NSUInteger end = _from > _end ? _from : _end;
-		_from = start;
-		_end = end;
+		NSUInteger tempHead = _head < _tail ? _head : _tail;
+		NSUInteger tempTail = _head > _tail ? _head : _tail;
+		_head = tempHead;
+		_tail = tempTail;
 		_status = UZTextViewSelected;
 		
 		[self setCursorHidden:NO];
 		
 		[self becomeFirstResponder];
-		[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_from toIndex:_end] inView:self];
+		[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_head toIndex:_tail] inView:self];
 		[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
 	}
 	_locationWhenTapBegan = CGPointZero;
@@ -423,8 +422,8 @@ typedef enum _UZTextViewStatus {
 		NSMutableArray *rects = [NSMutableArray array];
 		
 		[rects addObjectsFromArray:[self fragmentRectsForGlyphFromIndex:0 toIndex:self.attributedString.length-1]];
-		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_from side:UZTextViewLeftEdge]]];
-		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_end side:UZTextViewRightEdge]]];
+		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge]]];
+		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge]]];
 		
 		for (NSValue *rectValue in rects) {
 			if (CGRectContainsPoint([rectValue CGRectValue], point))

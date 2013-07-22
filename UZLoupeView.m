@@ -22,56 +22,6 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 
 @implementation UZLoupeView
 
-#pragma mark - Update own content
-
-- (void)updateAtLocation:(CGPoint)location textView:(UIView*)textView {
-	float offset = _loupeRadius;
-	float angle = 0;
-	
-	// convert point on key window
-	CGPoint c = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointMake(location.x, location.y) fromView:textView];
-
-	// Create UIImage from source view controller's view.
-	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius * 2, _loupeRadius * 2), NO, 0);
-	CGContextRef ctx = UIGraphicsGetCurrentContext();
-	CGContextTranslateCTM(ctx, -location.x + _loupeRadius, -location.y + _loupeRadius);
-	
-	
-	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft) {
-		angle = -M_PI * 0.5;
-		c.x -= offset;
-	}
-	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight) {
-		angle = M_PI * 0.5;
-		c.x += offset;
-	}
-	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortrait) {
-		c.y -= offset;
-	}
-	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortraitUpsideDown) {
-		angle = -M_PI;
-		c.y -= offset;
-	}
-	
-	// adjust orientation
-	CGContextTranslateCTM(ctx, location.x, location.y);
-	CGContextRotateCTM(ctx, angle);
-	CGContextTranslateCTM(ctx, -location.x, -location.y);
-	
-	// Drawing code
-	self.hidden = YES;
-	[textView.layer renderInContext:ctx];
-	self.hidden = NO;
-	
-	// Create bitmap
-	_image = UIGraphicsGetImageFromCurrentImageContext();
-	UIGraphicsEndImageContext();
-	
-	// update location
-	[[UIApplication sharedApplication].keyWindow addSubview:self];
-	[self setCenter:c];
-}
-
 #pragma mark - Create Core Animation objects for appearing
 
 - (CAAnimation*)alphaAnimationWhileAppearing {
@@ -205,9 +155,52 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 		[self animateForDisappearingWithDuration:duration];
 }
 
-- (void)updateLoupeWithImage:(UIImage*)image {
-	_image = image;
-	[self setNeedsDisplay];
+- (void)updateAtLocation:(CGPoint)location textView:(UIView*)textView {
+	float offset = _loupeRadius;
+	float angle = 0;
+	
+	// convert point on key window
+	CGPoint c = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointMake(location.x, location.y) fromView:textView];
+	
+	// Create UIImage from source view controller's view.
+	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius * 2, _loupeRadius * 2), NO, 0);
+	CGContextRef ctx = UIGraphicsGetCurrentContext();
+	CGContextTranslateCTM(ctx, -location.x + _loupeRadius, -location.y + _loupeRadius);
+	
+	
+	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft) {
+		angle = -M_PI * 0.5;
+		c.x -= offset;
+	}
+	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight) {
+		angle = M_PI * 0.5;
+		c.x += offset;
+	}
+	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortrait) {
+		c.y -= offset;
+	}
+	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortraitUpsideDown) {
+		angle = -M_PI;
+		c.y -= offset;
+	}
+	
+	// adjust orientation
+	CGContextTranslateCTM(ctx, location.x, location.y);
+	CGContextRotateCTM(ctx, angle);
+	CGContextTranslateCTM(ctx, -location.x, -location.y);
+	
+	// Drawing code
+	self.hidden = YES;
+	[textView.layer renderInContext:ctx];
+	self.hidden = NO;
+	
+	// Create bitmap
+	_image = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();
+	
+	// update location
+	[[UIApplication sharedApplication].keyWindow addSubview:self];
+	[self setCenter:c];
 }
 
 #pragma mark - Override
