@@ -54,7 +54,6 @@ typedef enum _UZTextViewStatus {
 	CGPoint				_locationWhenTapBegan;
 	
 	// invaliables
-	float				_loupeRadius;
 	float				_cursorMargin;
 	float				_tintAlpha;
 	float				_durationToCancelSuperViewScrolling;
@@ -86,9 +85,9 @@ typedef enum _UZTextViewStatus {
 }
 
 - (void)pushSnapshotToLoupeViewAtLocation:(CGPoint)location __attribute__((deprecated())) {
+#if 0
 	CGPoint c = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointMake(location.x, location.y) fromView:self];
 	
-#if 0
 	// Create UIImage from source view controller's view.
 	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius * 2, _loupeRadius * 2), NO, 0);
 	CGContextRef ctx = UIGraphicsGetCurrentContext();
@@ -103,7 +102,7 @@ typedef enum _UZTextViewStatus {
 	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
 	[_loupeView updateLoupeWithImage:sourceViewImage];
 	UIGraphicsEndImageContext();
-#else
+	
 	// Create UIImage from source view controller's view.
 	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius * 2, _loupeRadius * 2), NO, 0);
 	CGContextRef ctx = UIGraphicsGetCurrentContext();
@@ -116,7 +115,6 @@ typedef enum _UZTextViewStatus {
 	UIImage *sourceViewImage = UIGraphicsGetImageFromCurrentImageContext();
 	[_loupeView updateLoupeWithImage:sourceViewImage];
 	UIGraphicsEndImageContext();
-#endif
 	float offset = _loupeRadius + _cursorMargin;
 	
 	switch ([UIApplication sharedApplication].statusBarOrientation) {
@@ -136,6 +134,7 @@ typedef enum _UZTextViewStatus {
 	[_loupeView setBounds:CGRectMake(0, 0, _loupeRadius * 2, _loupeRadius * 2)];
 	[_loupeView setCenter:c];
 	[[UIApplication sharedApplication].keyWindow addSubview:_loupeView];
+#endif
 }
 
 - (void)setAttributedString:(NSAttributedString *)attributedString {
@@ -290,13 +289,12 @@ typedef enum _UZTextViewStatus {
 
 - (void)prepareForInitialization {
 	// init invaliables
-	_loupeRadius = 50;
 	_cursorMargin = 14;
 	_tintAlpha = 0.5;
 	_durationToCancelSuperViewScrolling = 0.25;
 	
 	// Initialization code
-	_loupeView = [[UZLoupeView alloc] initWithFrame:CGRectMake(0, 0, _loupeRadius, _loupeRadius)];
+	_loupeView = [[UZLoupeView alloc] initWithRadius:60];
 	[self addSubview:_loupeView];
 	
 	_leftCursor = [[UZCursorView alloc] initWithCursorDirection:UZTextViewUpCursor];

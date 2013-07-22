@@ -24,71 +24,52 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 
 #pragma mark - Update own content
 
-- (void)updateUsingSuperViewAtLocationOnSuperview:(CGPoint)location {
-}
-
-- (void)updateUsingKeyWindowAtLocationOnSuperview:(CGPoint)location {
-}
-
 - (void)updateAtLocation:(CGPoint)location textView:(UIView*)textView {
-	float loupeRadius = 50;
+	float offset = _loupeRadius;
+	float angle = 0;
+	
+	// convert point on key window
+	CGPoint c = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointMake(location.x, location.y) fromView:textView];
 
-	if (_windowImage == nil) {
-		// Create UIImage from source view controller's view.
-		UIGraphicsBeginImageContextWithOptions([UIApplication sharedApplication].keyWindow.frame.size, NO, 0);
-		CGContextRef ctx = UIGraphicsGetCurrentContext();
-		CGContextScaleCTM(ctx, 1, 1);
-		
-		// Drawing code
-		self.hidden = YES;
-		[[UIApplication sharedApplication].keyWindow.layer renderInContext:ctx];
-		self.hidden = NO;
-		
-		_windowImage = UIGraphicsGetImageFromCurrentImageContext();
-		UIGraphicsEndImageContext();
+	// Create UIImage from source view controller's view.
+	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius * 2, _loupeRadius * 2), NO, 0);
+	CGContextRef ctx = UIGraphicsGetCurrentContext();
+	CGContextTranslateCTM(ctx, -location.x + _loupeRadius, -location.y + _loupeRadius);
+	
+	
+	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft) {
+		angle = -M_PI * 0.5;
+		c.x -= offset;
+	}
+	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight) {
+		angle = M_PI * 0.5;
+		c.x += offset;
+	}
+	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortrait) {
+		c.y -= offset;
+	}
+	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortraitUpsideDown) {
+		angle = -M_PI;
+		c.y -= offset;
 	}
 	
+	// adjust orientation
+	CGContextTranslateCTM(ctx, location.x, location.y);
+	CGContextRotateCTM(ctx, angle);
+	CGContextTranslateCTM(ctx, -location.x, -location.y);
 	
-	_windowImageOffset = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointMake(location.x, location.y) fromView:textView];
-	_windowImageOffset.x -= loupeRadius;
-	_windowImageOffset.y -= loupeRadius;
-	
-	// Create UIImage from source view controller's view.
-	UIGraphicsBeginImageContextWithOptions(CGSizeMake(loupeRadius * 2, loupeRadius * 2), NO, 0);
-	CGContextRef ctx = UIGraphicsGetCurrentContext();
-	CGContextTranslateCTM(ctx, -location.x + loupeRadius, -location.y + loupeRadius);
 	// Drawing code
 	self.hidden = YES;
 	[textView.layer renderInContext:ctx];
 	self.hidden = NO;
 	
+	// Create bitmap
 	_image = UIGraphicsGetImageFromCurrentImageContext();
 	UIGraphicsEndImageContext();
 	
-	[self setNeedsDisplay];
-	
-	CGPoint c = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointMake(location.x, location.y) fromView:textView];
-	
-	float offset = loupeRadius + 10;
-	
-	switch ([UIApplication sharedApplication].statusBarOrientation) {
-		case UIInterfaceOrientationLandscapeLeft:
-			c.x -= offset;
-			break;
-		case UIInterfaceOrientationLandscapeRight:
-			c.x += offset;
-			break;
-		case UIInterfaceOrientationPortrait:
-			c.y -= offset;
-			break;
-		case UIInterfaceOrientationPortraitUpsideDown:
-			c.y -= offset;
-			break;
-	}
-	
-	[self setBounds:CGRectMake(0, 0, 100, 100)];
-	[self setCenter:c];
+	// update location
 	[[UIApplication sharedApplication].keyWindow addSubview:self];
+	[self setCenter:c];
 }
 
 #pragma mark - Create Core Animation objects for appearing
@@ -218,7 +199,6 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 
 - (void)setVisible:(BOOL)visible animated:(BOOL)animated {
 	float duration = animated ? UZ_LOUPE_ANIMATION_DUARTION : UZ_LOUPE_NO_ANIMATION_DUARTION;
-	_windowImage = nil;
 	if (visible)
 		[self animateForAppearingWithDuration:duration];
 	else
@@ -232,9 +212,15 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 
 #pragma mark - Override
 
-- (id)initWithFrame:(CGRect)frame {
-    self = [super initWithFrame:frame];
+- (void)setCenter:(CGPoint)center {
+	[super setCenter:center];
+	[self setNeedsDisplay];
+}
+
+- (id)initWithRadius:(float)radius {
+    self = [super initWithFrame:CGRectMake(0, 0, radius * 2, radius * 2)];
     if (self) {
+		_loupeRadius = radius;
 		[self setBackgroundColor:[UIColor clearColor]];
 		self.hidden = YES;
     }
@@ -243,31 +229,26 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 
 - (void)drawRect:(CGRect)rect {
 	CGContextRef context = UIGraphicsGetCurrentContext();
-	[[self.tintColor colorWithAlphaComponent:1] setStroke];
-	
-	float radius = rect.size.width/2;
 	
 	// draw back ground fill
-	CGContextSaveGState(context);
-	CGContextAddArc(context, radius, radius, radius, 0, M_PI * 2, 0);
+	[[[UIColor whiteColor] colorWithAlphaComponent:0.95] setFill];
+	CGContextAddArc(context, _loupeRadius, _loupeRadius, _loupeRadius, 0, M_PI * 2, 0);
 	CGContextClosePath(context);
-	CGContextClip(context);
-	CGContextTranslateCTM(context, -_windowImageOffset.x, -_windowImageOffset.y);
-	[_windowImage drawAtPoint:CGPointZero];
-	CGContextRestoreGState(context);
+	CGContextDrawPath(context, kCGPathFill);
 	
 	// draw captured UZTextView bitmap
 	CGContextSaveGState(context);
-	CGContextAddArc(context, radius, radius, radius, 0, M_PI * 2, 0);
+	CGContextAddArc(context, _loupeRadius, _loupeRadius, _loupeRadius, 0, M_PI * 2, 0);
 	CGContextClosePath(context);
 	CGContextClip(context);
 	[_image drawAtPoint:CGPointZero];
 	CGContextRestoreGState(context);
 	
 	// draw outline stroke
+	[[self.tintColor colorWithAlphaComponent:1] setStroke];
 	CGContextSaveGState(context);
 	CGContextSetLineWidth(context, UZ_LOUPE_OUTLINE_STROKE_WIDTH);
-	CGContextAddArc(context, radius, radius, radius-1, 0, M_PI * 2, 0);
+	CGContextAddArc(context, _loupeRadius, _loupeRadius, _loupeRadius-1, 0, M_PI * 2, 0);
 	CGContextClosePath(context);
 	CGContextDrawPath(context, kCGPathStroke);
 	CGContextRestoreGState(context);
