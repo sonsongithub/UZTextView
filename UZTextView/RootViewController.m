@@ -63,11 +63,22 @@
 		tweet.info = obj;
 		tweet.text = obj[@"text"];
 		tweet.attributedString = [[NSMutableAttributedString alloc] initWithString:tweet.text];
-		float height = [UZTextView sizeForAttributedString:tweet.attributedString withBoundWidth:226].height + 36;
-		tweet.height = height < 58 ? 58 : height;
 	}
 	_tweets = [NSArray arrayWithArray:buf];
+	[self updateLayout];
 	[self.tableView reloadData];
+}
+
+- (void)updateLayout {
+	float width = 226;
+	if ([[self.tableView visibleCells] count]) {
+		TextCell *cell = (TextCell*)[[self.tableView visibleCells] objectAtIndex:0];
+		width = cell.textView.frame.size.width;
+	}
+	for (Tweet *tweet in _tweets) {
+		float height = [UZTextView sizeForAttributedString:tweet.attributedString withBoundWidth:width].height + 36;
+		tweet.height = height < 58 ? 58 : height;
+	}
 }
 
 - (void)viewDidLoad {
@@ -100,6 +111,11 @@
 			}
 		}];
 	}
+}
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+	[self updateLayout];
+	[self.tableView reloadData];
 }
 
 - (void)didReceiveMemoryWarning {
