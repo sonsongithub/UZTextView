@@ -194,7 +194,7 @@ typedef enum _UZTextViewStatus {
 
 			[[self.tintColor colorWithAlphaComponent:_tintAlpha] setFill];
 
-			NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:range.location toIndex:range.location + range.length];
+			NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:range.location toIndex:range.location + range.length - 1];
 
 			for (NSValue *rectValue in fragmentRects) {
 				CGContextFillRect(context, [rectValue CGRectValue]);

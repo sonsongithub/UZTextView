@@ -22,6 +22,22 @@
 
 @implementation RootViewController
 
+- (NSMutableAttributedString*)parse:(NSString*)text {
+	NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc] initWithString:text];
+	NSError *error = nil;
+	NSRegularExpression *reg = [NSRegularExpression regularExpressionWithPattern:@"(http[s]?://[a-zA-Z0-9/.,?_+~=%&:;!#\\-]+)|(@[a-zA-Z0-9_]+)|(#[a-zA-Z0-9_]+)"
+															 options:0
+															   error:&error];
+	NSArray *array = [reg matchesInString:text options:0 range:NSMakeRange(0, text.length)];
+	for (NSTextCheckingResult *result in array) {
+		if ([result numberOfRanges]) {
+			NSLog(@"%@", [text substringWithRange:[result range]]);
+			[attrString setAttributes:@{NSLinkAttributeName:[text substringWithRange:[result range]]} range:[result range]];
+		}
+	}
+	return attrString;
+}
+
 - (void)selectionDidBeginTextView:(UZTextView*)textView {
 	self.tableView.scrollEnabled = NO;
 }
@@ -62,7 +78,8 @@
 		[buf addObject:tweet];
 		tweet.info = obj;
 		tweet.text = obj[@"text"];
-		tweet.attributedString = [[NSMutableAttributedString alloc] initWithString:tweet.text];
+//		[self parse:tweet.text];
+		tweet.attributedString = [self parse:tweet.text];//[[NSMutableAttributedString alloc] initWithString:tweet.text];
 	}
 	_tweets = [NSArray arrayWithArray:buf];
 	[self updateLayout];
