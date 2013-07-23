@@ -14,6 +14,7 @@
 #import "TextCell.h"
 #import "UZTextView.h"
 #import "Tweet.h"
+#import "SEImageCache.h"
 
 @interface RootViewController ()
 
@@ -62,7 +63,8 @@
 		tweet.info = obj;
 		tweet.text = obj[@"text"];
 		tweet.attributedString = [[NSMutableAttributedString alloc] initWithString:tweet.text];
-		tweet.height = [UZTextView sizeForAttributedString:tweet.attributedString withBoundWidth:249].height + 36;
+		float height = [UZTextView sizeForAttributedString:tweet.attributedString withBoundWidth:226].height + 36;
+		tweet.height = height < 58 ? 58 : height;
 	}
 	_tweets = [NSArray arrayWithArray:buf];
 	[self.tableView reloadData];
@@ -129,6 +131,19 @@
 	[cell.nameButton setTitle:tweet.info[@"user"][@"screen_name"] forState:UIControlStateNormal];
 	cell.textView.attributedString = tweet.attributedString;
 	cell.textView.delegate = self;
+	[cell.nameButton sizeToFit];
+	
+	NSURL *iconURL = [NSURL URLWithString:tweet.info[@"user"][@"profile_image_url_https"]];
+    UIImage *iconImage = [[SEImageCache sharedInstance] imageForURL:iconURL
+                                                       defaultImage:[NSImage imageNamed:@"default_user_icon"]
+                                                    completionBlock:^(NSImage *image, NSError *error)
+                          {
+                              if (image && [cell.profileIconURL isEqual:iconURL]) {
+                                  cell.iconImageView.image = image;
+                              }
+                          }];
+	cell.iconImageView.image = iconImage;
+	cell.profileIconURL = iconURL;
 	
     return cell;
 }

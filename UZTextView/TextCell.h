@@ -15,5 +15,6 @@
 @property (nonatomic, strong) IBOutlet UIImageView *iconImageView;
 @property (nonatomic, strong) IBOutlet UIButton	*nameButton;
 @property (nonatomic, strong) IBOutlet UZTextView *textView;
+@property (nonatomic, strong) NSURL *profileIconURL;
 
 @end
