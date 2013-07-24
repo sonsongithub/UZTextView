@@ -15,6 +15,8 @@
 #import "UZTextView.h"
 #import "Tweet.h"
 #import "SEImageCache.h"
+#import "WebViewController.h"
+#import "TweetViewController.h"
 
 @interface RootViewController ()
 
@@ -31,8 +33,18 @@
 	NSArray *array = [reg matchesInString:text options:0 range:NSMakeRange(0, text.length)];
 	for (NSTextCheckingResult *result in array) {
 		if ([result numberOfRanges]) {
-			NSLog(@"%@", [text substringWithRange:[result range]]);
-			[attrString setAttributes:@{NSLinkAttributeName:[text substringWithRange:[result range]]} range:[result range]];
+			if ([result rangeAtIndex:1].length) {
+				// http
+				[attrString setAttributes:@{NSLinkAttributeName:[text substringWithRange:[result range]], @"type":@"link"} range:[result range]];
+			}
+			if ([result rangeAtIndex:2].length) {
+				// reply
+				[attrString setAttributes:@{NSLinkAttributeName:[text substringWithRange:[result range]], @"type":@"reply"} range:[result range]];
+			}
+			if ([result rangeAtIndex:3].length) {
+				// hash
+				[attrString setAttributes:@{NSLinkAttributeName:[text substringWithRange:[result range]], @"type":@"hash"} range:[result range]];
+			}
 		}
 	}
 	return attrString;
@@ -47,12 +59,19 @@
 }
 
 - (void)textView:(UZTextView *)textview didClickLinkAttribute:(id)value {
-	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Clicked"
-														message:[value objectForKey:@"NSLink"]
-													   delegate:nil
-											  cancelButtonTitle:nil
-											  otherButtonTitles:@"OK", nil];
-	[alertView show];
+	NSLog(@"%@", value);
+	if ([value[@"type"] isEqualToString:@"link"]) {
+		_URLString = [value objectForKey:@"NSLink"];
+	}
+	if ([value[@"type"] isEqualToString:@"reply"]) {
+		NSString *name = [[value objectForKey:@"NSLink"] substringFromIndex:1];
+		_URLString = [NSString stringWithFormat:@"https://twitter.com/%@", name];
+	}
+	if ([value[@"type"] isEqualToString:@"hash"]) {
+		NSString *hash = [[value objectForKey:@"NSLink"] substringFromIndex:1];
+		_URLString = [NSString stringWithFormat:@"https://twitter.com/search?q=%%23%@", hash];
+	}
+	[self performSegueWithIdentifier:@"WebViewControllerSegue" sender:nil];
 }
 
 - (id)initWithStyle:(UITableViewStyle)style {
@@ -140,6 +159,22 @@
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
+}
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+	if ([segue.identifier isEqualToString:@"WebViewControllerSegue"]) {
+		WebViewController *controller = (WebViewController*)[((UINavigationController*)segue.destinationViewController) topViewController];
+		controller.URL = [NSURL URLWithString:_URLString];
+		_URLString = nil;
+	}
+	if ([segue.identifier isEqualToString:@"TweetViewControllerSegue"]) {
+		Tweet *tweet = [_tweets objectAtIndex:self.tableView.indexPathForSelectedRow.row];
+		TweetViewController *controller = (TweetViewController*)segue.destinationViewController;
+		controller.tweet = tweet;
+	}
+}
+
+- (IBAction)dismissViewController:(UIStoryboardSegue*)segue {
 }
 
 #pragma mark - Table view data source
