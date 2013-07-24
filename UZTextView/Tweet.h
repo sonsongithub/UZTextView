@@ -12,6 +12,7 @@
 
 @property (nonatomic, strong) NSString *text;
 @property (nonatomic, strong) NSAttributedString *attributedString;
+@property (nonatomic, strong) NSDictionary *info;
 @property (nonatomic, assign) float height;
 
 @end

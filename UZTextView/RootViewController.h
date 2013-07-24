@@ -12,6 +12,7 @@
 
 @interface RootViewController : UITableViewController <UZTextViewDelegate> {
 	NSArray *_tweets;
+	NSString *_URLString;
 }
 
 @end
