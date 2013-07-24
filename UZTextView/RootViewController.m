@@ -78,12 +78,13 @@
 		[buf addObject:tweet];
 		tweet.info = obj;
 		tweet.text = obj[@"text"];
-//		[self parse:tweet.text];
-		tweet.attributedString = [self parse:tweet.text];//[[NSMutableAttributedString alloc] initWithString:tweet.text];
+		tweet.attributedString = [self parse:tweet.text];
 	}
 	_tweets = [NSArray arrayWithArray:buf];
 	[self updateLayout];
-	[self.tableView reloadData];
+	dispatch_async(dispatch_get_main_queue(), ^(void){
+		[self.tableView reloadData];
+	});
 }
 
 - (void)updateLayout {
@@ -101,33 +102,35 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 	
-	if ([[NSFileManager defaultManager] isReadableFileAtPath:[self path]]) {
-		NSData *data = [NSData dataWithContentsOfFile:[self path]];
-		[self updateWithData:data];
-	}
-	else {
-		ACAccountStore *accountStore = [[ACAccountStore alloc]init];
-		ACAccountType *accountType = [accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
-		[accountStore requestAccessToAccountsWithType:accountType options:nil completion:^(BOOL granted, NSError *error) {
-			if (granted) {
-				NSArray *accounts = [accountStore accountsWithAccountType:accountType];
-				if (accounts.count > 0) {
-					ACAccount *account = accounts[0];
-					NSURL *requestURL = [NSURL URLWithString:@"https://api.twitter.com/1/statuses/home_timeline.json"];
-					NSDictionary *params = @{@"count": @"200", @"include_entities": @"true"};
-					SLRequest *request = [SLRequest requestForServiceType:SLServiceTypeTwitter
-												 requestMethod:SLRequestMethodGET
-														   URL:requestURL
-													parameters:params];
-					request.account = account;
-					[request performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) {
+	ACAccountStore *accountStore = [[ACAccountStore alloc]init];
+	ACAccountType *accountType = [accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
+	[accountStore requestAccessToAccountsWithType:accountType options:nil completion:^(BOOL granted, NSError *error) {
+		if (granted) {
+			NSArray *accounts = [accountStore accountsWithAccountType:accountType];
+			if (accounts.count > 0) {
+				ACAccount *account = accounts[0];
+				NSURL *requestURL = [NSURL URLWithString:@"https://api.twitter.com/1/statuses/home_timeline.json"];
+				NSDictionary *params = @{@"count": @"200", @"include_entities": @"true"};
+				SLRequest *request = [SLRequest requestForServiceType:SLServiceTypeTwitter
+														requestMethod:SLRequestMethodGET
+																  URL:requestURL
+														   parameters:params];
+				request.account = account;
+				[request performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) {
+					if (error) {
+						if ([[NSFileManager defaultManager] isReadableFileAtPath:[self path]]) {
+							NSData *data = [NSData dataWithContentsOfFile:[self path]];
+							[self updateWithData:data];
+						}
+					}
+					else {
 						[self updateWithData:responseData];
 						[responseData writeToFile:[self path] atomically:NO];
-					}];
-				}
+					}
+				}];
 			}
-		}];
-	}
+		}
+	}];
 }
 
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
@@ -137,13 +140,11 @@
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    // Return the number of sections.
     return 1;
 }
 

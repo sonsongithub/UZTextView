@@ -457,11 +457,6 @@ typedef enum _UZTextViewStatus {
 }
 
 - (void)drawRect:(CGRect)rect {
-	// draw background color
-//	CGContextRef context = UIGraphicsGetCurrentContext();
-//	[[UIColor whiteColor] setFill];
-//	CGContextFillRect(context, rect);
-	
 	// draw main content
 	[self drawContent];
 }
