@@ -20,8 +20,9 @@
 
 @interface UZTextView : UIView
 @property (nonatomic, assign) id <UZTextViewDelegate> delegate;
-@property (nonatomic, strong) NSAttributedString *attributedString;
+@property (nonatomic, copy) NSAttributedString *attributedString;
 @property (nonatomic, readonly) CGSize contentSize;
+@property (nonatomic, assign) float durationToCancelSuperViewScrolling;
 + (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width;
 - (void)prepareForReuse;
 @end

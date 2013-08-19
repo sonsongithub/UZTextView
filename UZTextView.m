@@ -42,6 +42,8 @@ typedef enum _UZTextViewStatus {
 	NSUInteger			_tailWhenBegan;
 	
 	UZTextViewStatus	_status;
+	BOOL				_isLocked;
+	
 	//
 	NSTimer				*_tapDurationTimer;
 	
@@ -264,6 +266,7 @@ typedef enum _UZTextViewStatus {
 #pragma mark - NSTimer callbacks
 
 - (void)tapDurationTimerFired:(NSTimer*)timer {
+	_isLocked = NO;
 	[_loupeView setVisible:YES animated:YES];
 	[_loupeView updateAtLocation:_locationWhenTapBegan textView:self];
 	if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
@@ -296,6 +299,7 @@ typedef enum _UZTextViewStatus {
 #pragma mark - Touch event
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	_isLocked = YES;
 	UITouch *touch = [touches anyObject];
 	[self setNeedsDisplay];
 	[[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
@@ -304,6 +308,7 @@ typedef enum _UZTextViewStatus {
 		_headWhenBegan = _head;
 		_tailWhenBegan = _tail;
 		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge], [touch locationInView:self])) {
+			_isLocked = NO;
 			_status = UZTextViewEditingFromSelection;
 			[_loupeView setVisible:YES animated:YES];
 			[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
@@ -313,6 +318,7 @@ typedef enum _UZTextViewStatus {
 			return;
 		}
 		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge], [touch locationInView:self])) {
+			_isLocked = NO;
 			_status = UZTextViewEditingToSelection;
 			[_loupeView setVisible:YES animated:YES];
 			[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
@@ -333,15 +339,16 @@ typedef enum _UZTextViewStatus {
 	
 	[self invalidateTapDurationTimer];
 	
+	if (_isLocked)
+		return;
+	
 	if (_status == UZTextViewNoSelection) {
-		if (fabs(_locationWhenTapBegan.x - [touch locationInView:self].y) + fabs(_locationWhenTapBegan.y - [touch locationInView:self].y) > 4) {
-			_head = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
-			_tail = _head;
-			[_loupeView setVisible:YES animated:YES];
-			_status = UZTextViewSelecting;
-			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
-				[self.delegate selectionDidBeginTextView:self];
-		}
+		_head = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
+		_tail = _head;
+		[_loupeView setVisible:YES animated:YES];
+		_status = UZTextViewSelecting;
+		if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
+			[self.delegate selectionDidBeginTextView:self];
 		[self setCursorHidden:YES];
 	}
 	if (_status == UZTextViewSelecting) {
