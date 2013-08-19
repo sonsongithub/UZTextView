@@ -61,7 +61,7 @@ typedef enum _UZTextViewStatus {
 	float				_durationToCancelSuperViewScrolling;
 }
 @end
-
+	
 @implementation UZTextView
 
 #pragma mark - Class method to estimate attributed string size
@@ -95,7 +95,6 @@ typedef enum _UZTextViewStatus {
 
 - (void)setAttributedString:(NSAttributedString *)attributedString {
 	[self prepareForReuse];
-	
 	_layoutManager = [[NSLayoutManager alloc] init];
 	_textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
 	_textStorage = [[NSTextStorage alloc] init];
