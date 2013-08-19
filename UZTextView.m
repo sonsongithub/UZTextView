@@ -61,7 +61,7 @@ typedef enum _UZTextViewStatus {
 	float				_durationToCancelSuperViewScrolling;
 }
 @end
-
+	
 @implementation UZTextView
 
 #pragma mark - Class method to estimate attributed string size
@@ -95,7 +95,6 @@ typedef enum _UZTextViewStatus {
 
 - (void)setAttributedString:(NSAttributedString *)attributedString {
 	[self prepareForReuse];
-	
 	_layoutManager = [[NSLayoutManager alloc] init];
 	_textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
 	_textStorage = [[NSTextStorage alloc] init];
@@ -117,6 +116,22 @@ typedef enum _UZTextViewStatus {
 	_contentSize = currentRect.size;
 	[self setNeedsLayout];
 	[self setNeedsDisplay];
+}
+
+- (void)setSelectedRange:(NSRange)selectedRange {
+	if (selectedRange.location >= self.attributedString.length)
+		return;
+	if (selectedRange.length > self.attributedString.length || selectedRange.location + selectedRange.length - 1 <= 0)
+		return;
+	_head = selectedRange.location;
+	_tail = selectedRange.location + selectedRange.length - 1;
+	_status = UZTextViewSelected;
+	[self setCursorHidden:NO];
+	[self setNeedsDisplay];
+}
+
+- (NSRange)selectedRange {
+	return NSMakeRange(_head, _tail - _head + 1);
 }
 
 #pragma mark - Layout information
@@ -286,7 +301,8 @@ typedef enum _UZTextViewStatus {
 }
 
 - (void)copy:(id)sender {
-	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:NSMakeRange(_head, _tail - _head)];
+	NSLog(@"%@", [self.attributedString.string substringWithRange:self.selectedRange]);
+	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:self.selectedRange];
 }
 
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
