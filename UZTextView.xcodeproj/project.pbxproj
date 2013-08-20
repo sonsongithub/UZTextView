@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		147737D217C2F3C400A4F04B /* UZCursorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886E517C2BFA0006F5514 /* UZCursorView.m */; };
+		147737D317C2F3C700A4F04B /* UZLoupeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886E717C2BFA0006F5514 /* UZLoupeView.m */; };
 		14F8866C17C2BB02006F5514 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14F8866B17C2BB02006F5514 /* Foundation.framework */; };
 		14F8867117C2BB02006F5514 /* UZTextView.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 14F8867017C2BB02006F5514 /* UZTextView.h */; };
 		14F8867317C2BB02006F5514 /* UZTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F8867217C2BB02006F5514 /* UZTextView.m */; };
@@ -266,6 +268,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				14F8867317C2BB02006F5514 /* UZTextView.m in Sources */,
+				147737D217C2F3C400A4F04B /* UZCursorView.m in Sources */,
+				147737D317C2F3C700A4F04B /* UZLoupeView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
