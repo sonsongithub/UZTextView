@@ -8,6 +8,8 @@
 
 #import "UZTextView.h"
 
+#import <CoreText/CoreText.h>
+
 #import "UZLoupeView.h"
 #import "UZCursorView.h"
 
@@ -30,6 +32,11 @@ typedef enum _UZTextViewStatus {
 }UZTextViewStatus;
 
 @interface UZTextView() {
+	// CoreText
+	CTFramesetterRef	_framesetter;
+    CTFrameRef			_frame;
+	CGRect				_contentRect;
+	
 	// text manager
 	NSLayoutManager		*_layoutManager;
 	NSTextContainer		*_textContainer;
@@ -64,22 +71,76 @@ typedef enum _UZTextViewStatus {
 	
 @implementation UZTextView
 
+- (void)releaseCoreText {
+	if (_frame) {
+		CFRelease(_frame);
+		_frame = nil;
+	}
+	if (_framesetter) {
+		CFRelease(_framesetter);
+		_framesetter = nil;
+	}
+}
+
 #pragma mark - Class method to estimate attributed string size
 
 + (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width {
-	NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
-	NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(width, CGFLOAT_MAX)];
-	NSTextStorage *textStorage = [[NSTextStorage alloc] init];
-	[layoutManager addTextContainer:textContainer];
+//	NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
+//	NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(width, CGFLOAT_MAX)];
+//	NSTextStorage *textStorage = [[NSTextStorage alloc] init];
+//	[layoutManager addTextContainer:textContainer];
+//	
+//	[textStorage setAttributedString:attributedString];
+//	
+//	[layoutManager setTextStorage:textStorage];
+//	
+//	[textStorage addLayoutManager:layoutManager];
+//	
+//	CGRect r = [layoutManager lineFragmentRectForGlyphAtIndex:attributedString.length-1 effectiveRange:NULL];
+//	return CGSizeMake(width, r.size.height + r.origin.y);
+	// Measures the height needed for a given width using Core Text:
+//	_tic();
+//	CTTypesetterRef typesetter = CTTypesetterCreateWithAttributedString((CFAttributedStringRef)attributedString);
+//	
+//	CFIndex offset = 0, length;
+//	CGFloat y = 0;
+//	do {
+//		length = CTTypesetterSuggestLineBreak(typesetter, offset, width);
+//		CTLineRef line = CTTypesetterCreateLine(typesetter, CFRangeMake(offset, length));
+//		
+//		CGFloat ascent, descent, leading;
+//		CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+//		
+//		CFRelease(line);
+//		
+//		offset += length;
+//		y += ascent + descent + leading;
+//	} while (offset < [attributedString length]);
+//	
+//	CFRelease(typesetter);
+//	
+////	DNSLog(@"=>%f", y);
+//	_toc();
+//	return CGSizeMake(width, ceil(y));
 	
-	[textStorage setAttributedString:attributedString];
+	_tic();
+	CTFramesetterRef	_framesetter;
+    CTFrameRef			_frame;
 	
-	[layoutManager setTextStorage:textStorage];
-	
-	[textStorage addLayoutManager:layoutManager];
-	
-	CGRect r = [layoutManager lineFragmentRectForGlyphAtIndex:attributedString.length-1 effectiveRange:NULL];
-	return CGSizeMake(width, r.size.height + r.origin.y);
+	// CoreText
+    
+    CFAttributedStringRef p = (__bridge CFAttributedStringRef)attributedString;
+	_framesetter = CTFramesetterCreateWithAttributedString(p);
+	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
+                                                                    CFRangeMake(0, attributedString.length),
+                                                                    NULL,
+                                                                    CGSizeMake(width, CGFLOAT_MAX),
+                                                                    NULL);
+	CGRect r2 = CGRectZero;
+	r2.size = frameSize;
+	CFRelease(_framesetter);
+	_toc();
+	return r2.size;
 }
 
 #pragma mark - Instance method
@@ -95,6 +156,41 @@ typedef enum _UZTextViewStatus {
 
 - (void)setAttributedString:(NSAttributedString *)attributedString {
 	[self prepareForReuse];
+	
+	_attributedString = attributedString;
+	
+	// CoreText
+	if (_framesetter)
+        CFRelease(_framesetter);
+    
+    CFAttributedStringRef p = (__bridge CFAttributedStringRef)attributedString;
+    if (p) {
+        _framesetter = CTFramesetterCreateWithAttributedString(p);
+    }
+	else {
+        p = CFAttributedStringCreate(NULL, CFSTR(""), NULL);
+        _framesetter = CTFramesetterCreateWithAttributedString(p);
+        CFRelease(p);
+    }
+	if (_frame) {
+        CFRelease(_frame);
+    }
+    
+	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
+                                                                    CFRangeMake(0, _attributedString.length),
+                                                                    NULL,
+                                                                    CGSizeMake(226, CGFLOAT_MAX),
+                                                                    NULL);
+	CGRect r2 = CGRectZero;
+	r2.size = frameSize;
+	_contentRect = r2;
+	CGMutablePathRef path = CGPathCreateMutable();
+	CGPathAddRect(path, NULL, r2);
+	_frame = CTFramesetterCreateFrame(_framesetter, CFRangeMake(0, 0), path, NULL);
+	CGPathRelease(path);
+	DNSLogRect(_contentRect);
+
+	// TextKit
 	_layoutManager = [[NSLayoutManager alloc] init];
 	_textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
 	_textStorage = [[NSTextStorage alloc] init];
@@ -111,9 +207,9 @@ typedef enum _UZTextViewStatus {
 	CGRect r = [_layoutManager lineFragmentRectForGlyphAtIndex:self.attributedString.length-1 effectiveRange:NULL];
 	
 	CGRect currentRect = self.frame;
-	currentRect.size = CGSizeMake(self.frame.size.width, r.size.height + r.origin.y);
+	currentRect.size = _contentRect.size;//CGSizeMake(self.frame.size.width, r.size.height + r.origin.y);
 	self.frame = currentRect;
-	_contentSize = currentRect.size;
+//	_contentSize = currentRect.size;
 	[self setNeedsLayout];
 	[self setNeedsDisplay];
 }
@@ -230,6 +326,15 @@ typedef enum _UZTextViewStatus {
 }
 
 - (void)drawContent {
+	CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    CGContextTranslateCTM(context, 0, self.frame.size.height);
+    CGContextScaleCTM(context, 1.0, -1.0);
+	
+	CGContextSetTextMatrix(context, CGAffineTransformIdentity);
+	CTFrameDraw(_frame, context);
+	
+	return;
 	// Drawing code
 	[_textContainer setSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
 	[_layoutManager drawGlyphsForGlyphRange:NSMakeRange(0, self.attributedString.length) atPoint:CGPointMake(0, 0)];
@@ -458,6 +563,10 @@ typedef enum _UZTextViewStatus {
 		[self setNeedsDisplay];
     }
     return nil;
+}
+
+- (CGSize)contentSize {
+	return _contentRect.size;
 }
 
 - (void)layoutSubviews {
