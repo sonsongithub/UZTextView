@@ -84,46 +84,41 @@ typedef enum _UZTextViewStatus {
 
 #pragma mark - Class method to estimate attributed string size
 
-+ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width {
-//	NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
-//	NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(width, CGFLOAT_MAX)];
-//	NSTextStorage *textStorage = [[NSTextStorage alloc] init];
-//	[layoutManager addTextContainer:textContainer];
-//	
-//	[textStorage setAttributedString:attributedString];
-//	
-//	[layoutManager setTextStorage:textStorage];
-//	
-//	[textStorage addLayoutManager:layoutManager];
-//	
-//	CGRect r = [layoutManager lineFragmentRectForGlyphAtIndex:attributedString.length-1 effectiveRange:NULL];
-//	return CGSizeMake(width, r.size.height + r.origin.y);
-	// Measures the height needed for a given width using Core Text:
-//	_tic();
-//	CTTypesetterRef typesetter = CTTypesetterCreateWithAttributedString((CFAttributedStringRef)attributedString);
-//	
-//	CFIndex offset = 0, length;
-//	CGFloat y = 0;
-//	do {
-//		length = CTTypesetterSuggestLineBreak(typesetter, offset, width);
-//		CTLineRef line = CTTypesetterCreateLine(typesetter, CFRangeMake(offset, length));
-//		
-//		CGFloat ascent, descent, leading;
-//		CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
-//		
-//		CFRelease(line);
-//		
-//		offset += length;
-//		y += ascent + descent + leading;
-//	} while (offset < [attributedString length]);
-//	
-//	CFRelease(typesetter);
-//	
-////	DNSLog(@"=>%f", y);
-//	_toc();
-//	return CGSizeMake(width, ceil(y));
++ (CGSize)sizeUsingTextKitForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width {
+	NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
+	NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(width, CGFLOAT_MAX)];
+	NSTextStorage *textStorage = [[NSTextStorage alloc] init];
+	[layoutManager addTextContainer:textContainer];
+	[textStorage setAttributedString:attributedString];
+	[textStorage addLayoutManager:layoutManager];
+	CGRect r = [layoutManager lineFragmentRectForGlyphAtIndex:attributedString.length-1 effectiveRange:NULL];
+	return CGSizeMake(width, r.size.height + r.origin.y);
+}
+
++ (CGSize)sizeUsingTypeSetterForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width {
+	CTTypesetterRef typesetter = CTTypesetterCreateWithAttributedString((CFAttributedStringRef)attributedString);
 	
-	_tic();
+	CFIndex offset = 0, length;
+	CGFloat y = 0;
+	do {
+		length = CTTypesetterSuggestLineBreak(typesetter, offset, width);
+		CTLineRef line = CTTypesetterCreateLine(typesetter, CFRangeMake(offset, length));
+		
+		CGFloat ascent, descent, leading;
+		CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+		
+		CFRelease(line);
+		
+		offset += length;
+		y += ascent + descent + leading;
+	} while (offset < [attributedString length]);
+	
+	CFRelease(typesetter);
+	
+	return CGSizeMake(width, ceil(y));
+}
+
++ (CGSize)sizeUsingCTFrameForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width {
 	CTFramesetterRef	_framesetter;
     CTFrameRef			_frame;
 	
@@ -139,7 +134,6 @@ typedef enum _UZTextViewStatus {
 	CGRect r2 = CGRectZero;
 	r2.size = frameSize;
 	CFRelease(_framesetter);
-	_toc();
 	return r2.size;
 }
 
@@ -181,16 +175,16 @@ typedef enum _UZTextViewStatus {
                                                                     NULL,
                                                                     CGSizeMake(226, CGFLOAT_MAX),
                                                                     NULL);
-	CGRect r2 = CGRectZero;
-	r2.size = frameSize;
-	_contentRect = r2;
+	_contentRect = CGRectZero;
+	_contentRect.size = frameSize;
+	
 	CGMutablePathRef path = CGPathCreateMutable();
-	CGPathAddRect(path, NULL, r2);
+	CGPathAddRect(path, NULL, _contentRect);
 	_frame = CTFramesetterCreateFrame(_framesetter, CFRangeMake(0, 0), path, NULL);
 	CGPathRelease(path);
 	DNSLogRect(_contentRect);
-
-	// TextKit
+//
+//	// TextKit
 	_layoutManager = [[NSLayoutManager alloc] init];
 	_textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
 	_textStorage = [[NSTextStorage alloc] init];
@@ -206,10 +200,7 @@ typedef enum _UZTextViewStatus {
 	
 	CGRect r = [_layoutManager lineFragmentRectForGlyphAtIndex:self.attributedString.length-1 effectiveRange:NULL];
 	
-	CGRect currentRect = self.frame;
-	currentRect.size = _contentRect.size;//CGSizeMake(self.frame.size.width, r.size.height + r.origin.y);
-	self.frame = currentRect;
-//	_contentSize = currentRect.size;
+	self.frame = _contentRect;
 	[self setNeedsLayout];
 	[self setNeedsDisplay];
 }
@@ -327,8 +318,13 @@ typedef enum _UZTextViewStatus {
 
 - (void)drawContent {
 	CGContextRef context = UIGraphicsGetCurrentContext();
-    
-    CGContextTranslateCTM(context, 0, self.frame.size.height);
+
+	DNSLog(@"contentRect");
+	DNSLogRect(_contentRect);
+	DNSLog(@"frame");
+	DNSLogRect(self.frame);
+	
+    CGContextTranslateCTM(context, 0, _contentRect.size.height);
     CGContextScaleCTM(context, 1.0, -1.0);
 	
 	CGContextSetTextMatrix(context, CGAffineTransformIdentity);
@@ -417,6 +413,55 @@ typedef enum _UZTextViewStatus {
 	return NO;
 }
 
+#pragma mark - CoreText
+
+- (CFIndex)indexForPoint:(CGPoint)point {
+	CFArrayRef lines = CTFrameGetLines(_frame);
+    CFIndex lineCount = CFArrayGetCount(lines);
+    CGPoint lineOrigins[lineCount];
+    CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
+    
+//    NSMutableArray *lineLayouts = [[NSMutableArray alloc] initWithCapacity:lineCount];
+    for (NSInteger index = 0; index < lineCount; index++) {
+        CGPoint origin = lineOrigins[index];
+        CTLineRef line = CFArrayGetValueAtIndex(lines, index);
+        return CTLineGetStringIndexForPosition(line, point);
+		
+        CGFloat ascent;
+        CGFloat descent;
+        CGFloat leading;
+        CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+        
+//        SELineMetrics metrics;
+//        metrics.ascent = ascent;
+//        metrics.descent = descent;
+//        metrics.leading = leading;
+//        metrics.width = width;
+//        metrics.trailingWhitespaceWidth = CTLineGetTrailingWhitespaceWidth(line);
+        
+        CGRect lineRect = CGRectMake(origin.x,
+                                     ceilf(origin.y - descent),
+                                     width,
+                                     ceilf(ascent + descent));
+		// padding
+		// lineRect.origin.x += _frameRect.origin.x;
+        lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
+
+//        SELineLayout *lineLayout = [[SELineLayout alloc] initWithLine:line index:index rect:lineRect metrics:metrics];
+//        
+//        for (SELinkText *link in self.links) {
+//            CGRect linkRect = [lineLayout rectOfStringWithRange:link.range];
+//            if (!CGRectIsEmpty(linkRect)) {
+//                SETextGeometry *geometry = [[SETextGeometry alloc] initWithRect:linkRect lineNumber:index];
+//                [link addLinkGeometry:geometry];
+//                
+//                [lineLayout addLink:link];
+//            }
+//        }
+    }
+	return kCFNotFound;
+}
+
 #pragma mark - Touch event
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -459,6 +504,9 @@ typedef enum _UZTextViewStatus {
 	UITouch *touch = [touches anyObject];
 	
 	[self invalidateTapDurationTimer];
+	
+	CFIndex i = [self indexForPoint:[touch locationInView:self]];
+	NSLog(@"%ld", i);
 	
 	if (_isLocked)
 		return;
@@ -588,8 +636,63 @@ typedef enum _UZTextViewStatus {
 	return self;
 }
 
+- (void)drawLineRegionsUsingCoreText {
+	CGContextRef context = UIGraphicsGetCurrentContext();
+	
+	CFArrayRef lines = CTFrameGetLines(_frame);
+    CFIndex lineCount = CFArrayGetCount(lines);
+    CGPoint lineOrigins[lineCount];
+    CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
+    
+    NSMutableArray *lineLayouts = [[NSMutableArray alloc] initWithCapacity:lineCount];
+    for (NSInteger index = 0; index < lineCount; index++) {
+        CGPoint origin = lineOrigins[index];
+        CTLineRef line = CFArrayGetValueAtIndex(lines, index);
+        
+        CGFloat ascent;
+        CGFloat descent;
+        CGFloat leading;
+        CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+        
+//        SELineMetrics metrics;
+//        metrics.ascent = ascent;
+//        metrics.descent = descent;
+//        metrics.leading = leading;
+//        metrics.width = width;
+//        metrics.trailingWhitespaceWidth = CTLineGetTrailingWhitespaceWidth(line);
+        
+        CGRect lineRect = CGRectMake(origin.x,
+                                     ceilf(origin.y - descent),
+                                     width,
+                                     ceilf(ascent + descent));
+//        lineRect.origin.x += _frameRect.origin.x;
+//        
+//#if TARGET_OS_IPHONE
+        lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
+//#else
+//        lineRect.origin.y += _frameRect.origin.y;
+//#endif
+//        
+//        SELineLayout *lineLayout = [[SELineLayout alloc] initWithLine:line index:index rect:lineRect metrics:metrics];
+//        
+//        for (SELinkText *link in self.links) {
+//            CGRect linkRect = [lineLayout rectOfStringWithRange:link.range];
+//            if (!CGRectIsEmpty(linkRect)) {
+//                SETextGeometry *geometry = [[SETextGeometry alloc] initWithRect:linkRect lineNumber:index];
+//                [link addLinkGeometry:geometry];
+//                
+//                [lineLayout addLink:link];
+//            }
+//        }
+//        [lineLayouts addObject:lineLayout];
+		[[[UIColor redColor] colorWithAlphaComponent:0.4] setFill];
+		CGContextFillRect(context, lineRect);
+    }
+}
+
 - (void)drawRect:(CGRect)rect {
 	// draw main content
+	[self drawLineRegionsUsingCoreText];
 	[self drawContent];
 }
 

@@ -71,4 +71,8 @@
  * Prepares for reusing an object. You have to call this method before you set another attributed string to the object.
  */
 - (void)prepareForReuse;
+
++ (CGSize)sizeUsingTextKitForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width;
++ (CGSize)sizeUsingTypeSetterForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width;
++ (CGSize)sizeUsingCTFrameForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width;
 @end
