@@ -200,7 +200,7 @@ typedef enum _UZTextViewStatus {
 	
 	CGRect r = [_layoutManager lineFragmentRectForGlyphAtIndex:self.attributedString.length-1 effectiveRange:NULL];
 	
-	self.frame = _contentRect;
+//	self.frame = _contentRect;
 	[self setNeedsLayout];
 	[self setNeedsDisplay];
 }
@@ -242,34 +242,86 @@ typedef enum _UZTextViewStatus {
 	if (!(fromIndex <= toIndex && fromIndex >=0 && toIndex >=0))
 		return @[];
 	
-	// Extracted fragment rects from layout manager
-	NSMutableArray *fragmentRects = [NSMutableArray array];
-	for (int i = fromIndex; i <= toIndex;) {
-		// Get right glyph index and left one on the line
-		NSRange effectiveRange;
-		[_layoutManager lineFragmentRectForGlyphAtIndex:i effectiveRange:(NSRangePointer)&effectiveRange];
-		NSUInteger left = effectiveRange.location >= i ? effectiveRange.location : i;
-		NSUInteger right = effectiveRange.location + effectiveRange.length <= toIndex ? effectiveRange.location + effectiveRange.length - 1 : toIndex;
+	CFArrayRef lines = CTFrameGetLines(_frame);
+    CFIndex lineCount = CFArrayGetCount(lines);
+    CGPoint lineOrigins[lineCount];
+    CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
 	
-		// Skip new line code
-		CGGlyph rightGlyph = [_layoutManager glyphAtIndex:right];
-		if (rightGlyph == NEW_LINE_GLYPH)
-			right--;
+	NSMutableArray *fragmentRects = [NSMutableArray array];
+	
+	NSRange range = NSMakeRange(fromIndex, toIndex - fromIndex);
+    
+    NSMutableArray *lineLayouts = [[NSMutableArray alloc] initWithCapacity:lineCount];
+    for (NSInteger index = 0; index < lineCount; index++) {
+        CGPoint origin = lineOrigins[index];
+        CTLineRef line = CFArrayGetValueAtIndex(lines, index);
+        
+		CGRect rect = CGRectZero;
+		CFRange stringRange = CTLineGetStringRange(line);
+		NSRange intersectionRange = NSIntersectionRange(range, NSMakeRange(stringRange.location, stringRange.length));
 		
-		if (left <= right) {
-			// Get regions of right and left glyph
-			CGRect r1 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(left, 1) inTextContainer:_textContainer];
-			CGRect r2 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(right, 1) inTextContainer:_textContainer];
+		CGFloat ascent;
+        CGFloat descent;
+        CGFloat leading;
+        CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+        
+		//        SELineMetrics metrics;
+		//        metrics.ascent = ascent;
+		//        metrics.descent = descent;
+		//        metrics.leading = leading;
+		//        metrics.width = width;
+		//        metrics.trailingWhitespaceWidth = CTLineGetTrailingWhitespaceWidth(line);
+        
+        CGRect lineRect = CGRectMake(origin.x,
+                                     ceilf(origin.y - descent),
+                                     width,
+                                     ceilf(ascent + descent));
+		//        lineRect.origin.x += _frameRect.origin.x;
+		//
+		//#if TARGET_OS_IPHONE
+        lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
+		
+		if (intersectionRange.length > 0) {
+			CGFloat startOffset = CTLineGetOffsetForStringIndex(line, intersectionRange.location, NULL);
+			CGFloat endOffset = CTLineGetOffsetForStringIndex(line, NSMaxRange(intersectionRange), NULL);
 			
-			// Get line region by combining right and left regions.
-			CGRect r = CGRectMake(r1.origin.x, r1.origin.y, r2.origin.x + r2.size.width - r1.origin.x, r1.size.height);
-			
-			[fragmentRects addObject:[NSValue valueWithCGRect:r]];
+			rect = lineRect;
+			rect.origin.x += startOffset;
+			rect.size.width -= (rect.size.width - endOffset);
+			rect.size.width = rect.size.width - startOffset;
+			[fragmentRects addObject:[NSValue valueWithCGRect:rect]];
 		}
-		// forward glyph index pointer, i
-		i = effectiveRange.location + effectiveRange.length;
-	}
+    }
 	return [NSArray arrayWithArray:fragmentRects];
+		
+//	// Extracted fragment rects from layout manager
+//	NSMutableArray *fragmentRects = [NSMutableArray array];
+//	for (int i = fromIndex; i <= toIndex;) {
+//		// Get right glyph index and left one on the line
+//		NSRange effectiveRange;
+//		[_layoutManager lineFragmentRectForGlyphAtIndex:i effectiveRange:(NSRangePointer)&effectiveRange];
+//		NSUInteger left = effectiveRange.location >= i ? effectiveRange.location : i;
+//		NSUInteger right = effectiveRange.location + effectiveRange.length <= toIndex ? effectiveRange.location + effectiveRange.length - 1 : toIndex;
+//	
+//		// Skip new line code
+//		CGGlyph rightGlyph = [_layoutManager glyphAtIndex:right];
+//		if (rightGlyph == NEW_LINE_GLYPH)
+//			right--;
+//		
+//		if (left <= right) {
+//			// Get regions of right and left glyph
+//			CGRect r1 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(left, 1) inTextContainer:_textContainer];
+//			CGRect r2 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(right, 1) inTextContainer:_textContainer];
+//			
+//			// Get line region by combining right and left regions.
+//			CGRect r = CGRectMake(r1.origin.x, r1.origin.y, r2.origin.x + r2.size.width - r1.origin.x, r1.size.height);
+//			
+//			[fragmentRects addObject:[NSValue valueWithCGRect:r]];
+//		}
+//		// forward glyph index pointer, i
+//		i = effectiveRange.location + effectiveRange.length;
+//	}
+//	return [NSArray arrayWithArray:fragmentRects];
 }
 
 - (CGRect)fragmentRectForSelectedStringFromIndex:(int)fromIndex toIndex:(int)toIndex {
@@ -324,16 +376,17 @@ typedef enum _UZTextViewStatus {
 	DNSLog(@"frame");
 	DNSLogRect(self.frame);
 	
+	CGContextSaveGState(context);
     CGContextTranslateCTM(context, 0, _contentRect.size.height);
     CGContextScaleCTM(context, 1.0, -1.0);
 	
 	CGContextSetTextMatrix(context, CGAffineTransformIdentity);
 	CTFrameDraw(_frame, context);
+	CGContextRestoreGState(context);
 	
-	return;
 	// Drawing code
-	[_textContainer setSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
-	[_layoutManager drawGlyphsForGlyphRange:NSMakeRange(0, self.attributedString.length) atPoint:CGPointMake(0, 0)];
+//	[_textContainer setSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
+//	[_layoutManager drawGlyphsForGlyphRange:NSMakeRange(0, self.attributedString.length) atPoint:CGPointMake(0, 0)];
 	
 	int headForRendering = _head < _tail ? _head : _tail;
 	int tailForRendering = _head < _tail ? _tail : _head;
@@ -692,7 +745,7 @@ typedef enum _UZTextViewStatus {
 
 - (void)drawRect:(CGRect)rect {
 	// draw main content
-	[self drawLineRegionsUsingCoreText];
+//	[self drawLineRegionsUsingCoreText];
 	[self drawContent];
 }
 

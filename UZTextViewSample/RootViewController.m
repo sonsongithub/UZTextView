@@ -114,17 +114,17 @@
 	}
 	for (Tweet *tweet in _tweets) {
 		float height = [UZTextView sizeUsingCTFrameForAttributedString:tweet.attributedString withBoundWidth:width].height + 36;
-		_tic();
-		[UZTextView sizeUsingTextKitForAttributedString:tweet.attributedString withBoundWidth:width];
-		_toc();
-		_tic();
-		[UZTextView sizeUsingCTFrameForAttributedString:tweet.attributedString withBoundWidth:width];
-		_toc();
-		_tic();
-		[UZTextView sizeUsingTypeSetterForAttributedString:tweet.attributedString withBoundWidth:width];
-		_toc();
-		printf("\n");
-		tweet.height = height < 58 ? 58 : height;
+//		_tic();
+//		[UZTextView sizeUsingTextKitForAttributedString:tweet.attributedString withBoundWidth:width];
+//		_toc();
+//		_tic();
+//		[UZTextView sizeUsingCTFrameForAttributedString:tweet.attributedString withBoundWidth:width];
+//		_toc();
+//		_tic();
+//		[UZTextView sizeUsingTypeSetterForAttributedString:tweet.attributedString withBoundWidth:width];
+//		_toc();
+//		printf("\n");
+		tweet.height = height;
 	}
 }
 
