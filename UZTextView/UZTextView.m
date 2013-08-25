@@ -38,9 +38,9 @@ typedef enum _UZTextViewStatus {
 	CGRect				_contentRect;
 	
 	// text manager
-	NSLayoutManager		*_layoutManager;
-	NSTextContainer		*_textContainer;
-	NSTextStorage		*_textStorage;
+//	NSLayoutManager		*_layoutManager;
+//	NSTextContainer		*_textContainer;
+//	NSTextStorage		*_textStorage;
 	
 	// parameter
 	NSUInteger			_head;
@@ -183,24 +183,7 @@ typedef enum _UZTextViewStatus {
 	_frame = CTFramesetterCreateFrame(_framesetter, CFRangeMake(0, 0), path, NULL);
 	CGPathRelease(path);
 	DNSLogRect(_contentRect);
-//
-//	// TextKit
-	_layoutManager = [[NSLayoutManager alloc] init];
-	_textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
-	_textStorage = [[NSTextStorage alloc] init];
-	[_layoutManager addTextContainer:_textContainer];
 	
-	_attributedString = attributedString;
-	
-	[_textStorage setAttributedString:attributedString];
-	
-	[_layoutManager setTextStorage:_textStorage];
-	
-	[_textStorage addLayoutManager:_layoutManager];
-	
-	CGRect r = [_layoutManager lineFragmentRectForGlyphAtIndex:self.attributedString.length-1 effectiveRange:NULL];
-	
-//	self.frame = _contentRect;
 	[self setNeedsLayout];
 	[self setNeedsDisplay];
 }
@@ -225,15 +208,26 @@ typedef enum _UZTextViewStatus {
 
 - (CGRect)fragmentRectForCursorAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side {
 	if (side == UZTextViewLeftEdge) {
-		CGRect rect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(index, 1) inTextContainer:_textContainer];
-		rect.size.width = 0;
+		NSArray *rects = [self fragmentRectsForGlyphFromIndex:index toIndex:index+1];
+		CGRect rect = CGRectZero;
+		if ([rects count]) {
+			rect = [[rects objectAtIndex:0] CGRectValue];
+			rect.size.width = 0;
+		}
 		return CGRectInset(rect, -_cursorMargin, -_cursorMargin);
 	}
 	else {
-		CGRect rect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(index, 1) inTextContainer:_textContainer];
-		if ([_layoutManager glyphAtIndex:index] != NEW_LINE_GLYPH)
-			rect.origin.x += rect.size.width;
-		rect.size.width = 0;
+//		CGRect rect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(index, 1) inTextContainer:_textContainer];
+//		if ([_layoutManager glyphAtIndex:index] != NEW_LINE_GLYPH)
+//			rect.origin.x += rect.size.width;
+//		rect.size.width = 0;
+		
+		NSArray *rects = [self fragmentRectsForGlyphFromIndex:index toIndex:index+1];
+		CGRect rect = CGRectZero;
+		if ([rects count]) {
+			rect = [[rects objectAtIndex:0] CGRectValue];
+			rect.size.width = 0;
+		}
 		return CGRectInset(rect, -_cursorMargin, -_cursorMargin);
 	}
 }
@@ -265,13 +259,6 @@ typedef enum _UZTextViewStatus {
         CGFloat leading;
         CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
         
-		//        SELineMetrics metrics;
-		//        metrics.ascent = ascent;
-		//        metrics.descent = descent;
-		//        metrics.leading = leading;
-		//        metrics.width = width;
-		//        metrics.trailingWhitespaceWidth = CTLineGetTrailingWhitespaceWidth(line);
-        
         CGRect lineRect = CGRectMake(origin.x,
                                      ceilf(origin.y - descent),
                                      width,
@@ -293,35 +280,6 @@ typedef enum _UZTextViewStatus {
 		}
     }
 	return [NSArray arrayWithArray:fragmentRects];
-		
-//	// Extracted fragment rects from layout manager
-//	NSMutableArray *fragmentRects = [NSMutableArray array];
-//	for (int i = fromIndex; i <= toIndex;) {
-//		// Get right glyph index and left one on the line
-//		NSRange effectiveRange;
-//		[_layoutManager lineFragmentRectForGlyphAtIndex:i effectiveRange:(NSRangePointer)&effectiveRange];
-//		NSUInteger left = effectiveRange.location >= i ? effectiveRange.location : i;
-//		NSUInteger right = effectiveRange.location + effectiveRange.length <= toIndex ? effectiveRange.location + effectiveRange.length - 1 : toIndex;
-//	
-//		// Skip new line code
-//		CGGlyph rightGlyph = [_layoutManager glyphAtIndex:right];
-//		if (rightGlyph == NEW_LINE_GLYPH)
-//			right--;
-//		
-//		if (left <= right) {
-//			// Get regions of right and left glyph
-//			CGRect r1 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(left, 1) inTextContainer:_textContainer];
-//			CGRect r2 = [_layoutManager boundingRectForGlyphRange:NSMakeRange(right, 1) inTextContainer:_textContainer];
-//			
-//			// Get line region by combining right and left regions.
-//			CGRect r = CGRectMake(r1.origin.x, r1.origin.y, r2.origin.x + r2.size.width - r1.origin.x, r1.size.height);
-//			
-//			[fragmentRects addObject:[NSValue valueWithCGRect:r]];
-//		}
-//		// forward glyph index pointer, i
-//		i = effectiveRange.location + effectiveRange.length;
-//	}
-//	return [NSArray arrayWithArray:fragmentRects];
 }
 
 - (CGRect)fragmentRectForSelectedStringFromIndex:(int)fromIndex toIndex:(int)toIndex {
@@ -339,13 +297,22 @@ typedef enum _UZTextViewStatus {
 	NSRange range;
 	if (CGPointEqualToPoint(_locationWhenTapBegan, CGPointZero))
 		return;
-	int tappedIndex = [_layoutManager glyphIndexForPoint:_locationWhenTapBegan inTextContainer:_textContainer];
+	int tappedIndex = [self indexForPoint:_locationWhenTapBegan];
 	NSDictionary *dict = [self.attributedString attributesAtIndex:tappedIndex effectiveRange:&range];
 	if (dict[NSLinkAttributeName]) {
 		NSLogRange(range);
-		CGRect glyphrect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(tappedIndex, 1) inTextContainer:_textContainer];
+		
+		
+		NSArray *rects = [self fragmentRectsForGlyphFromIndex:tappedIndex toIndex:tappedIndex+1];
+		CGRect rect = CGRectZero;
+		if ([rects count]) {
+			rect = [[rects objectAtIndex:0] CGRectValue];
+			rect.size.width = 0;
+		}
+		
+//		CGRect glyphrect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(tappedIndex, 1) inTextContainer:_textContainer];
 
-		if (CGRectContainsPoint(glyphrect, _locationWhenTapBegan)) {
+		if (CGRectContainsPoint(rect, _locationWhenTapBegan)) {
 			CGContextRef context = UIGraphicsGetCurrentContext();
 
 			[[self.tintColor colorWithAlphaComponent:_tintAlpha] setFill];
@@ -473,44 +440,43 @@ typedef enum _UZTextViewStatus {
     CFIndex lineCount = CFArrayGetCount(lines);
     CGPoint lineOrigins[lineCount];
     CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
+	
+	CGRect previousLineRect = CGRectZero;
     
-//    NSMutableArray *lineLayouts = [[NSMutableArray alloc] initWithCapacity:lineCount];
     for (NSInteger index = 0; index < lineCount; index++) {
         CGPoint origin = lineOrigins[index];
         CTLineRef line = CFArrayGetValueAtIndex(lines, index);
-        return CTLineGetStringIndexForPosition(line, point);
 		
+		CFRange lineRange = CTLineGetStringRange(line);
+		
+	
         CGFloat ascent;
         CGFloat descent;
         CGFloat leading;
         CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
         
-//        SELineMetrics metrics;
-//        metrics.ascent = ascent;
-//        metrics.descent = descent;
-//        metrics.leading = leading;
-//        metrics.width = width;
-//        metrics.trailingWhitespaceWidth = CTLineGetTrailingWhitespaceWidth(line);
-        
         CGRect lineRect = CGRectMake(origin.x,
                                      ceilf(origin.y - descent),
                                      width,
                                      ceilf(ascent + descent));
-		// padding
-		// lineRect.origin.x += _frameRect.origin.x;
-        lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
-
-//        SELineLayout *lineLayout = [[SELineLayout alloc] initWithLine:line index:index rect:lineRect metrics:metrics];
-//        
-//        for (SELinkText *link in self.links) {
-//            CGRect linkRect = [lineLayout rectOfStringWithRange:link.range];
-//            if (!CGRectIsEmpty(linkRect)) {
-//                SETextGeometry *geometry = [[SETextGeometry alloc] initWithRect:linkRect lineNumber:index];
-//                [link addLinkGeometry:geometry];
-//                
-//                [lineLayout addLink:link];
-//            }
-//        }
+		lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
+		
+		if (index > 0) {
+			CGRect rectBetweenLines = CGRectZero;
+			rectBetweenLines.origin.x = previousLineRect.origin.x;
+			rectBetweenLines.origin.y = previousLineRect.origin.y + previousLineRect.size.height;
+			rectBetweenLines.size.width = previousLineRect.size.width;
+			rectBetweenLines.size.height = lineRect.origin.y - rectBetweenLines.origin.y;
+			if (CGRectContainsPoint(rectBetweenLines, point)) {
+				return lineRange.location;
+			}
+		}
+		previousLineRect = lineRect;
+		if (CGRectContainsPoint(lineRect, point)) {
+			CFIndex result = CTLineGetStringIndexForPosition(line, point);
+			if (result != kCFNotFound)
+				return result;
+		}
     }
 	return kCFNotFound;
 }
@@ -565,7 +531,7 @@ typedef enum _UZTextViewStatus {
 		return;
 	
 	if (_status == UZTextViewNoSelection) {
-		_head = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
+		_head = [self indexForPoint:[touch locationInView:self]];
 		_tail = _head;
 		[_loupeView setVisible:YES animated:YES];
 		_status = UZTextViewSelecting;
@@ -574,13 +540,13 @@ typedef enum _UZTextViewStatus {
 		[self setCursorHidden:YES];
 	}
 	if (_status == UZTextViewSelecting) {
-		_tail = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
+		_tail = [self indexForPoint:[touch locationInView:self]];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 	}
 	else if (_status == UZTextViewEditingFromSelection) {
 		[self setCursorHidden:NO];
 		int prev_from = _head;
-		_head = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
+		_head = [self indexForPoint:[touch locationInView:self]];
 		if (prev_from <= _tail && _head > _tail)
 			_tail = _tailWhenBegan + 1;
 		else if (prev_from >= _tail && _head < _tail)
@@ -590,7 +556,7 @@ typedef enum _UZTextViewStatus {
 	else if (_status == UZTextViewEditingToSelection) {
 		[self setCursorHidden:NO];
 		int prev_end = _tail;
-		_tail = [_layoutManager glyphIndexForPoint:[touch locationInView:self] inTextContainer:_textContainer];
+		_tail = [self indexForPoint:[touch locationInView:self]];
 		if (prev_end >= _head && _head > _tail)
 			_head = _headWhenBegan - 1;
 		else if (prev_end <= _head && _head < _tail)
@@ -611,11 +577,20 @@ typedef enum _UZTextViewStatus {
 	
 	if (_status == UZTextViewNoSelection) {
 		// clicked
-		int tappedIndex = [_layoutManager glyphIndexForPoint:_locationWhenTapBegan inTextContainer:_textContainer];
+		int tappedIndex = [self indexForPoint:_locationWhenTapBegan];
 		NSDictionary *dict = [self.attributedString attributesAtIndex:tappedIndex effectiveRange:NULL];
 		if (dict[NSLinkAttributeName]) {
-			CGRect glyphrect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(tappedIndex, 1) inTextContainer:_textContainer];
-			if (CGRectContainsPoint(glyphrect, _locationWhenTapBegan)) {
+			
+			
+			NSArray *rects = [self fragmentRectsForGlyphFromIndex:tappedIndex toIndex:tappedIndex+1];
+			CGRect rect = CGRectZero;
+			if ([rects count]) {
+				rect = [[rects objectAtIndex:0] CGRectValue];
+				rect.size.width = 0;
+			}
+			
+//			CGRect glyphrect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(tappedIndex, 1) inTextContainer:_textContainer];
+			if (CGRectContainsPoint(rect, _locationWhenTapBegan)) {
 				if ([self.delegate respondsToSelector:@selector(textView:didClickLinkAttribute:)]) {
 					[self.delegate textView:self didClickLinkAttribute:dict];
 				}
@@ -697,7 +672,6 @@ typedef enum _UZTextViewStatus {
     CGPoint lineOrigins[lineCount];
     CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
     
-    NSMutableArray *lineLayouts = [[NSMutableArray alloc] initWithCapacity:lineCount];
     for (NSInteger index = 0; index < lineCount; index++) {
         CGPoint origin = lineOrigins[index];
         CTLineRef line = CFArrayGetValueAtIndex(lines, index);
@@ -707,37 +681,11 @@ typedef enum _UZTextViewStatus {
         CGFloat leading;
         CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
         
-//        SELineMetrics metrics;
-//        metrics.ascent = ascent;
-//        metrics.descent = descent;
-//        metrics.leading = leading;
-//        metrics.width = width;
-//        metrics.trailingWhitespaceWidth = CTLineGetTrailingWhitespaceWidth(line);
-        
         CGRect lineRect = CGRectMake(origin.x,
                                      ceilf(origin.y - descent),
                                      width,
                                      ceilf(ascent + descent));
-//        lineRect.origin.x += _frameRect.origin.x;
-//        
-//#if TARGET_OS_IPHONE
         lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
-//#else
-//        lineRect.origin.y += _frameRect.origin.y;
-//#endif
-//        
-//        SELineLayout *lineLayout = [[SELineLayout alloc] initWithLine:line index:index rect:lineRect metrics:metrics];
-//        
-//        for (SELinkText *link in self.links) {
-//            CGRect linkRect = [lineLayout rectOfStringWithRange:link.range];
-//            if (!CGRectIsEmpty(linkRect)) {
-//                SETextGeometry *geometry = [[SETextGeometry alloc] initWithRect:linkRect lineNumber:index];
-//                [link addLinkGeometry:geometry];
-//                
-//                [lineLayout addLink:link];
-//            }
-//        }
-//        [lineLayouts addObject:lineLayout];
 		[[[UIColor redColor] colorWithAlphaComponent:0.4] setFill];
 		CGContextFillRect(context, lineRect);
     }
