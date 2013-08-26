@@ -33,39 +33,34 @@ typedef enum _UZTextViewStatus {
 
 @interface UZTextView() {
 	// CoreText
-	CTFramesetterRef	_framesetter;
-    CTFrameRef			_frame;
-	CGRect				_contentRect;
+	CTFramesetterRef				_framesetter;
+    CTFrameRef						_frame;
+	CGRect							_contentRect;
 	
-	// text manager
-//	NSLayoutManager		*_layoutManager;
-//	NSTextContainer		*_textContainer;
-//	NSTextStorage		*_textStorage;
+	// Tap
+	UILongPressGestureRecognizer	*_longPressGestureRecognizer;
 	
 	// parameter
-	NSUInteger			_head;
-	NSUInteger			_tail;
-	NSUInteger			_headWhenBegan;
-	NSUInteger			_tailWhenBegan;
+	NSUInteger						_head;
+	NSUInteger						_tail;
+	NSUInteger						_headWhenBegan;
+	NSUInteger						_tailWhenBegan;
 	
-	UZTextViewStatus	_status;
-	BOOL				_isLocked;
-	
-	//
-	NSTimer				*_tapDurationTimer;
+	UZTextViewStatus				_status;
+	BOOL							_isLocked;
 	
 	// child view
-	UZLoupeView			*_loupeView;
-	UZCursorView		*_leftCursor;
-	UZCursorView		*_rightCursor;
+	UZLoupeView						*_loupeView;
+	UZCursorView					*_leftCursor;
+	UZCursorView					*_rightCursor;
 	
 	// tap event control
-	CGPoint				_locationWhenTapBegan;
+	CGPoint							_locationWhenTapBegan;
 	
 	// invaliables
-	float				_cursorMargin;
-	float				_tintAlpha;
-	float				_durationToCancelSuperViewScrolling;
+	float							_cursorMargin;
+	float							_tintAlpha;
+	float							_durationToCancelSuperViewScrolling;
 }
 @end
 	
@@ -84,43 +79,8 @@ typedef enum _UZTextViewStatus {
 
 #pragma mark - Class method to estimate attributed string size
 
-+ (CGSize)sizeUsingTextKitForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width {
-	NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
-	NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(width, CGFLOAT_MAX)];
-	NSTextStorage *textStorage = [[NSTextStorage alloc] init];
-	[layoutManager addTextContainer:textContainer];
-	[textStorage setAttributedString:attributedString];
-	[textStorage addLayoutManager:layoutManager];
-	CGRect r = [layoutManager lineFragmentRectForGlyphAtIndex:attributedString.length-1 effectiveRange:NULL];
-	return CGSizeMake(width, r.size.height + r.origin.y);
-}
-
-+ (CGSize)sizeUsingTypeSetterForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width {
-	CTTypesetterRef typesetter = CTTypesetterCreateWithAttributedString((CFAttributedStringRef)attributedString);
-	
-	CFIndex offset = 0, length;
-	CGFloat y = 0;
-	do {
-		length = CTTypesetterSuggestLineBreak(typesetter, offset, width);
-		CTLineRef line = CTTypesetterCreateLine(typesetter, CFRangeMake(offset, length));
-		
-		CGFloat ascent, descent, leading;
-		CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
-		
-		CFRelease(line);
-		
-		offset += length;
-		y += ascent + descent + leading;
-	} while (offset < [attributedString length]);
-	
-	CFRelease(typesetter);
-	
-	return CGSizeMake(width, ceil(y));
-}
-
-+ (CGSize)sizeUsingCTFrameForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width {
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width {
 	CTFramesetterRef	_framesetter;
-    CTFrameRef			_frame;
 	
 	// CoreText
     
@@ -365,6 +325,28 @@ typedef enum _UZTextViewStatus {
 		[self drawSelectedLinkFragments];
 }
 
+#pragma mark - UILongPressGesture
+
+- (void)didChangeLongPressGesture:(UILongPressGestureRecognizer *)gestureRecognizer {
+	DNSLogMethod
+    if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
+		[self setSelectionWithPoint:[gestureRecognizer locationInView:self]];
+		[_loupeView setVisible:YES animated:YES];
+		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
+		[self setCursorHidden:NO];
+    }
+	else if (gestureRecognizer.state == UIGestureRecognizerStateChanged) {
+		[_loupeView setVisible:YES animated:YES];
+		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
+    }
+	else if (gestureRecognizer.state == UIGestureRecognizerStateEnded || gestureRecognizer.state == UIGestureRecognizerStateCancelled || gestureRecognizer.state == UIGestureRecognizerStateFailed) {
+		[_loupeView setVisible:NO animated:YES];
+		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
+		[self setCursorHidden:YES];
+    }
+    [self setNeedsDisplay];
+}
+
 #pragma mark - Preparation
 
 - (void)prepareForInitialization {
@@ -372,6 +354,9 @@ typedef enum _UZTextViewStatus {
 	_cursorMargin = 14;
 	_tintAlpha = 0.5;
 	_durationToCancelSuperViewScrolling = 0.25;
+	
+	_longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(didChangeLongPressGesture:)];
+	[self addGestureRecognizer:_longPressGestureRecognizer];
 	
 	// Initialization code
 	_loupeView = [[UZLoupeView alloc] initWithRadius:60];
@@ -393,7 +378,6 @@ typedef enum _UZTextViewStatus {
 	_headWhenBegan = 0;
 	_tailWhenBegan = 0;
 	
-	[self invalidateTapDurationTimer];
 	_leftCursor.hidden = YES;
 	_rightCursor.hidden = YES;
 	_locationWhenTapBegan = CGPointZero;
@@ -407,12 +391,6 @@ typedef enum _UZTextViewStatus {
 	[_loupeView updateAtLocation:_locationWhenTapBegan textView:self];
 	if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 		[self.delegate selectionDidBeginTextView:self];
-	_tapDurationTimer = nil;
-}
-
-- (void)invalidateTapDurationTimer {
-	[_tapDurationTimer invalidate];
-	_tapDurationTimer = nil;
 }
 
 #pragma mark - for UIMenuController
@@ -434,6 +412,35 @@ typedef enum _UZTextViewStatus {
 }
 
 #pragma mark - CoreText
+
+- (void)setSelectionWithPoint:(CGPoint)point {
+    CFIndex index = [self indexForPoint:point];
+    if (index == kCFNotFound) {
+        return;
+    }
+    
+    CFStringRef string = (__bridge CFStringRef)self.attributedString.string;
+    CFRange range = CFRangeMake(0, CFStringGetLength(string));
+    CFStringTokenizerRef tokenizer = CFStringTokenizerCreate(
+                                                             NULL,
+                                                             string,
+                                                             range,
+                                                             kCFStringTokenizerUnitWordBoundary,
+                                                             NULL);
+    CFStringTokenizerTokenType tokenType = CFStringTokenizerGoToTokenAtIndex(tokenizer, 0);
+    while (tokenType != kCFStringTokenizerTokenNone || range.location + range.length < CFStringGetLength(string)) {
+        range = CFStringTokenizerGetCurrentTokenRange(tokenizer);
+        CFIndex first = range.location;
+        CFIndex second = range.location + range.length;
+        if (first != kCFNotFound && first <= index && index <= second) {
+			_head = first;
+			_tail = second;
+        }
+        
+        tokenType = CFStringTokenizerAdvanceToNextToken(tokenizer);
+    }
+    CFRelease(tokenizer);
+}
 
 - (CFIndex)indexForPoint:(CGPoint)point {
 	CFArrayRef lines = CTFrameGetLines(_frame);
@@ -484,6 +491,7 @@ typedef enum _UZTextViewStatus {
 #pragma mark - Touch event
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	return;
 	_isLocked = YES;
 	UITouch *touch = [touches anyObject];
 	[self setNeedsDisplay];
@@ -516,13 +524,11 @@ typedef enum _UZTextViewStatus {
 	[self setCursorHidden:YES];
 	_status = UZTextViewNoSelection;
 	_locationWhenTapBegan = [touch locationInView:self];
-	_tapDurationTimer = [NSTimer scheduledTimerWithTimeInterval:_durationToCancelSuperViewScrolling target:self selector:@selector(tapDurationTimerFired:) userInfo:nil repeats:NO];
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+	return;
 	UITouch *touch = [touches anyObject];
-	
-	[self invalidateTapDurationTimer];
 	
 	CFIndex i = [self indexForPoint:[touch locationInView:self]];
 	NSLog(@"%ld", i);
@@ -568,7 +574,7 @@ typedef enum _UZTextViewStatus {
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	[self invalidateTapDurationTimer];
+	return;
 	
 	[_loupeView setVisible:NO animated:YES];
 	
@@ -621,25 +627,25 @@ typedef enum _UZTextViewStatus {
 
 #pragma mark - Override
 
-- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
-    if (CGRectContainsPoint(self.bounds, point)) {
-		NSMutableArray *rects = [NSMutableArray array];
-		
-		[rects addObjectsFromArray:[self fragmentRectsForGlyphFromIndex:0 toIndex:self.attributedString.length-1]];
-		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge]]];
-		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge]]];
-		
-		for (NSValue *rectValue in rects) {
-			if (CGRectContainsPoint([rectValue CGRectValue], point))
-				return [super hitTest:point withEvent:event];
-		}
-		
-		[self setCursorHidden:YES];
-		_status = UZTextViewNoSelection;
-		[self setNeedsDisplay];
-    }
-    return nil;
-}
+//- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+//    if (CGRectContainsPoint(self.bounds, point)) {
+//		NSMutableArray *rects = [NSMutableArray array];
+//		
+//		[rects addObjectsFromArray:[self fragmentRectsForGlyphFromIndex:0 toIndex:self.attributedString.length-1]];
+//		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge]]];
+//		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge]]];
+//		
+//		for (NSValue *rectValue in rects) {
+//			if (CGRectContainsPoint([rectValue CGRectValue], point))
+//				return [super hitTest:point withEvent:event];
+//		}
+//		
+//		[self setCursorHidden:YES];
+//		_status = UZTextViewNoSelection;
+//		[self setNeedsDisplay];
+//    }
+//    return nil;
+//}
 
 - (CGSize)contentSize {
 	return _contentRect.size;
@@ -664,36 +670,8 @@ typedef enum _UZTextViewStatus {
 	return self;
 }
 
-- (void)drawLineRegionsUsingCoreText {
-	CGContextRef context = UIGraphicsGetCurrentContext();
-	
-	CFArrayRef lines = CTFrameGetLines(_frame);
-    CFIndex lineCount = CFArrayGetCount(lines);
-    CGPoint lineOrigins[lineCount];
-    CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
-    
-    for (NSInteger index = 0; index < lineCount; index++) {
-        CGPoint origin = lineOrigins[index];
-        CTLineRef line = CFArrayGetValueAtIndex(lines, index);
-        
-        CGFloat ascent;
-        CGFloat descent;
-        CGFloat leading;
-        CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
-        
-        CGRect lineRect = CGRectMake(origin.x,
-                                     ceilf(origin.y - descent),
-                                     width,
-                                     ceilf(ascent + descent));
-        lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
-		[[[UIColor redColor] colorWithAlphaComponent:0.4] setFill];
-		CGContextFillRect(context, lineRect);
-    }
-}
-
 - (void)drawRect:(CGRect)rect {
 	// draw main content
-//	[self drawLineRegionsUsingCoreText];
 	[self drawContent];
 }
 

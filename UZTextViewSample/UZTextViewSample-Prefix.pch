@@ -14,6 +14,13 @@
 	#import <UIKit/UIKit.h>
 	#import <Foundation/Foundation.h>
 #endif
+#if TARGET_IPHONE_SIMULATOR
+#import <objc/objc-runtime.h>
+#else
+#import <objc/runtime.h>
+#endif
+
+
 #define _DEBUG
 
 #ifdef	_DEBUG
