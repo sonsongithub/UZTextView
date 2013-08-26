@@ -318,11 +318,11 @@ typedef enum _UZTextViewStatus {
 	int headForRendering = _head < _tail ? _head : _tail;
 	int tailForRendering = _head < _tail ? _tail : _head;
 	
-	if (_status == UZTextViewSelecting || _status == UZTextViewSelected || _status == UZTextViewEditingToSelection || _status == UZTextViewEditingFromSelection) {
+//	if (_status == UZTextViewSelecting || _status == UZTextViewSelected || _status == UZTextViewEditingToSelection || _status == UZTextViewEditingFromSelection) {
 		[self drawSelectedTextFragmentRectsFromIndex:headForRendering toIndex:tailForRendering];
-	}
-	if (_status == UZTextViewNoSelection)
-		[self drawSelectedLinkFragments];
+//	}
+//	if (_status == UZTextViewNoSelection)
+//		[self drawSelectedLinkFragments];
 }
 
 #pragma mark - UILongPressGesture
@@ -331,20 +331,24 @@ typedef enum _UZTextViewStatus {
 	DNSLogMethod
     if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
 		[self setSelectionWithPoint:[gestureRecognizer locationInView:self]];
+		[self setCursorHidden:YES];
+		[self setNeedsDisplay];
 		[_loupeView setVisible:YES animated:YES];
 		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
-		[self setCursorHidden:NO];
     }
 	else if (gestureRecognizer.state == UIGestureRecognizerStateChanged) {
+		[self setSelectionWithPoint:[gestureRecognizer locationInView:self]];
+		[self setCursorHidden:YES];
+		[self setNeedsDisplay];
 		[_loupeView setVisible:YES animated:YES];
 		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
     }
 	else if (gestureRecognizer.state == UIGestureRecognizerStateEnded || gestureRecognizer.state == UIGestureRecognizerStateCancelled || gestureRecognizer.state == UIGestureRecognizerStateFailed) {
+		[self setCursorHidden:NO];
+		[self setNeedsDisplay];
 		[_loupeView setVisible:NO animated:YES];
 		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
-		[self setCursorHidden:YES];
     }
-    [self setNeedsDisplay];
 }
 
 #pragma mark - Preparation
@@ -491,96 +495,68 @@ typedef enum _UZTextViewStatus {
 #pragma mark - Touch event
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-	return;
-	_isLocked = YES;
 	UITouch *touch = [touches anyObject];
 	[self setNeedsDisplay];
 	[[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
 	
-	if (_status == UZTextViewSelected) {
-		_headWhenBegan = _head;
-		_tailWhenBegan = _tail;
-		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge], [touch locationInView:self])) {
-			_isLocked = NO;
-			_status = UZTextViewEditingFromSelection;
-			[_loupeView setVisible:YES animated:YES];
-			[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
-			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
-				[self.delegate selectionDidBeginTextView:self];
-			[self setCursorHidden:NO];
-			return;
-		}
-		if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge], [touch locationInView:self])) {
-			_isLocked = NO;
-			_status = UZTextViewEditingToSelection;
-			[_loupeView setVisible:YES animated:YES];
-			[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
-			if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
-				[self.delegate selectionDidBeginTextView:self];
-			[self setCursorHidden:NO];
-			return;
-		}
+	_headWhenBegan = _head;
+	_tailWhenBegan = _tail;
+	if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge], [touch locationInView:self])) {
+		_status = UZTextViewEditingFromSelection;
+		[_loupeView setVisible:YES animated:YES];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
+		if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
+			[self.delegate selectionDidBeginTextView:self];
+		[self setCursorHidden:NO];
 	}
-	[self setCursorHidden:YES];
-	_status = UZTextViewNoSelection;
-	_locationWhenTapBegan = [touch locationInView:self];
+	if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge], [touch locationInView:self])) {
+		_status = UZTextViewEditingToSelection;
+		[_loupeView setVisible:YES animated:YES];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
+		if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
+			[self.delegate selectionDidBeginTextView:self];
+		[self setCursorHidden:NO];
+	}
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-	return;
 	UITouch *touch = [touches anyObject];
 	
-	CFIndex i = [self indexForPoint:[touch locationInView:self]];
-	NSLog(@"%ld", i);
-	
-	if (_isLocked)
-		return;
-	
-	if (_status == UZTextViewNoSelection) {
-		_head = [self indexForPoint:[touch locationInView:self]];
-		_tail = _head;
-		[_loupeView setVisible:YES animated:YES];
-		_status = UZTextViewSelecting;
-		if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
-			[self.delegate selectionDidBeginTextView:self];
-		[self setCursorHidden:YES];
-	}
-	if (_status == UZTextViewSelecting) {
-		_tail = [self indexForPoint:[touch locationInView:self]];
-		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
-	}
-	else if (_status == UZTextViewEditingFromSelection) {
+	if (_status == UZTextViewEditingFromSelection) {
+		int newHead = [self indexForPoint:[touch locationInView:self]];
+		if (newHead != kCFNotFound) {
+			if (newHead < _tail && newHead >= 0) {
+				_head = newHead;
+				[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
+			}
+		}
 		[self setCursorHidden:NO];
-		int prev_from = _head;
-		_head = [self indexForPoint:[touch locationInView:self]];
-		if (prev_from <= _tail && _head > _tail)
-			_tail = _tailWhenBegan + 1;
-		else if (prev_from >= _tail && _head < _tail)
-			_tail = _tailWhenBegan;
-		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 	}
 	else if (_status == UZTextViewEditingToSelection) {
+		int newTail = [self indexForPoint:[touch locationInView:self]];
 		[self setCursorHidden:NO];
-		int prev_end = _tail;
-		_tail = [self indexForPoint:[touch locationInView:self]];
-		if (prev_end >= _head && _head > _tail)
-			_head = _headWhenBegan - 1;
-		else if (prev_end <= _head && _head < _tail)
-			_head = _headWhenBegan;
-		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
+		if (newTail != kCFNotFound) {
+			if (newTail > _head && newTail <= self.attributedString.length) {
+				_tail = newTail;
+				[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
+			}
+		}
+		[self setCursorHidden:NO];
 	}
-	
+//
 	[self setNeedsDisplay];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	return;
+
 	
 	[_loupeView setVisible:NO animated:YES];
+	
 	
 	if ([self.delegate respondsToSelector:@selector(selectionDidEndTextView:)])
 		[self.delegate selectionDidEndTextView:self];
 	
+	return;
 	if (_status == UZTextViewNoSelection) {
 		// clicked
 		int tappedIndex = [self indexForPoint:_locationWhenTapBegan];

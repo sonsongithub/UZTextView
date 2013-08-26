@@ -214,8 +214,6 @@
 	cell.iconImageView.image = iconImage;
 	cell.profileIconURL = iconURL;
 	
-	cell.textView.selectedRange = NSMakeRange(0, 2);
-	
     return cell;
 }
 
