@@ -46,6 +46,8 @@ typedef enum _UZTextViewStatus {
 	NSUInteger						_headWhenBegan;
 	NSUInteger						_tailWhenBegan;
 	
+	CFIndex							_testCaret;
+	
 	UZTextViewStatus				_status;
 	BOOL							_isLocked;
 	
@@ -168,7 +170,7 @@ typedef enum _UZTextViewStatus {
 
 - (CGRect)fragmentRectForCursorAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side {
 	if (side == UZTextViewLeftEdge) {
-		NSArray *rects = [self fragmentRectsForGlyphFromIndex:index toIndex:index+1];
+		NSArray *rects = [self fragmentRectsForGlyphFromIndex:index toIndex:index];
 		CGRect rect = CGRectZero;
 		if ([rects count]) {
 			rect = [[rects objectAtIndex:0] CGRectValue];
@@ -177,12 +179,7 @@ typedef enum _UZTextViewStatus {
 		return CGRectInset(rect, -_cursorMargin, -_cursorMargin);
 	}
 	else {
-//		CGRect rect = [_layoutManager boundingRectForGlyphRange:NSMakeRange(index, 1) inTextContainer:_textContainer];
-//		if ([_layoutManager glyphAtIndex:index] != NEW_LINE_GLYPH)
-//			rect.origin.x += rect.size.width;
-//		rect.size.width = 0;
-		
-		NSArray *rects = [self fragmentRectsForGlyphFromIndex:index toIndex:index+1];
+		NSArray *rects = [self fragmentRectsForGlyphFromIndex:index toIndex:index];
 		CGRect rect = CGRectZero;
 		if ([rects count]) {
 			rect = [[rects objectAtIndex:0] CGRectValue];
@@ -203,7 +200,7 @@ typedef enum _UZTextViewStatus {
 	
 	NSMutableArray *fragmentRects = [NSMutableArray array];
 	
-	NSRange range = NSMakeRange(fromIndex, toIndex - fromIndex);
+	NSRange range = NSMakeRange(fromIndex, 1);
     
     NSMutableArray *lineLayouts = [[NSMutableArray alloc] initWithCapacity:lineCount];
     for (NSInteger index = 0; index < lineCount; index++) {
@@ -213,7 +210,9 @@ typedef enum _UZTextViewStatus {
 		CGRect rect = CGRectZero;
 		CFRange stringRange = CTLineGetStringRange(line);
 		NSRange intersectionRange = NSIntersectionRange(range, NSMakeRange(stringRange.location, stringRange.length));
-		
+		DNSLog(@"range= %d->%d", range.location, range.location + range.length);
+		DNSLog(@"stringRange= %d->%d", stringRange.location, stringRange.location + stringRange.length);
+		DNSLog(@"intersectionRange= %d->%d", intersectionRange.location, intersectionRange.location + intersectionRange.length);
 		CGFloat ascent;
         CGFloat descent;
         CGFloat leading;
@@ -291,36 +290,31 @@ typedef enum _UZTextViewStatus {
 	[[self.tintColor colorWithAlphaComponent:_tintAlpha] setFill];
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:fromIndex toIndex:toIndex];
-	for (NSValue *rectValue in fragmentRects)
+	for (NSValue *rectValue in fragmentRects) {
 		CGContextFillRect(context, [rectValue CGRectValue]);
+		DNSLog(@"%d=>%d", fromIndex, toIndex);
+		DNSLogRect([rectValue CGRectValue]);
+	}
 }
 
 - (void)drawContent {
 	CGContextRef context = UIGraphicsGetCurrentContext();
-
-	DNSLog(@"contentRect");
-	DNSLogRect(_contentRect);
-	DNSLog(@"frame");
-	DNSLogRect(self.frame);
 	
+	// draw text
 	CGContextSaveGState(context);
     CGContextTranslateCTM(context, 0, _contentRect.size.height);
     CGContextScaleCTM(context, 1.0, -1.0);
-	
 	CGContextSetTextMatrix(context, CGAffineTransformIdentity);
 	CTFrameDraw(_frame, context);
 	CGContextRestoreGState(context);
 	
-	// Drawing code
-//	[_textContainer setSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
-//	[_layoutManager drawGlyphsForGlyphRange:NSMakeRange(0, self.attributedString.length) atPoint:CGPointMake(0, 0)];
-	
 	int headForRendering = _head < _tail ? _head : _tail;
 	int tailForRendering = _head < _tail ? _tail : _head;
 	
-//	if (_status == UZTextViewSelecting || _status == UZTextViewSelected || _status == UZTextViewEditingToSelection || _status == UZTextViewEditingFromSelection) {
-		[self drawSelectedTextFragmentRectsFromIndex:headForRendering toIndex:tailForRendering];
-//	}
+	[self drawSelectedTextFragmentRectsFromIndex:_testCaret toIndex:_testCaret];
+	
+//	[self drawSelectedTextFragmentRectsFromIndex:headForRendering toIndex:tailForRendering];
+	
 //	if (_status == UZTextViewNoSelection)
 //		[self drawSelectedLinkFragments];
 }
@@ -359,8 +353,8 @@ typedef enum _UZTextViewStatus {
 	_tintAlpha = 0.5;
 	_durationToCancelSuperViewScrolling = 0.25;
 	
-	_longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(didChangeLongPressGesture:)];
-	[self addGestureRecognizer:_longPressGestureRecognizer];
+//	_longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(didChangeLongPressGesture:)];
+//	[self addGestureRecognizer:_longPressGestureRecognizer];
 	
 	// Initialization code
 	_loupeView = [[UZLoupeView alloc] initWithRadius:60];
@@ -385,16 +379,6 @@ typedef enum _UZTextViewStatus {
 	_leftCursor.hidden = YES;
 	_rightCursor.hidden = YES;
 	_locationWhenTapBegan = CGPointZero;
-}
-
-#pragma mark - NSTimer callbacks
-
-- (void)tapDurationTimerFired:(NSTimer*)timer {
-	_isLocked = NO;
-	[_loupeView setVisible:YES animated:YES];
-	[_loupeView updateAtLocation:_locationWhenTapBegan textView:self];
-	if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
-		[self.delegate selectionDidBeginTextView:self];
 }
 
 #pragma mark - for UIMenuController
@@ -472,17 +456,20 @@ typedef enum _UZTextViewStatus {
                                      ceilf(ascent + descent));
 		lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
 		
-		if (index > 0) {
-			CGRect rectBetweenLines = CGRectZero;
-			rectBetweenLines.origin.x = previousLineRect.origin.x;
-			rectBetweenLines.origin.y = previousLineRect.origin.y + previousLineRect.size.height;
-			rectBetweenLines.size.width = previousLineRect.size.width;
-			rectBetweenLines.size.height = lineRect.origin.y - rectBetweenLines.origin.y;
-			if (CGRectContainsPoint(rectBetweenLines, point)) {
-				return lineRange.location;
-			}
-		}
+//		if (index > 0) {
+//			CGRect rectBetweenLines = CGRectZero;
+//			rectBetweenLines.origin.x = previousLineRect.origin.x;
+//			rectBetweenLines.origin.y = previousLineRect.origin.y + previousLineRect.size.height;
+//			rectBetweenLines.size.width = previousLineRect.size.width;
+//			rectBetweenLines.size.height = lineRect.origin.y - rectBetweenLines.origin.y;
+//			if (CGRectContainsPoint(rectBetweenLines, point)) {
+//				return lineRange.location;
+//			}
+//		}
 		previousLineRect = lineRect;
+		DNSLog(@"Test");
+		DNSLogPoint(point);
+		DNSLogRect(lineRect);
 		if (CGRectContainsPoint(lineRect, point)) {
 			CFIndex result = CTLineGetStringIndexForPosition(line, point);
 			if (result != kCFNotFound)
@@ -498,6 +485,8 @@ typedef enum _UZTextViewStatus {
 	UITouch *touch = [touches anyObject];
 	[self setNeedsDisplay];
 	[[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
+	
+	return;
 	
 	_headWhenBegan = _head;
 	_tailWhenBegan = _tail;
@@ -521,6 +510,12 @@ typedef enum _UZTextViewStatus {
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [touches anyObject];
+	
+	CFIndex i = [self indexForPoint:[touch locationInView:self]];
+	if (i != kCFNotFound)
+		_testCaret = i;
+	
+	DNSLog(@"moved=%ld/%d", _testCaret, [self.attributedString length]);
 	
 	if (_status == UZTextViewEditingFromSelection) {
 		int newHead = [self indexForPoint:[touch locationInView:self]];
