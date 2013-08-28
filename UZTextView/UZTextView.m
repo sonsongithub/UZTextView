@@ -37,6 +37,10 @@ typedef enum _UZTextViewStatus {
 	CGRect							_contentRect;
 	CFStringTokenizerRef			_tokenizer;
 	
+	// Tap link attribute
+	NSRange							_tappedLinkRange;
+	id								_tappedLinkAttribute;
+	
 	// Tap
 	UILongPressGestureRecognizer	*_longPressGestureRecognizer;
 	
@@ -304,19 +308,24 @@ typedef enum _UZTextViewStatus {
 	// draw selected strings
 	if (_status > 0)
 		[self drawSelectedTextFragmentRectsFromIndex:_head toIndex:_tail];
+	
+	// draw tapped link range background
+	if (_tappedLinkRange.length > 0)
+		[self drawSelectedTextFragmentRectsFromIndex:_tappedLinkRange.location toIndex:_tappedLinkRange.location + _tappedLinkRange.length - 1];
 }
 
 #pragma mark - UILongPressGesture
 
 - (void)didChangeLongPressGesture:(UILongPressGestureRecognizer *)gestureRecognizer {
 	DNSLogMethod
+	DNSLog(@"%d", gestureRecognizer.state);
     if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
 		[self setSelectionWithPoint:[gestureRecognizer locationInView:self]];
+		_status = UZTextViewSelected;
 		[self setCursorHidden:YES];
 		[self setNeedsDisplay];
 		[_loupeView setVisible:YES animated:YES];
 		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
-		_status = UZTextViewSelected;
     }
 	else if (gestureRecognizer.state == UIGestureRecognizerStateChanged) {
 		[self setSelectionWithPoint:[gestureRecognizer locationInView:self]];
@@ -342,6 +351,7 @@ typedef enum _UZTextViewStatus {
 	_durationToCancelSuperViewScrolling = 0.25;
 	
 	_longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(didChangeLongPressGesture:)];
+	_longPressGestureRecognizer.minimumPressDuration = 0.75;
 	[self addGestureRecognizer:_longPressGestureRecognizer];
 	
 	// Initialization code
@@ -389,6 +399,29 @@ typedef enum _UZTextViewStatus {
 
 #pragma mark - CoreText
 
+- (NSRange)rangeOfLinkStringAtPoint:(CGPoint)point {
+	__block NSRange resultRange = NSMakeRange(0, 0);
+	
+	_tappedLinkAttribute = nil;
+	
+    CFIndex index = [self indexForPoint:point];
+    if (index == kCFNotFound)
+        return resultRange;
+    
+	NSUInteger length = self.attributedString.length;
+    [self.attributedString enumerateAttribute:NSLinkAttributeName
+                                      inRange:NSMakeRange(0, length)
+                                      options:0
+                                   usingBlock:^(id value, NSRange range, BOOL *stop)
+     {
+         if (value && NSLocationInRange(index, range)) {
+			 resultRange = range;
+			 _tappedLinkAttribute = value;
+         }
+     }];
+	return resultRange;
+}
+
 - (void)setSelectionWithPoint:(CGPoint)point {
     CFIndex index = [self indexForPoint:point];
     if (index == kCFNotFound)
@@ -413,6 +446,7 @@ typedef enum _UZTextViewStatus {
         if (first != kCFNotFound && first <= index && index <= second) {
 			_head = first;
 			_tail = second;
+			DNSLog(@"%d->%d", _head, _tail);
         }
         
         tokenType = CFStringTokenizerAdvanceToNextToken(_tokenizer);
@@ -457,6 +491,7 @@ typedef enum _UZTextViewStatus {
 #pragma mark - Touch event
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	DNSLogMethod
 	UITouch *touch = [touches anyObject];
 	[self setNeedsDisplay];
 	[[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
@@ -471,7 +506,7 @@ typedef enum _UZTextViewStatus {
 			[self.delegate selectionDidBeginTextView:self];
 		[self setCursorHidden:NO];
 	}
-	if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge], [touch locationInView:self])) {
+	else if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge], [touch locationInView:self])) {
 		_status = UZTextViewEditingToSelection;
 		[_loupeView setVisible:YES animated:YES];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
@@ -479,9 +514,14 @@ typedef enum _UZTextViewStatus {
 			[self.delegate selectionDidBeginTextView:self];
 		[self setCursorHidden:NO];
 	}
+	else {
+		_tappedLinkRange = [self rangeOfLinkStringAtPoint:[touch locationInView:self]];
+		[self setNeedsDisplay];
+	}
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+	DNSLogMethod
 	UITouch *touch = [touches anyObject];
 	if (_status == UZTextViewEditingFromSelection) {
 		int newHead = [self indexForPoint:[touch locationInView:self]];
@@ -504,12 +544,25 @@ typedef enum _UZTextViewStatus {
 		}
 		[self setCursorHidden:NO];
 	}
+	_tappedLinkRange = NSMakeRange(0, 0);
+	_tappedLinkAttribute = nil;
 	[self setNeedsDisplay];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-
-	[_loupeView setVisible:NO animated:YES];
+	DNSLogMethod
+	if (_tappedLinkAttribute) {
+		DNSLog(@"%@", _tappedLinkAttribute);
+	}
+	
+	_tappedLinkRange = NSMakeRange(0, 0);
+	
+	if (_status == UZTextViewEditingFromSelection) {
+		[_loupeView setVisible:NO animated:YES];
+	}
+	else if (_status == UZTextViewEditingToSelection) {
+		[_loupeView setVisible:NO animated:YES];
+	}
 	
 	if (_status > 0)
 		_status = UZTextViewSelected;
