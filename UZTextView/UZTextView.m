@@ -19,8 +19,8 @@
 #define NSLogRange(p) NSLog(@"%d,%d",p.location, p.length)
 
 typedef enum _UZTextViewGlyphEdgeType {
-	UZTextViewLeftEdge		= 0,
-	UZTextViewRightEdge		= 1
+	UZTextViewLeftEdge				= 0,
+	UZTextViewRightEdge				= 1
 }UZTextViewGlyphEdgeType;
 
 typedef enum _UZTextViewStatus {
@@ -43,6 +43,7 @@ typedef enum _UZTextViewStatus {
 	
 	// Tap
 	UILongPressGestureRecognizer	*_longPressGestureRecognizer;
+	CFTimeInterval					_minimumPressDuration;
 	
 	// parameter
 	NSUInteger						_head;
@@ -164,6 +165,15 @@ typedef enum _UZTextViewStatus {
 	_status = UZTextViewSelected;
 	[self setCursorHidden:NO];
 	[self setNeedsDisplay];
+}
+
+- (void)setMinimumPressDuration:(CFTimeInterval)minimumPressDuration {
+	_minimumPressDuration = minimumPressDuration;
+	_longPressGestureRecognizer.minimumPressDuration = minimumPressDuration;
+}
+
+- (CFTimeInterval)minimumPressDuration {
+	return _longPressGestureRecognizer.minimumPressDuration;
 }
 
 - (NSRange)selectedRange {

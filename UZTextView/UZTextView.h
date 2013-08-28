@@ -29,12 +29,6 @@
  * \param textView The text view in which selecting ended.
  */
 - (void)selectionDidEndTextView:(UZTextView*)textView;
-
-/**
- * Tells the delegate that selecting of the range of textview has been changed.
- * \param textView The text view whose selected range changed.
- */
-- (void)selectionRangeDidChangeTextView:(UZTextView*)textView;
 @end
 
 @interface UZTextView : UIView
@@ -61,16 +55,9 @@
 @property (nonatomic, assign) NSRange selectedRange;
 
 /**
- * The current rect of circumscribed rectangle which includes selected string. 
- *
- * This rectangle should be used in order to make UIMenuController visible.
+ * The duration (in seconds) of a wait before text selection will start.
  */
-@property (nonatomic, assign) CGRect selectedCircumscribedRectangle;
-
-/**
- * The duration (in seconds) of a wait before superview's scrolling is cancelled.
- */
-@property (nonatomic, assign) float durationToCancelSuperViewScrolling;
+@property (nonatomic, assign) CFTimeInterval minimumPressDuration;
 
 /**
  * Returns the bounding size required to draw the string.
