@@ -29,6 +29,7 @@
 #define DNSLogPoint(p)	NSLog(@"%f,%f", p.x, p.y);
 #define DNSLogSize(p)	NSLog(@"%f,%f", p.width, p.height);
 #define DNSLogRect(p)	NSLog(@"%f,%f %f,%f", p.origin.x, p.origin.y, p.size.width, p.size.height);
+#define DNSLogRange(p)	NSLog(@"%d=>%d", p.location, p.location + p.length - 1);
 #define DNSLogMainThread if ([NSThread isMainThread]){NSLog(@"This is the main thread.");}else{NSLog(@"This is a sub thread.");}
 #else
 #define DNSLog(...)		{}
@@ -36,6 +37,7 @@
 #define DNSLogPoint(p)	{}
 #define DNSLogSize(p)	{}
 #define DNSLogRect(p)	{}
+#define DNSLogRange(p)	{}
 #define DNSLogMainThread {}
 #endif
 
