@@ -349,6 +349,9 @@ typedef enum _UZTextViewStatus {
 		[self setNeedsDisplay];
 		[_loupeView setVisible:NO animated:YES];
 		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
+		[self becomeFirstResponder];
+		[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_head toIndex:_tail] inView:self];
+		[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
     }
 }
 
@@ -563,15 +566,24 @@ typedef enum _UZTextViewStatus {
 	DNSLogMethod
 	if (_tappedLinkAttribute) {
 		DNSLog(@"%@", _tappedLinkAttribute);
+		if ([self.delegate respondsToSelector:@selector(textView:didClickLinkAttribute:)]) {
+			[self.delegate textView:self didClickLinkAttribute:_tappedLinkAttribute];
+		}
 	}
 	
 	_tappedLinkRange = NSMakeRange(0, 0);
 	
 	if (_status == UZTextViewEditingFromSelection) {
 		[_loupeView setVisible:NO animated:YES];
+		[self becomeFirstResponder];
+		[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_head toIndex:_tail] inView:self];
+		[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
 	}
 	else if (_status == UZTextViewEditingToSelection) {
 		[_loupeView setVisible:NO animated:YES];
+		[self becomeFirstResponder];
+		[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_head toIndex:_tail] inView:self];
+		[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
 	}
 	
 	if (_status > 0)
