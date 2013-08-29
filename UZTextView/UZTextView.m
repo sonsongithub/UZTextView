@@ -144,6 +144,9 @@ typedef enum _UZTextViewStatus {
 	_status = UZTextViewSelected;
 	[self setCursorHidden:NO];
 	[self setNeedsDisplay];
+	
+	[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_head toIndex:_tail] inView:self];
+	[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
 }
 
 - (void)setMinimumPressDuration:(CFTimeInterval)minimumPressDuration {
@@ -198,7 +201,7 @@ typedef enum _UZTextViewStatus {
 	
 	if (range.length <= 0)
 		range.length = 1;
-    
+	
     for (NSInteger index = 0; index < lineCount; index++) {
         CGPoint origin = lineOrigins[index];
         CTLineRef line = CFArrayGetValueAtIndex(lines, index);
@@ -384,10 +387,15 @@ typedef enum _UZTextViewStatus {
 	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:self.selectedRange];
 }
 
+- (void)selectAll:(id)sender {
+	[self setSelectedRange:NSMakeRange(0, self.attributedString.length)];
+}
+
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
-	if (action == @selector(copy:)) {
+	if (action == @selector(copy:))
 		return YES;
-	}
+	if (action == @selector(selectAll:))
+		return YES;
 	return NO;
 }
 
@@ -461,7 +469,13 @@ typedef enum _UZTextViewStatus {
                                      width,
                                      ceilf(ascent + descent));
 		lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
-		previousLineRect = lineRect;		if (CGRectContainsPoint(lineRect, point)) {
+
+		CGRect temp = lineRect;
+		lineRect.size.height += (lineRect.origin.y - previousLineRect.origin.y - previousLineRect.size.height);
+		lineRect.origin.y = previousLineRect.origin.y + previousLineRect.size.height;
+		previousLineRect = temp;
+		
+		if (CGRectContainsPoint(lineRect, point)) {
 			CFIndex result = CTLineGetStringIndexForPosition(line, point);
 			if (result != kCFNotFound && NSLocationInRange(result, lineRange))
 				return result;
@@ -473,7 +487,6 @@ typedef enum _UZTextViewStatus {
 #pragma mark - Touch event
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-	DNSLogMethod
 	UITouch *touch = [touches anyObject];
 	[self setNeedsDisplay];
 	[[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
@@ -503,25 +516,23 @@ typedef enum _UZTextViewStatus {
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-	DNSLogMethod
 	UITouch *touch = [touches anyObject];
 	if (_status == UZTextViewEditingFromSelection) {
 		int newHead = [self indexForPoint:[touch locationInView:self]];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 		if (newHead != kCFNotFound) {
 			if (newHead <= _tail) {
 				_head = newHead;
-				[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 			}
 		}
 		[self setCursorHidden:NO];
 	}
 	else if (_status == UZTextViewEditingToSelection) {
 		int newTail = [self indexForPoint:[touch locationInView:self]];
-		[self setCursorHidden:NO];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 		if (newTail != kCFNotFound) {
 			if (newTail >= _head) {
 				_tail = newTail;
-				[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 			}
 		}
 		[self setCursorHidden:NO];
@@ -532,7 +543,6 @@ typedef enum _UZTextViewStatus {
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	DNSLogMethod
 	if (_tappedLinkAttribute[NSLinkAttributeName] && _tappedLinkRange.length) {
 		DNSLog(@"%@", _tappedLinkAttribute);
 		if ([self.delegate respondsToSelector:@selector(textView:didClickLinkAttribute:)]) {
