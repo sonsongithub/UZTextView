@@ -114,7 +114,7 @@
 	}
 	for (Tweet *tweet in _tweets) {
 		float height = [UZTextView sizeForAttributedString:tweet.attributedString withBoundWidth:width].height + 36;
-		tweet.height = height < 58 ? 58 : height;
+		tweet.height = height;
 	}
 }
 
@@ -213,8 +213,6 @@
                           }];
 	cell.iconImageView.image = iconImage;
 	cell.profileIconURL = iconURL;
-	
-	cell.textView.selectedRange = NSMakeRange(0, 2);
 	
     return cell;
 }

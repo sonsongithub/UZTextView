@@ -55,9 +55,9 @@
 @property (nonatomic, assign) NSRange selectedRange;
 
 /**
- * The duration (in seconds) of a wait before superview's scrolling is cancelled.
+ * The duration (in seconds) of a wait before text selection will start.
  */
-@property (nonatomic, assign) float durationToCancelSuperViewScrolling;
+@property (nonatomic, assign) CFTimeInterval minimumPressDuration;
 
 /**
  * Returns the bounding size required to draw the string.
