@@ -17,6 +17,7 @@
 
 #define NSLogRect(p) NSLog(@"%f,%f,%f,%f",p.origin.x, p.origin.y, p.size.width, p.size.height)
 #define NSLogRange(p) NSLog(@"%d,%d",p.location, p.length)
+#define SAFE_CFRELEASE(p) if(p){CFRelease(p);p=NULL;}
 
 typedef enum _UZTextViewGlyphEdgeType {
 	UZTextViewLeftEdge				= 0,
@@ -73,24 +74,6 @@ typedef enum _UZTextViewStatus {
 	
 @implementation UZTextView
 
-- (void)releaseCoreText {
-	if (_frame) {
-		CFRelease(_frame);
-		_frame = nil;
-	}
-	if (_framesetter) {
-		CFRelease(_framesetter);
-		_framesetter = nil;
-	}
-}
-
-- (void)releaseTokenizer {
-	if (_tokenizer) {
-		CFRelease(_tokenizer);
-		_tokenizer = NULL;
-	}
-}
-
 #pragma mark - Class method to estimate attributed string size
 
 + (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width {
@@ -115,21 +98,11 @@ typedef enum _UZTextViewStatus {
 }
 
 - (void)updateLayout {
-	
-}
-
-- (void)setAttributedString:(NSAttributedString *)attributedString {
-	[self prepareForReuse];
-	
-	_attributedString = attributedString;
-	
 	// CoreText
-	if (_framesetter)
-        CFRelease(_framesetter);
+	SAFE_CFRELEASE(_framesetter);
+	SAFE_CFRELEASE(_frame);
 	
-	[self releaseTokenizer];
-    
-    CFAttributedStringRef p = (__bridge CFAttributedStringRef)attributedString;
+    CFAttributedStringRef p = (__bridge CFAttributedStringRef)_attributedString;
     if (p) {
         _framesetter = CTFramesetterCreateWithAttributedString(p);
     }
@@ -137,9 +110,6 @@ typedef enum _UZTextViewStatus {
         p = CFAttributedStringCreate(NULL, CFSTR(""), NULL);
         _framesetter = CTFramesetterCreateWithAttributedString(p);
         CFRelease(p);
-    }
-	if (_frame) {
-        CFRelease(_frame);
     }
     
 	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
@@ -154,8 +124,13 @@ typedef enum _UZTextViewStatus {
 	CGPathAddRect(path, NULL, _contentRect);
 	_frame = CTFramesetterCreateFrame(_framesetter, CFRangeMake(0, 0), path, NULL);
 	CGPathRelease(path);
+}
+
+- (void)setAttributedString:(NSAttributedString *)attributedString {
+	[self prepareForReuse];
+	_attributedString = attributedString;
 	
-	[self setNeedsLayout];
+	[self updateLayout];
 	[self setNeedsDisplay];
 }
 
@@ -394,6 +369,8 @@ typedef enum _UZTextViewStatus {
 	_leftCursor.hidden = YES;
 	_rightCursor.hidden = YES;
 	_locationWhenTapBegan = CGPointZero;
+	
+	SAFE_CFRELEASE(_tokenizer);
 }
 
 #pragma mark - for UIMenuController
@@ -455,9 +432,7 @@ typedef enum _UZTextViewStatus {
         if (first != kCFNotFound && first <= index && index <= second) {
 			_head = first;
 			_tail = second;
-			DNSLog(@"%d->%d", _head, _tail);
         }
-        
         tokenType = CFStringTokenizerAdvanceToNextToken(_tokenizer);
     }
 }
@@ -488,8 +463,6 @@ typedef enum _UZTextViewStatus {
 		lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
 		previousLineRect = lineRect;		if (CGRectContainsPoint(lineRect, point)) {
 			CFIndex result = CTLineGetStringIndexForPosition(line, point);
-			DNSLog(@"candidate=%ld", result);
-			DNSLogRange(lineRange);
 			if (result != kCFNotFound && NSLocationInRange(result, lineRange))
 				return result;
 		}
@@ -595,6 +568,21 @@ typedef enum _UZTextViewStatus {
 	[self touchesEnded:touches withEvent:event];
 }
 
+#pragma mark - Setter and getter
+
+- (void)setFrame:(CGRect)frame {
+	[super setFrame:frame];
+	[self updateLayout];
+	[self setNeedsDisplay];
+}
+
+
+- (void)setBounds:(CGRect)bounds {
+	[super setBounds:bounds];
+	[self updateLayout];
+	[self setNeedsDisplay];
+}
+
 #pragma mark - Override
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
@@ -615,10 +603,6 @@ typedef enum _UZTextViewStatus {
 		[self setNeedsDisplay];
     }
     return nil;
-}
-
-- (CGSize)contentSize {
-	return _contentRect.size;
 }
 
 - (void)layoutSubviews {
