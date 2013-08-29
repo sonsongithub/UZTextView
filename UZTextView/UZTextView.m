@@ -114,6 +114,10 @@ typedef enum _UZTextViewStatus {
 	_rightCursor.hidden = hidden;
 }
 
+- (void)updateLayout {
+	
+}
+
 - (void)setAttributedString:(NSAttributedString *)attributedString {
 	[self prepareForReuse];
 	
@@ -141,7 +145,7 @@ typedef enum _UZTextViewStatus {
 	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
                                                                     CFRangeMake(0, _attributedString.length),
                                                                     NULL,
-                                                                    CGSizeMake(226, CGFLOAT_MAX),
+                                                                    CGSizeMake(self.frame.size.width, CGFLOAT_MAX),
                                                                     NULL);
 	_contentRect = CGRectZero;
 	_contentRect.size = frameSize;
@@ -420,18 +424,10 @@ typedef enum _UZTextViewStatus {
     CFIndex index = [self indexForPoint:point];
     if (index == kCFNotFound)
         return resultRange;
-    
-	NSUInteger length = self.attributedString.length;
-    [self.attributedString enumerateAttribute:NSLinkAttributeName
-                                      inRange:NSMakeRange(0, length)
-                                      options:0
-                                   usingBlock:^(id value, NSRange range, BOOL *stop)
-     {
-         if (value && NSLocationInRange(index, range)) {
-			 resultRange = range;
-			 _tappedLinkAttribute = value;
-         }
-     }];
+	
+	_tappedLinkAttribute = [self.attributedString attributesAtIndex:index effectiveRange:&resultRange];
+	if (!_tappedLinkAttribute[NSLinkAttributeName])
+		resultRange = NSMakeRange(0, 0);
 	return resultRange;
 }
 
@@ -564,7 +560,7 @@ typedef enum _UZTextViewStatus {
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
 	DNSLogMethod
-	if (_tappedLinkAttribute) {
+	if (_tappedLinkAttribute[NSLinkAttributeName] && _tappedLinkRange.length) {
 		DNSLog(@"%@", _tappedLinkAttribute);
 		if ([self.delegate respondsToSelector:@selector(textView:didClickLinkAttribute:)]) {
 			[self.delegate textView:self didClickLinkAttribute:_tappedLinkAttribute];
