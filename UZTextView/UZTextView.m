@@ -505,6 +505,14 @@ typedef enum _UZTextViewStatus {
 			if (result != kCFNotFound && NSLocationInRange(result, lineRange))
 				return result;
 		}
+		
+		CGRect marginArea = lineRect;
+		marginArea.origin.x = _contentRect.origin.x;
+		marginArea.size.width = _contentRect.size.width;
+		
+		if (CGRectContainsPoint(marginArea, point)) {
+				return lineRange.location + lineRange.length - 1;
+		}
     }
 	return kCFNotFound;
 }
@@ -578,30 +586,33 @@ typedef enum _UZTextViewStatus {
 			if ([self.delegate respondsToSelector:@selector(textView:didClickLinkAttribute:)]) {
 				[self.delegate textView:self didClickLinkAttribute:_tappedLinkAttribute];
 			}
+			return;
 		}
 	}
-	
-	_tappedLinkRange = NSMakeRange(0, 0);
 	
 	if (_status == UZTextViewEditingFromSelection) {
 		[_loupeView setVisible:NO animated:YES];
 		[self becomeFirstResponder];
 		[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_head toIndex:_tail] inView:self];
 		[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
+		_status = UZTextViewSelected;
 	}
 	else if (_status == UZTextViewEditingToSelection) {
 		[_loupeView setVisible:NO animated:YES];
 		[self becomeFirstResponder];
 		[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_head toIndex:_tail] inView:self];
 		[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
+		_status = UZTextViewSelected;
 	}
 	
-	if (_status > 0)
-		_status = UZTextViewSelected;
-	
+	// for unlocking parent view's scrolling
 	if ([self.delegate respondsToSelector:@selector(selectionDidEndTextView:)])
 		[self.delegate selectionDidEndTextView:self];
+	
+	// clear tapping location
 	_locationWhenTapBegan = CGPointZero;
+	_tappedLinkRange = NSMakeRange(0, 0);
+	
 	[self setNeedsDisplay];
 }
 
