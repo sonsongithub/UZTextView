@@ -7,7 +7,8 @@ cp ./UZTextView/UZTextView.h ./Product/
 
 if [ -x /usr/local/bin/appledoc ]; then
 	echo "appledoc is found and executable, will start to create documentation."
-	appledoc --project-name UZTextView --project-company sonson --create-html --no-create-docset --output ./Product/ ./UZTextView/
+	appledoc --project-name UZTextView --project-company sonson --create-html --no-create-docset --no-repeat-first-par --output ./Product/ ./UZTextView/
+	rm -rf ./Product/document
 	mv ./Product/html ./Product/document
 else
 	echo "appledoc is not found"

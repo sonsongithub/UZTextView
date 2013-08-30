@@ -20,12 +20,16 @@
 
 /**
  * Tells the delegate that selecting of the specified text view has begun.
+ *
+ * You can use this delegate method in order to make its parent view disabled scrolling.
  * \param textView The text view in which selecting began.
  */
 - (void)selectionDidBeginTextView:(UZTextView*)textView;
 
 /**
  * Tells the delegate that selecting of the specified text view has ended.
+ *
+ * You can use this delegate method in order to make its parent view enabled scrolling.
  * \param textView The text view in which selecting ended.
  */
 - (void)selectionDidEndTextView:(UZTextView*)textView;
@@ -35,6 +39,7 @@
 /**
  * Receiver's delegate.
  * The delegate is sent messages when contents are selected and tapped.
+ *
  * See UZTextViewDelegate Protocol Reference for the optional methods this delegate may implement.
  */
 @property (nonatomic, assign) id <UZTextViewDelegate> delegate;
