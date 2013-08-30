@@ -31,6 +31,31 @@ typedef enum _UZTextViewStatus {
 	UZTextViewEditingToSelection	= 3,
 }UZTextViewStatus;
 
+@interface UIGestureRecognizer (UZTextView)
+- (NSString*)stateDescription;
+@end
+
+@implementation UIGestureRecognizer (UZTextView)
+
+- (NSString*)stateDescription {
+	if (self.state == UIGestureRecognizerStatePossible)
+		return @"UIGestureRecognizerStatePossible";
+	if (self.state == UIGestureRecognizerStateBegan)
+		return @"UIGestureRecognizerStateBegan";
+	if (self.state == UIGestureRecognizerStateChanged)
+		return @"UIGestureRecognizerStateChanged";
+	if (self.state == UIGestureRecognizerStateCancelled)
+		return @"UIGestureRecognizerStateCancelled";
+	if (self.state == UIGestureRecognizerStateFailed)
+		return @"UIGestureRecognizerStateFailed";
+	if (self.state == UIGestureRecognizerStateRecognized)
+		return @"UIGestureRecognizerStateRecognized";
+	
+	return @"Unknown state";
+}
+
+@end
+
 @interface UZTextView() {
 	// CoreText
 	CTFramesetterRef				_framesetter;
@@ -310,7 +335,7 @@ typedef enum _UZTextViewStatus {
 
 - (void)didChangeLongPressGesture:(UILongPressGestureRecognizer *)gestureRecognizer {
 	DNSLogMethod
-	DNSLog(@"%d", gestureRecognizer.state);
+	DNSLog(@"%@", [_longPressGestureRecognizer stateDescription]);
     if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
 		[self setSelectionWithPoint:[gestureRecognizer locationInView:self]];
 		_status = UZTextViewSelected;
@@ -543,10 +568,16 @@ typedef enum _UZTextViewStatus {
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	if (_tappedLinkAttribute[NSLinkAttributeName] && _tappedLinkRange.length) {
-		DNSLog(@"%@", _tappedLinkAttribute);
-		if ([self.delegate respondsToSelector:@selector(textView:didClickLinkAttribute:)]) {
-			[self.delegate textView:self didClickLinkAttribute:_tappedLinkAttribute];
+	DNSLogMethod
+	
+	DNSLog(@"%@", [_longPressGestureRecognizer stateDescription]);
+	
+	if (_longPressGestureRecognizer.state == UIGestureRecognizerStatePossible) {
+		if (_tappedLinkAttribute[NSLinkAttributeName] && _tappedLinkRange.length) {
+			DNSLog(@"%@", _tappedLinkAttribute);
+			if ([self.delegate respondsToSelector:@selector(textView:didClickLinkAttribute:)]) {
+				[self.delegate textView:self didClickLinkAttribute:_tappedLinkAttribute];
+			}
 		}
 	}
 	
