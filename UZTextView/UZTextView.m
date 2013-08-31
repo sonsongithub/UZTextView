@@ -50,7 +50,6 @@ typedef enum _UZTextViewStatus {
 		return @"UIGestureRecognizerStateFailed";
 	if (self.state == UIGestureRecognizerStateRecognized)
 		return @"UIGestureRecognizerStateRecognized";
-	
 	return @"Unknown state";
 }
 
@@ -595,6 +594,9 @@ typedef enum _UZTextViewStatus {
 			if ([self.delegate respondsToSelector:@selector(textView:didClickLinkAttribute:)]) {
 				[self.delegate textView:self didClickLinkAttribute:_tappedLinkAttribute];
 			}
+			_tappedLinkRange = NSMakeRange(0, 0);
+			_tappedLinkAttribute = nil;
+			[self setNeedsDisplay];
 			return;
 		}
 	}
