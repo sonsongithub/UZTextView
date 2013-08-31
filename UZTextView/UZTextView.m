@@ -449,22 +449,31 @@ typedef enum _UZTextViewStatus {
     CFStringRef string = (__bridge CFStringRef)self.attributedString.string;
     CFRange range = CFRangeMake(0, CFStringGetLength(string));
   
+
 	if (_tokenizer == NULL) {
 		_tokenizer = CFStringTokenizerCreate(
-                                                             NULL,
-                                                             string,
-                                                             range,
-                                                             kCFStringTokenizerUnitWordBoundary,
-                                                             NULL);
+															 NULL,
+															 string,
+															 range,
+															 kCFStringTokenizerUnitWordBoundary,
+															 NULL);
 	}
     CFStringTokenizerTokenType tokenType = CFStringTokenizerGoToTokenAtIndex(_tokenizer, 0);
     while (tokenType != kCFStringTokenizerTokenNone || range.location + range.length < CFStringGetLength(string)) {
         range = CFStringTokenizerGetCurrentTokenRange(_tokenizer);
+		
+		if (range.location == kCFNotFound) {
+			_head = index;
+			_tail = index;
+			break;
+		}
+		
         CFIndex first = range.location;
         CFIndex second = range.location + range.length - 1;
         if (first != kCFNotFound && first <= index && index <= second) {
 			_head = first;
 			_tail = second;
+			break;
         }
         tokenType = CFStringTokenizerAdvanceToNextToken(_tokenizer);
     }
