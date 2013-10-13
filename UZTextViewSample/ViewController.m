@@ -16,6 +16,12 @@
 
 @implementation ViewController
 
+- (void)selectionDidBeginTextView:(UZTextView*)textView {
+}
+
+- (void)selectionDidEndTextView:(UZTextView*)textView {
+}
+
 - (void)viewDidAppear:(BOOL)animated {
 	[super viewDidAppear:animated];
 	NSString *string = @"hoge\rhoge\rhttp://www.yahoo.co.jp\r\rあれから吉田悠一012345678901234567890123456789012345678901234567890123456789hoge>>190";
@@ -26,6 +32,16 @@
 	[attributedString addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleNone) range:NSMakeRange(10, 22)];
 	
 	self.textView.attributedString = attributedString;
+	self.textView.delegate = self;
+}
+
+- (void)textView:(UZTextView *)textview didClickLinkAttribute:(id)value {
+	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Clicked"
+														message:[value objectForKey:@"NSLink"]
+													   delegate:nil
+											  cancelButtonTitle:nil
+											  otherButtonTitles:@"OK", nil];
+	[alertView show];
 }
 
 @end

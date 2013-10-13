@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "14F8866717C2BB02006F5514"
-               BuildableName = "libUZTextView.a"
-               BlueprintName = "UZTextView"
+               BlueprintIdentifier = "14F8869417C2BB4A006F5514"
+               BuildableName = "UZTextViewSample.app"
+               BlueprintName = "UZTextViewSample"
                ReferencedContainer = "container:UZTextView.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -29,16 +29,34 @@
       buildConfiguration = "Debug">
       <Testables>
       </Testables>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "14F8869417C2BB4A006F5514"
+            BuildableName = "UZTextViewSample.app"
+            BlueprintName = "UZTextViewSample"
+            ReferencedContainer = "container:UZTextView.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </TestAction>
    <LaunchAction
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
-      buildConfiguration = "Debug"
+      buildConfiguration = "Release"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">
+      <BuildableProductRunnable>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "14F8869417C2BB4A006F5514"
+            BuildableName = "UZTextViewSample.app"
+            BlueprintName = "UZTextViewSample"
+            ReferencedContainer = "container:UZTextView.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -48,6 +66,15 @@
       useCustomWorkingDirectory = "NO"
       buildConfiguration = "Release"
       debugDocumentVersioning = "YES">
+      <BuildableProductRunnable>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "14F8869417C2BB4A006F5514"
+            BuildableName = "UZTextViewSample.app"
+            BlueprintName = "UZTextViewSample"
+            ReferencedContainer = "container:UZTextView.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
