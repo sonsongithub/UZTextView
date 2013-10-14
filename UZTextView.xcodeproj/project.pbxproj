@@ -194,6 +194,7 @@
 				14F8866417C2BB02006F5514 /* Sources */,
 				14F8866517C2BB02006F5514 /* Frameworks */,
 				14F8866617C2BB02006F5514 /* CopyFiles */,
+				14CFB167180C9AF200212334 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -261,6 +262,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		14CFB167180C9AF200212334 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ -x /usr/local/bin/appledoc ]; then\necho \"appledoc is found and executable, will start to create documentation.\"\n/usr/local/bin/appledoc --project-name UZTextView --project-company sonson --create-html --no-create-docset --no-repeat-first-par --output $SRCROOT ./UZTextView/\nelse\necho \"appledoc is not found\"\nfi";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		14F8866417C2BB02006F5514 /* Sources */ = {
