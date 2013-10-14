@@ -65,6 +65,11 @@
 @property (nonatomic, assign) CFTimeInterval minimumPressDuration;
 
 /**
+ * Ranges to be highlighted.
+ */
+@property (nonatomic, strong) NSArray *highlightRanges;
+
+/**
  * Returns the bounding size required to draw the string.
  * \param attributedString Contents of the string to be drawn.
  * \param width The width constraint to apply when computing the string’s bounding rectangle.

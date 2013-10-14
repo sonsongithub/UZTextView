@@ -68,7 +68,7 @@ typedef enum _UZTextViewStatus {
 	id								_tappedLinkAttribute;
 	
 	// Highlighted text
-	NSRange							_highlightedTextRange;
+	NSArray							*_highlightRanges;
 	
 	// Tap
 	UILongPressGestureRecognizer	*_longPressGestureRecognizer;
@@ -122,11 +122,6 @@ typedef enum _UZTextViewStatus {
 	return CGRectMake(point.x - margin, point.y - margin, margin*2, margin*2);
 }
 
-- (void)setHighlightedTextRange:(NSRange)range {
-	_highlightedTextRange = range;
-	[self setNeedsDisplay];
-}
-
 - (void)setCursorHidden:(BOOL)hidden {
 	[_leftCursor setFrame:[self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge]];
 	[_rightCursor setFrame:[self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge]];
@@ -171,6 +166,11 @@ typedef enum _UZTextViewStatus {
 	[self setNeedsDisplay];
 }
 
+- (void)setHighlightRanges:(NSArray *)highlightRanges {
+	_highlightRanges = highlightRanges;
+	[self setNeedsDisplay];
+}
+
 - (void)setSelectedRange:(NSRange)selectedRange {
 	if (selectedRange.location >= self.attributedString.length)
 		return;
@@ -200,11 +200,6 @@ typedef enum _UZTextViewStatus {
 
 - (void)showUIMenu {
 	[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_head toIndex:_tail] inView:self];
-	UIMenuItem *addNGItem1 = [[UIMenuItem alloc] initWithTitle:@"NG ID" action:@selector(addNGID:)];
-	UIMenuItem *addNGItem2 = [[UIMenuItem alloc] initWithTitle:@"NG Name" action:@selector(addNGName:)];
-	UIMenuItem *addNGItem3 = [[UIMenuItem alloc] initWithTitle:@"NG Word" action:@selector(addNGWord:)];
-	
-	[UIMenuController sharedMenuController].menuItems = @[addNGItem1, addNGItem2, addNGItem3];
 	[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
 }
 
@@ -383,9 +378,10 @@ typedef enum _UZTextViewStatus {
 	// [self drawStringRectForDebug];
 	
 	// draw hightlighted text
-	if (_highlightedTextRange.length)
-		[self drawSelectedTextFragmentRectsFromIndex:_highlightedTextRange.location toIndex:_highlightedTextRange.location + _highlightedTextRange.length - 1 color:[[UIColor yellowColor] colorWithAlphaComponent:0.5]];
-	
+	for (NSValue *value in _highlightRanges) {
+		NSRange range = [value rangeValue];
+		[self drawSelectedTextFragmentRectsFromIndex:range.location toIndex:range.location + range.length - 1 color:[[UIColor yellowColor] colorWithAlphaComponent:0.5]];
+	}
 	// draw selected strings
 	if (_status > 0)
 		[self drawSelectedTextFragmentRectsFromIndex:_head toIndex:_tail];

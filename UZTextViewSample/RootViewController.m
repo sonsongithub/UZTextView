@@ -121,7 +121,7 @@
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
 	NSError *error = nil;
 	NSRegularExpression *reg = [NSRegularExpression regularExpressionWithPattern:searchText
-																		 options:0
+																		 options:NSRegularExpressionCaseInsensitive
 																		   error:&error];
 	for (Tweet *tweet in _tweets) {
 		NSMutableArray *highlightRanges = [NSMutableArray array];
@@ -142,6 +142,7 @@
 	
 	UISearchBar *searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, 240, 44)];
 	self.navigationItem.titleView = searchBar;
+	searchBar.placeholder = NSLocalizedString(@"Highlight text", nil);
 	searchBar.delegate = self;
 	
 	ACAccountStore *accountStore = [[ACAccountStore alloc]init];
@@ -230,6 +231,7 @@
 	[cell.nameButton setTitle:tweet.info[@"user"][@"screen_name"] forState:UIControlStateNormal];
 	cell.textView.attributedString = tweet.attributedString;
 	cell.textView.delegate = self;
+	cell.textView.highlightRanges = tweet.highlightRanges;
 	[cell.nameButton sizeToFit];
 	
 	NSURL *iconURL = [NSURL URLWithString:tweet.info[@"user"][@"profile_image_url_https"]];
