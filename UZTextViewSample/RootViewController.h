@@ -10,7 +10,7 @@
 
 #import "UZTextView.h"
 
-@interface RootViewController : UITableViewController <UZTextViewDelegate> {
+@interface RootViewController : UITableViewController <UZTextViewDelegate, UISearchBarDelegate> {
 	NSArray *_tweets;
 	NSString *_URLString;
 }
