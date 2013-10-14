@@ -166,8 +166,13 @@ typedef enum _UZTextViewStatus {
 	[self setNeedsDisplay];
 }
 
+/**
+ * Ranges to be highlighted.
+ *
+ * \param highlightRanges Array of NSValue objects as highlight ranges. 
+ */
 - (void)setHighlightRanges:(NSArray *)highlightRanges {
-	_highlightRanges = highlightRanges;
+	_highlightRanges = [highlightRanges copy];
 	[self setNeedsDisplay];
 }
 

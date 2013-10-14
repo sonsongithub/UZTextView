@@ -67,7 +67,7 @@
 /**
  * Ranges to be highlighted.
  */
-@property (nonatomic, strong) NSArray *highlightRanges;
+@property (nonatomic, copy) NSArray *highlightRanges;
 
 /**
  * Returns the bounding size required to draw the string.
