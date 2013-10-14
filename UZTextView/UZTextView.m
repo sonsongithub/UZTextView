@@ -14,6 +14,7 @@
 #import "UZCursorView.h"
 
 #define NEW_LINE_GLYPH 65535
+#define TAP_MARGIN 10
 
 #define NSLogRect(p) NSLog(@"%f,%f,%f,%f",p.origin.x, p.origin.y, p.size.width, p.size.height)
 #define NSLogRange(p) NSLog(@"%d,%d",p.location, p.length)
@@ -66,6 +67,9 @@ typedef enum _UZTextViewStatus {
 	NSRange							_tappedLinkRange;
 	id								_tappedLinkAttribute;
 	
+	// Highlighted text
+	NSRange							_highlightedTextRange;
+	
 	// Tap
 	UILongPressGestureRecognizer	*_longPressGestureRecognizer;
 	CFTimeInterval					_minimumPressDuration;
@@ -114,6 +118,15 @@ typedef enum _UZTextViewStatus {
 
 #pragma mark - Instance method
 
+- (CGRect)rectForTappingPoint:(CGPoint)point withMargin:(float)margin {
+	return CGRectMake(point.x - margin, point.y - margin, margin*2, margin*2);
+}
+
+- (void)setHighlightedTextRange:(NSRange)range {
+	_highlightedTextRange = range;
+	[self setNeedsDisplay];
+}
+
 - (void)setCursorHidden:(BOOL)hidden {
 	[_leftCursor setFrame:[self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge]];
 	[_rightCursor setFrame:[self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge]];
@@ -150,7 +163,7 @@ typedef enum _UZTextViewStatus {
 	CGPathRelease(path);
 }
 
-- (void)setAttributedString:(NSAttributedString *)attributedString {
+- (void)setAttributedString:(NSMutableAttributedString *)attributedString {
 	[self prepareForReuse];
 	_attributedString = attributedString;
 	
@@ -169,8 +182,7 @@ typedef enum _UZTextViewStatus {
 	[self setCursorHidden:NO];
 	[self setNeedsDisplay];
 	
-	[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_head toIndex:_tail] inView:self];
-	[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
+	[self showUIMenu];
 }
 
 - (void)setMinimumPressDuration:(CFTimeInterval)minimumPressDuration {
@@ -186,6 +198,16 @@ typedef enum _UZTextViewStatus {
 	return NSMakeRange(_head, _tail - _head + 1);
 }
 
+- (void)showUIMenu {
+	[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_head toIndex:_tail] inView:self];
+	UIMenuItem *addNGItem1 = [[UIMenuItem alloc] initWithTitle:@"NG ID" action:@selector(addNGID:)];
+	UIMenuItem *addNGItem2 = [[UIMenuItem alloc] initWithTitle:@"NG Name" action:@selector(addNGName:)];
+	UIMenuItem *addNGItem3 = [[UIMenuItem alloc] initWithTitle:@"NG Word" action:@selector(addNGWord:)];
+	
+	[UIMenuController sharedMenuController].menuItems = @[addNGItem1, addNGItem2, addNGItem3];
+	[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
+}
+
 #pragma mark - Layout information
 
 - (CGRect)fragmentRectForCursorAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side {
@@ -196,7 +218,7 @@ typedef enum _UZTextViewStatus {
 			rect = [[rects objectAtIndex:0] CGRectValue];
 			rect.size.width = 0;
 		}
-		return CGRectInset(rect, -_cursorMargin, -_cursorMargin);
+		return CGRectInset(rect, -6, -12);
 	}
 	else {
 		NSArray *rects = [self fragmentRectsForGlyphFromIndex:index toIndex:index];
@@ -206,7 +228,7 @@ typedef enum _UZTextViewStatus {
 			rect.origin.x += rect.size.width;
 			rect.size.width = 0;
 		}
-		return CGRectInset(rect, -_cursorMargin, -_cursorMargin);
+		return CGRectInset(rect, -6, -12);
 	}
 }
 
@@ -300,6 +322,16 @@ typedef enum _UZTextViewStatus {
 	}
 }
 
+- (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex color:(UIColor*)color {
+	// Set drawing color
+	[color setFill];
+	CGContextRef context = UIGraphicsGetCurrentContext();
+	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:fromIndex toIndex:toIndex];
+	for (NSValue *rectValue in fragmentRects) {
+		CGContextFillRect(context, [rectValue CGRectValue]);
+	}
+}
+
 - (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex {
 	// Set drawing color
 	[[self.tintColor colorWithAlphaComponent:_tintAlpha] setFill];
@@ -308,6 +340,32 @@ typedef enum _UZTextViewStatus {
 	for (NSValue *rectValue in fragmentRects) {
 		CGContextFillRect(context, [rectValue CGRectValue]);
 	}
+}
+
+- (void)drawStringRectForDebug {
+	CGContextRef context = UIGraphicsGetCurrentContext();
+	
+	CFArrayRef lines = CTFrameGetLines(_frame);
+    CFIndex lineCount = CFArrayGetCount(lines);
+    CGPoint lineOrigins[lineCount];
+    CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
+	
+    for (NSInteger index = 0; index < lineCount; index++) {
+        CGPoint origin = lineOrigins[index];
+        CTLineRef line = CFArrayGetValueAtIndex(lines, index);
+		
+        CGFloat ascent;
+        CGFloat descent;
+        CGFloat leading;
+        CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+        
+        CGRect lineRect = CGRectMake(origin.x,
+                                     ceilf(origin.y - descent),
+                                     width,
+                                     ceilf(ascent + descent));
+		lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
+		CGContextStrokeRect(context, lineRect);
+    }
 }
 
 - (void)drawContent {
@@ -320,6 +378,13 @@ typedef enum _UZTextViewStatus {
 	CGContextSetTextMatrix(context, CGAffineTransformIdentity);
 	CTFrameDraw(_frame, context);
 	CGContextRestoreGState(context);
+	
+	// for debug
+	// [self drawStringRectForDebug];
+	
+	// draw hightlighted text
+	if (_highlightedTextRange.length)
+		[self drawSelectedTextFragmentRectsFromIndex:_highlightedTextRange.location toIndex:_highlightedTextRange.location + _highlightedTextRange.length - 1 color:[[UIColor yellowColor] colorWithAlphaComponent:0.5]];
 	
 	// draw selected strings
 	if (_status > 0)
@@ -356,8 +421,7 @@ typedef enum _UZTextViewStatus {
 		[_loupeView setVisible:NO animated:YES];
 		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
 		[self becomeFirstResponder];
-		[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_head toIndex:_tail] inView:self];
-		[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
+		[self showUIMenu];
     }
 }
 
@@ -365,7 +429,7 @@ typedef enum _UZTextViewStatus {
 
 - (void)prepareForInitialization {
 	// init invaliables
-	_cursorMargin = 14;
+	_cursorMargin = 10;
 	_tintAlpha = 0.5;
 	_durationToCancelSuperViewScrolling = 0.25;
 	
@@ -384,6 +448,10 @@ typedef enum _UZTextViewStatus {
 	_rightCursor = [[UZCursorView alloc] initWithCursorDirection:UZTextViewDownCursor];
 	_rightCursor.userInteractionEnabled = NO;
 	[self addSubview:_rightCursor];
+	
+	// for debug
+	//_leftCursor.backgroundColor = [UIColor redColor];
+	//_rightCursor.backgroundColor = [UIColor redColor];
 }
 
 - (void)prepareForReuse {
@@ -534,7 +602,7 @@ typedef enum _UZTextViewStatus {
 	
 	_headWhenBegan = _head;
 	_tailWhenBegan = _tail;
-	if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge], [touch locationInView:self])) {
+	if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge], [touch locationInView:self]) && !_leftCursor.hidden && !_rightCursor.hidden) {
 		_status = UZTextViewEditingFromSelection;
 		[_loupeView setVisible:YES animated:YES];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
@@ -542,7 +610,7 @@ typedef enum _UZTextViewStatus {
 			[self.delegate selectionDidBeginTextView:self];
 		[self setCursorHidden:NO];
 	}
-	else if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge], [touch locationInView:self])) {
+	else if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge], [touch locationInView:self]) && !_leftCursor.hidden && !_rightCursor.hidden) {
 		_status = UZTextViewEditingToSelection;
 		[_loupeView setVisible:YES animated:YES];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
@@ -615,6 +683,18 @@ typedef enum _UZTextViewStatus {
 		[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
 		_status = UZTextViewSelected;
 	}
+	else if (_longPressGestureRecognizer.state != UIGestureRecognizerStateBegan) {
+		if (_tappedLinkRange.length == 0) {
+			DNSLog(@"リンク以外のテキストをタップした");
+			if (_status != UZTextViewNoSelection) {
+				// テキストが選択去れている場合は，それをキャンセルする
+				[self setCursorHidden:YES];
+				_status = UZTextViewNoSelection;
+			}
+			else {
+			}
+		}
+	}
 	
 	// for unlocking parent view's scrolling
 	if ([self.delegate respondsToSelector:@selector(selectionDidEndTextView:)])
@@ -629,6 +709,17 @@ typedef enum _UZTextViewStatus {
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
 	[self touchesEnded:touches withEvent:event];
+}
+
+- (BOOL)cancelSelectedText {
+	if (_status != UZTextViewNoSelection) {
+		// テキストが選択去れている場合は，それをキャンセルする
+		[self setCursorHidden:YES];
+		_status = UZTextViewNoSelection;
+		[self setNeedsDisplay];
+		return YES;
+	}
+	return NO;
 }
 
 #pragma mark - Setter and getter
