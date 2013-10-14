@@ -8,8 +8,6 @@
 
 #import "UZTextView.h"
 
-#import <CoreText/CoreText.h>
-
 #import "UZLoupeView.h"
 #import "UZCursorView.h"
 
@@ -19,18 +17,6 @@
 #define NSLogRect(p) NSLog(@"%f,%f,%f,%f",p.origin.x, p.origin.y, p.size.width, p.size.height)
 #define NSLogRange(p) NSLog(@"%d,%d",p.location, p.length)
 #define SAFE_CFRELEASE(p) if(p){CFRelease(p);p=NULL;}
-
-typedef enum _UZTextViewGlyphEdgeType {
-	UZTextViewLeftEdge				= 0,
-	UZTextViewRightEdge				= 1
-}UZTextViewGlyphEdgeType;
-
-typedef enum _UZTextViewStatus {
-	UZTextViewNoSelection			= 0,
-	UZTextViewSelected				= 1,
-	UZTextViewEditingFromSelection	= 2,
-	UZTextViewEditingToSelection	= 3,
-}UZTextViewStatus;
 
 @interface UIGestureRecognizer (UZTextView)
 - (NSString*)stateDescription;
@@ -56,54 +42,16 @@ typedef enum _UZTextViewStatus {
 
 @end
 
-@interface UZTextView() {
-	// CoreText
-	CTFramesetterRef				_framesetter;
-    CTFrameRef						_frame;
-	CGRect							_contentRect;
-	CFStringTokenizerRef			_tokenizer;
-	
-	// Tap link attribute
-	NSRange							_tappedLinkRange;
-	id								_tappedLinkAttribute;
-	
-	// Highlighted text
-	NSArray							*_highlightRanges;
-	
-	// Tap
-	UILongPressGestureRecognizer	*_longPressGestureRecognizer;
-	CFTimeInterval					_minimumPressDuration;
-	
-	// parameter
-	NSUInteger						_head;
-	NSUInteger						_tail;
-	NSUInteger						_headWhenBegan;
-	NSUInteger						_tailWhenBegan;
-	
-	CFIndex							_testCaret;
-	
-	UZTextViewStatus				_status;
-	BOOL							_isLocked;
-	
-	// child view
-	UZLoupeView						*_loupeView;
-	UZCursorView					*_leftCursor;
-	UZCursorView					*_rightCursor;
-	
-	// tap event control
-	CGPoint							_locationWhenTapBegan;
-	
-	// invaliables
-	float							_cursorMargin;
-	float							_tintAlpha;
-	float							_durationToCancelSuperViewScrolling;
-}
-@end
-	
 @implementation UZTextView
 
 #pragma mark - Class method to estimate attributed string size
 
+/**
+ * Returns the bounding size required to draw the string.
+ * \param attributedString Contents of the string to be drawn.
+ * \param width The width constraint to apply when computing the string’s bounding rectangle.
+ * \return A rectangle whose size component indicates the width and height required to draw the entire contents of the string.
+ */
 + (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width {
 	// CoreText
 	CTFramesetterRef _framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedString);
@@ -115,6 +63,26 @@ typedef enum _UZTextViewStatus {
 	CFRelease(_framesetter);
 	return frameSize;
 }
+
+/**
+ * Prepares for reusing an object. You have to call this method before you set another attributed string to the object.
+ */
+- (void)prepareForReuse {
+	_status = UZTextViewNoSelection;
+	_head = 0;
+	_tail = 0;
+	_headWhenBegan = 0;
+	_tailWhenBegan = 0;
+	
+	_leftCursor.hidden = YES;
+	_rightCursor.hidden = YES;
+	_locationWhenTapBegan = CGPointZero;
+	
+	SAFE_CFRELEASE(_tokenizer);
+}
+@end
+
+@implementation UZTextView(Internal)
 
 #pragma mark - Instance method
 
@@ -158,47 +126,6 @@ typedef enum _UZTextViewStatus {
 	CGPathRelease(path);
 }
 
-- (void)setAttributedString:(NSMutableAttributedString *)attributedString {
-	[self prepareForReuse];
-	_attributedString = attributedString;
-	
-	[self updateLayout];
-	[self setNeedsDisplay];
-}
-
-/**
- * Ranges to be highlighted.
- *
- * \param highlightRanges Array of NSValue objects as highlight ranges. 
- */
-- (void)setHighlightRanges:(NSArray *)highlightRanges {
-	_highlightRanges = [highlightRanges copy];
-	[self setNeedsDisplay];
-}
-
-- (void)setSelectedRange:(NSRange)selectedRange {
-	if (selectedRange.location >= self.attributedString.length)
-		return;
-	if (selectedRange.length > self.attributedString.length || selectedRange.location + selectedRange.length - 1 <= 0)
-		return;
-	_head = selectedRange.location;
-	_tail = selectedRange.location + selectedRange.length - 1;
-	_status = UZTextViewSelected;
-	[self setCursorHidden:NO];
-	[self setNeedsDisplay];
-	
-	[self showUIMenu];
-}
-
-- (void)setMinimumPressDuration:(CFTimeInterval)minimumPressDuration {
-	_minimumPressDuration = minimumPressDuration;
-	_longPressGestureRecognizer.minimumPressDuration = minimumPressDuration;
-}
-
-- (CFTimeInterval)minimumPressDuration {
-	return _longPressGestureRecognizer.minimumPressDuration;
-}
-
 - (NSRange)selectedRange {
 	return NSMakeRange(_head, _tail - _head + 1);
 }
@@ -206,6 +133,17 @@ typedef enum _UZTextViewStatus {
 - (void)showUIMenu {
 	[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_head toIndex:_tail] inView:self];
 	[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
+}
+
+- (BOOL)cancelSelectedText {
+	if (_status != UZTextViewNoSelection) {
+		// テキストが選択去れている場合は，それをキャンセルする
+		[self setCursorHidden:YES];
+		_status = UZTextViewNoSelection;
+		[self setNeedsDisplay];
+		return YES;
+	}
+	return NO;
 }
 
 #pragma mark - Layout information
@@ -396,7 +334,7 @@ typedef enum _UZTextViewStatus {
 		[self drawSelectedTextFragmentRectsFromIndex:_tappedLinkRange.location toIndex:_tappedLinkRange.location + _tappedLinkRange.length - 1];
 }
 
-#pragma mark - UILongPressGesture
+#pragma mark - UILongPressGestureDelegate
 
 - (void)didChangeLongPressGesture:(UILongPressGestureRecognizer *)gestureRecognizer {
 	DNSLogMethod
@@ -453,43 +391,6 @@ typedef enum _UZTextViewStatus {
 	// for debug
 	//_leftCursor.backgroundColor = [UIColor redColor];
 	//_rightCursor.backgroundColor = [UIColor redColor];
-}
-
-- (void)prepareForReuse {
-	_status = UZTextViewNoSelection;
-	_head = 0;
-	_tail = 0;
-	_headWhenBegan = 0;
-	_tailWhenBegan = 0;
-	
-	_leftCursor.hidden = YES;
-	_rightCursor.hidden = YES;
-	_locationWhenTapBegan = CGPointZero;
-	
-	SAFE_CFRELEASE(_tokenizer);
-}
-
-#pragma mark - for UIMenuController
-
-- (BOOL)canBecomeFirstResponder {
-	return YES;
-}
-
-- (void)copy:(id)sender {
-	NSLog(@"%@", [self.attributedString.string substringWithRange:self.selectedRange]);
-	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:self.selectedRange];
-}
-
-- (void)selectAll:(id)sender {
-	[self setSelectedRange:NSMakeRange(0, self.attributedString.length)];
-}
-
-- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
-	if (action == @selector(copy:))
-		return YES;
-	if (action == @selector(selectAll:))
-		return YES;
-	return NO;
 }
 
 #pragma mark - CoreText
@@ -594,7 +495,7 @@ typedef enum _UZTextViewStatus {
 	return kCFNotFound;
 }
 
-#pragma mark - Touch event
+#pragma mark - Touch event(Override)
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [touches anyObject];
@@ -712,18 +613,69 @@ typedef enum _UZTextViewStatus {
 	[self touchesEnded:touches withEvent:event];
 }
 
-- (BOOL)cancelSelectedText {
-	if (_status != UZTextViewNoSelection) {
-		// テキストが選択去れている場合は，それをキャンセルする
-		[self setCursorHidden:YES];
-		_status = UZTextViewNoSelection;
-		[self setNeedsDisplay];
+#pragma mark - Setter and getter
+
+- (void)setAttributedString:(NSMutableAttributedString *)attributedString {
+	[self prepareForReuse];
+	_attributedString = attributedString;
+	
+	[self updateLayout];
+	[self setNeedsDisplay];
+}
+
+- (void)setHighlightRanges:(NSArray *)highlightRanges {
+	_highlightRanges = [highlightRanges copy];
+	[self setNeedsDisplay];
+}
+
+- (void)setSelectedRange:(NSRange)selectedRange {
+	if (selectedRange.location >= self.attributedString.length)
+		return;
+	if (selectedRange.length > self.attributedString.length || selectedRange.location + selectedRange.length - 1 <= 0)
+		return;
+	_head = selectedRange.location;
+	_tail = selectedRange.location + selectedRange.length - 1;
+	_status = UZTextViewSelected;
+	[self setCursorHidden:NO];
+	[self setNeedsDisplay];
+	
+	[self showUIMenu];
+}
+
+- (void)setMinimumPressDuration:(CFTimeInterval)minimumPressDuration {
+	_minimumPressDuration = minimumPressDuration;
+	_longPressGestureRecognizer.minimumPressDuration = minimumPressDuration;
+}
+
+- (CFTimeInterval)minimumPressDuration {
+	return _longPressGestureRecognizer.minimumPressDuration;
+}
+
+#pragma mark - for UIMenuController(Override)
+
+- (BOOL)canBecomeFirstResponder {
+	return YES;
+}
+
+- (void)copy:(id)sender {
+	NSLog(@"%@", [self.attributedString.string substringWithRange:self.selectedRange]);
+	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:self.selectedRange];
+}
+
+- (void)selectAll:(id)sender {
+	[self setSelectedRange:NSMakeRange(0, self.attributedString.length)];
+}
+
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
+	if (action == @selector(copy:))
 		return YES;
-	}
+	if (action == @selector(selectAll:))
+		return YES;
 	return NO;
 }
 
-#pragma mark - Setter and getter
+
+#pragma mark - Setter and getter(Override)
 
 - (void)setFrame:(CGRect)frame {
 	[super setFrame:frame];
