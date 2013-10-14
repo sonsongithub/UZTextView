@@ -6,7 +6,13 @@ Clickable and selectable text view for iOS
 - UZTextView class implements implements the behavior for a scrollable, multiline, selectable, clickable text region. 
  The class supports the display of text using custom style and link information.
 - Create subclass of the class and use UZTextView internal category methods if you want to expand the UZTextView class. For example, you have to override some methods of the class in order to add your custom UIMenuItem objects.
-- You can use the Class on the UITableView cell and set custom style text using NSAttributedString class objects.
+- You can use the Class on the UITableView cell and set custom style text using NSAttributedString class objects(like the following image).
+
+![image](https://raw.github.com/sonsongithub/UZTextView/master/screenshot/sample01.jpg)
+
+###How to build
+- Use build.sh. Automatically lib and header file generated at ./build/.
+- Currently, arch64 has not been tested.
 
 ###Document
 - See html/index.html
