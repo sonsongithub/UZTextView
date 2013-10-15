@@ -594,6 +594,9 @@
 				_status = UZTextViewNoSelection;
 			}
 			else {
+				if ([self.delegate respondsToSelector:@selector(didTapTextDoesNotIncludeLinkTextView:)]) {
+					[self.delegate didTapTextDoesNotIncludeLinkTextView:self];
+				}
 			}
 		}
 	}
@@ -673,7 +676,6 @@
 		return YES;
 	return NO;
 }
-
 
 #pragma mark - Setter and getter(Override)
 
