@@ -83,6 +83,9 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  Create subclass of the class and use UZTextView internal category methods if you want to expand the UZTextView class.
  */
 @interface UZTextView : UIView {
+	// Data
+	NSAttributedString				*_attributedString;
+	
 	// CoreText
 	CTFramesetterRef				_framesetter;
     CTFrameRef						_frame;
