@@ -12,11 +12,9 @@
 #import "UZCursorView.h"
 
 #define NEW_LINE_GLYPH 65535
-#define TAP_MARGIN 10
 
 #define NSLogRect(p) NSLog(@"%f,%f,%f,%f",p.origin.x, p.origin.y, p.size.width, p.size.height)
 #define NSLogRange(p) NSLog(@"%d,%d",p.location, p.length)
-#define SAFE_CFRELEASE(p) if(p){CFRelease(p);p=NULL;}
 
 @interface UIGestureRecognizer (UZTextView)
 - (NSString*)stateDescription;

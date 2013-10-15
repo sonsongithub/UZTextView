@@ -22,7 +22,6 @@
 - (void)viewWillAppear:(BOOL)animated {
 	[super viewWillAppear:animated];
 	
-	self.textView.delegate = self;
 	self.textView.attributedString = self.tweet.attributedString;
 	
 	NSURL *iconURL = [NSURL URLWithString:self.tweet.info[@"user"][@"profile_image_url_https"]];
