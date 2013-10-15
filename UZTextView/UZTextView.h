@@ -9,6 +9,9 @@
 #import <UIKit/UIKit.h>
 #import <CoreText/CoreText.h>
 
+#define SAFE_CFRELEASE(p) if(p){CFRelease(p);p=NULL;}
+#define TAP_MARGIN 10
+
 @class UZLoupeView;
 @class UZCursorView;
 
@@ -62,6 +65,15 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * \param textView The text view in which selecting ended.
  */
 - (void)selectionDidEndTextView:(UZTextView*)textView;
+
+/**
+ * Tells the delegate that tap an area which does not include any links.
+ *
+ * You can use this delegate method to pass this event to parent views.
+ * For example, you can select/deselect the UITableViewCell object whose UZTextView is tapped by an user.
+ * \param textView The text view in which is tapped.
+ */
+- (void)didTapTextDoesNotIncludeLinkTextView:(UZTextView*)textView;
 @end
 
 /**
