@@ -1,6 +1,11 @@
 # Xcode
+
+.DS_Store
+*/build/*
+=======
 build/*
 Product/*
+
 *.pbxuser
 !default.pbxuser
 *.mode1v3
@@ -9,6 +14,18 @@ Product/*
 !default.mode2v3
 *.perspectivev3
 !default.perspectivev3
+
+xcuserdata
+profile
+*.moved-aside
+DerivedData
+.idea/
+*.hmap
+*.xccheckout
+
+#CocoaPods
+Pods
+=======
 *.xcworkspace
 !default.xcworkspace
 xcuserdata
@@ -17,3 +34,4 @@ profile
 .DS_Store
 *~
 *.xccheckout
+
