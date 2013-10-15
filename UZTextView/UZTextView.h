@@ -10,7 +10,6 @@
 #import <CoreText/CoreText.h>
 
 #define SAFE_CFRELEASE(p) if(p){CFRelease(p);p=NULL;}
-#define TAP_MARGIN 10
 
 @class UZLoupeView;
 @class UZCursorView;

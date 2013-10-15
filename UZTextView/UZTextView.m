@@ -11,11 +11,6 @@
 #import "UZLoupeView.h"
 #import "UZCursorView.h"
 
-#define NEW_LINE_GLYPH 65535
-
-#define NSLogRect(p) NSLog(@"%f,%f,%f,%f",p.origin.x, p.origin.y, p.size.width, p.size.height)
-#define NSLogRange(p) NSLog(@"%d,%d",p.location, p.length)
-
 @interface UIGestureRecognizer (UZTextView)
 - (NSString*)stateDescription;
 @end
@@ -84,10 +79,6 @@
 
 #pragma mark - Instance method
 
-- (CGRect)rectForTappingPoint:(CGPoint)point withMargin:(float)margin {
-	return CGRectMake(point.x - margin, point.y - margin, margin*2, margin*2);
-}
-
 - (void)setCursorHidden:(BOOL)hidden {
 	[_leftCursor setFrame:[self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge]];
 	[_rightCursor setFrame:[self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge]];
@@ -135,7 +126,6 @@
 
 - (BOOL)cancelSelectedText {
 	if (_status != UZTextViewNoSelection) {
-		// テキストが選択去れている場合は，それをキャンセルする
 		[self setCursorHidden:YES];
 		_status = UZTextViewNoSelection;
 		[self setNeedsDisplay];
@@ -233,10 +223,7 @@
 		return;
 	int tappedIndex = [self indexForPoint:_locationWhenTapBegan];
 	NSDictionary *dict = [self.attributedString attributesAtIndex:tappedIndex effectiveRange:&range];
-	if (dict[NSLinkAttributeName]) {
-		NSLogRange(range);
-		
-		
+	if (dict[NSLinkAttributeName]) {		
 		NSArray *rects = [self fragmentRectsForGlyphFromIndex:tappedIndex toIndex:tappedIndex+1];
 		CGRect rect = CGRectZero;
 		if ([rects count]) {
@@ -583,13 +570,13 @@
 	}
 	else if (_longPressGestureRecognizer.state != UIGestureRecognizerStateBegan) {
 		if (_tappedLinkRange.length == 0) {
-			DNSLog(@"リンク以外のテキストをタップした");
 			if (_status != UZTextViewNoSelection) {
-				// テキストが選択去れている場合は，それをキャンセルする
-				[self setCursorHidden:YES];
-				_status = UZTextViewNoSelection;
+				// selection is cancelled when some strings are selected.
+				[self cancelSelectedText];
 			}
 			else {
+				// tells the event to tap any region which has not include any links to the delegtae
+				// when any text has not been selected.
 				if ([self.delegate respondsToSelector:@selector(didTapTextDoesNotIncludeLinkTextView:)]) {
 					[self.delegate didTapTextDoesNotIncludeLinkTextView:self];
 				}
@@ -693,7 +680,6 @@
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
     if (CGRectContainsPoint(self.bounds, point)) {
 		NSMutableArray *rects = [NSMutableArray array];
-		
 		[rects addObjectsFromArray:[self fragmentRectsForGlyphFromIndex:0 toIndex:self.attributedString.length-1]];
 		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge]]];
 		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge]]];
@@ -702,10 +688,11 @@
 			if (CGRectContainsPoint([rectValue CGRectValue], point))
 				return [super hitTest:point withEvent:event];
 		}
-		
-		[self setCursorHidden:YES];
-		_status = UZTextViewNoSelection;
-		[self setNeedsDisplay];
+		if (_status != UZTextViewNoSelection) {
+			// does not pass tap event to the other view
+			// when some text is selected.
+			return [super hitTest:point withEvent:event];
+		}
     }
     return nil;
 }
