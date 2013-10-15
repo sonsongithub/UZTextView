@@ -24,32 +24,6 @@
 
 @implementation RootViewController
 
-- (NSMutableAttributedString*)parse:(NSString*)text {
-	NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc] initWithString:text];
-	NSError *error = nil;
-	NSRegularExpression *reg = [NSRegularExpression regularExpressionWithPattern:@"(http[s]?://[a-zA-Z0-9/.,?_+~=%&:;!#\\-]+)|(@[a-zA-Z0-9_]+)|(#[a-zA-Z0-9_]+)"
-															 options:0
-															   error:&error];
-	NSArray *array = [reg matchesInString:text options:0 range:NSMakeRange(0, text.length)];
-	for (NSTextCheckingResult *result in array) {
-		if ([result numberOfRanges]) {
-			if ([result rangeAtIndex:1].length) {
-				// http
-				[attrString setAttributes:@{NSLinkAttributeName:[text substringWithRange:[result range]], @"type":@"link"} range:[result range]];
-			}
-			if ([result rangeAtIndex:2].length) {
-				// reply
-				[attrString setAttributes:@{NSLinkAttributeName:[text substringWithRange:[result range]], @"type":@"reply"} range:[result range]];
-			}
-			if ([result rangeAtIndex:3].length) {
-				// hash
-				[attrString setAttributes:@{NSLinkAttributeName:[text substringWithRange:[result range]], @"type":@"hash"} range:[result range]];
-			}
-		}
-	}
-	return attrString;
-}
-
 - (void)selectionDidBeginTextView:(UZTextView*)textView {
 	self.tableView.scrollEnabled = NO;
 }
@@ -74,13 +48,21 @@
 	[self performSegueWithIdentifier:@"WebViewControllerSegue" sender:nil];
 }
 
-- (id)initWithStyle:(UITableViewStyle)style {
-    self = [super initWithStyle:style];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
+- (void)didTapTextDoesNotIncludeLinkTextView:(UZTextView *)textView {
+	if (!self.tableView.decelerating) {
+		NSArray *visibleCells = [self.tableView visibleCells];
+		for (TextCell *cell in visibleCells) {
+			if (cell.textView == textView) {
+				NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+				[self.tableView selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
+				[self performSegueWithIdentifier:@"TweetViewControllerSegue" sender:self];
+				break;
+			}
+		}
+	}
 }
+
+#pragma mark - Instance method
 
 - (NSString*)path {
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
@@ -118,6 +100,34 @@
 	}
 }
 
+- (NSMutableAttributedString*)parse:(NSString*)text {
+	NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc] initWithString:text];
+	NSError *error = nil;
+	NSRegularExpression *reg = [NSRegularExpression regularExpressionWithPattern:@"(http[s]?://[a-zA-Z0-9/.,?_+~=%&:;!#\\-]+)|(@[a-zA-Z0-9_]+)|(#[a-zA-Z0-9_]+)"
+																		 options:0
+																		   error:&error];
+	NSArray *array = [reg matchesInString:text options:0 range:NSMakeRange(0, text.length)];
+	for (NSTextCheckingResult *result in array) {
+		if ([result numberOfRanges]) {
+			if ([result rangeAtIndex:1].length) {
+				// http
+				[attrString setAttributes:@{NSLinkAttributeName:[text substringWithRange:[result range]], @"type":@"link"} range:[result range]];
+			}
+			if ([result rangeAtIndex:2].length) {
+				// reply
+				[attrString setAttributes:@{NSLinkAttributeName:[text substringWithRange:[result range]], @"type":@"reply"} range:[result range]];
+			}
+			if ([result rangeAtIndex:3].length) {
+				// hash
+				[attrString setAttributes:@{NSLinkAttributeName:[text substringWithRange:[result range]], @"type":@"hash"} range:[result range]];
+			}
+		}
+	}
+	return attrString;
+}
+
+#pragma mark - UISeachBarDelegate
+
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
 	NSError *error = nil;
 	NSRegularExpression *reg = [NSRegularExpression regularExpressionWithPattern:searchText
@@ -136,6 +146,8 @@
 	}
 	[self.tableView reloadData];
 }
+
+#pragma mark - View controller lifecycle
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -197,6 +209,8 @@
 		controller.tweet = tweet;
 	}
 }
+
+#pragma mark - Unwind
 
 - (IBAction)dismissViewController:(UIStoryboardSegue*)segue {
 }
