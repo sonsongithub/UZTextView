@@ -572,15 +572,13 @@
 	if (_status == UZTextViewEditingFromSelection) {
 		[_loupeView setVisible:NO animated:YES];
 		[self becomeFirstResponder];
-		[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_head toIndex:_tail] inView:self];
-		[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
+		[self showUIMenu];
 		_status = UZTextViewSelected;
 	}
 	else if (_status == UZTextViewEditingToSelection) {
 		[_loupeView setVisible:NO animated:YES];
 		[self becomeFirstResponder];
-		[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_head toIndex:_tail] inView:self];
-		[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
+		[self showUIMenu];
 		_status = UZTextViewSelected;
 	}
 	else if (_longPressGestureRecognizer.state != UIGestureRecognizerStateBegan) {
