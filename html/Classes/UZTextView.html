@@ -65,21 +65,19 @@
 	
 	<option value="//api/name/cancelSelectedText">&nbsp;&nbsp;&nbsp;&nbsp;- cancelSelectedText</option>
 	
+	<option value="//api/name/circumscribingRectForStringFromIndex:toIndex:">&nbsp;&nbsp;&nbsp;&nbsp;- circumscribingRectForStringFromIndex:toIndex:</option>
+	
 	<option value="//api/name/didChangeLongPressGesture:">&nbsp;&nbsp;&nbsp;&nbsp;- didChangeLongPressGesture:</option>
 	
 	<option value="//api/name/drawContent">&nbsp;&nbsp;&nbsp;&nbsp;- drawContent</option>
 	
 	<option value="//api/name/drawSelectedLinkFragments">&nbsp;&nbsp;&nbsp;&nbsp;- drawSelectedLinkFragments</option>
 	
-	<option value="//api/name/drawSelectedTextFragmentRectsFromIndex:toIndex:">&nbsp;&nbsp;&nbsp;&nbsp;- drawSelectedTextFragmentRectsFromIndex:toIndex:</option>
-	
 	<option value="//api/name/drawSelectedTextFragmentRectsFromIndex:toIndex:color:">&nbsp;&nbsp;&nbsp;&nbsp;- drawSelectedTextFragmentRectsFromIndex:toIndex:color:</option>
 	
 	<option value="//api/name/drawStringRectForDebug">&nbsp;&nbsp;&nbsp;&nbsp;- drawStringRectForDebug</option>
 	
 	<option value="//api/name/fragmentRectForCursorAtIndex:side:">&nbsp;&nbsp;&nbsp;&nbsp;- fragmentRectForCursorAtIndex:side:</option>
-	
-	<option value="//api/name/fragmentRectForSelectedStringFromIndex:toIndex:">&nbsp;&nbsp;&nbsp;&nbsp;- fragmentRectForSelectedStringFromIndex:toIndex:</option>
 	
 	<option value="//api/name/fragmentRectsForGlyphFromIndex:toIndex:">&nbsp;&nbsp;&nbsp;&nbsp;- fragmentRectsForGlyphFromIndex:toIndex:</option>
 	
@@ -155,21 +153,19 @@
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/cancelSelectedText">cancelSelectedText</a></span></li>
 	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/circumscribingRectForStringFromIndex:toIndex:">circumscribingRectForStringFromIndex:toIndex:</a></span></li>
+	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/didChangeLongPressGesture:">didChangeLongPressGesture:</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/drawContent">drawContent</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/drawSelectedLinkFragments">drawSelectedLinkFragments</a></span></li>
 	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/drawSelectedTextFragmentRectsFromIndex:toIndex:">drawSelectedTextFragmentRectsFromIndex:toIndex:</a></span></li>
-	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/drawSelectedTextFragmentRectsFromIndex:toIndex:color:">drawSelectedTextFragmentRectsFromIndex:toIndex:color:</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/drawStringRectForDebug">drawStringRectForDebug</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/fragmentRectForCursorAtIndex:side:">fragmentRectForCursorAtIndex:side:</a></span></li>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/fragmentRectForSelectedStringFromIndex:toIndex:">fragmentRectForSelectedStringFromIndex:toIndex:</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/fragmentRectsForGlyphFromIndex:toIndex:">fragmentRectsForGlyphFromIndex:toIndex:</a></span></li>
 	
@@ -339,7 +335,7 @@ The class supports the display of text using custom style and link information.<
 	
 </li><li>
 	<span class="tooltip">
-		<code><a href="#//api/name/fragmentRectForSelectedStringFromIndex:toIndex:">&ndash;&nbsp;fragmentRectForSelectedStringFromIndex:toIndex:</a></code>
+		<code><a href="#//api/name/circumscribingRectForStringFromIndex:toIndex:">&ndash;&nbsp;circumscribingRectForStringFromIndex:toIndex:</a></code>
 	</span>
 	
 	
@@ -352,12 +348,6 @@ The class supports the display of text using custom style and link information.<
 </li><li>
 	<span class="tooltip">
 		<code><a href="#//api/name/drawSelectedTextFragmentRectsFromIndex:toIndex:color:">&ndash;&nbsp;drawSelectedTextFragmentRectsFromIndex:toIndex:color:</a></code>
-	</span>
-	
-	
-</li><li>
-	<span class="tooltip">
-		<code><a href="#//api/name/drawSelectedTextFragmentRectsFromIndex:toIndex:">&ndash;&nbsp;drawSelectedTextFragmentRectsFromIndex:toIndex:</a></code>
 	</span>
 	
 	
@@ -757,13 +747,74 @@ The delegate is sent messages when contents are selected and tapped.</p>
 </div>
 						
 						<div class="section-method">
+	<a name="//api/name/circumscribingRectForStringFromIndex:toIndex:" title="circumscribingRectForStringFromIndex:toIndex:"></a>
+	<h3 class="subsubtitle method-title">circumscribingRectForStringFromIndex:toIndex:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Returns the frame rectangle circumscribing the specified string.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (CGRect)circumscribingRectForStringFromIndex:(int)<em>fromIndex</em> toIndex:(int)<em>toIndex</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>fromIndex</em></dt>
+			<dd><p>A beginning index to specify strings. The value must lie within the bounds of the receiver.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>toIndex</em></dt>
+			<dd><p>A ending index to specify strings. The value must lie within the bounds of the receiver.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>CGRect object circumscribing the specified strings.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<div class="warning"><p><strong>Warning:</strong> This is an internal/private method. Use this method in subclass of UZTextView.</p></div>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">UZTextView.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
 	<a name="//api/name/didChangeLongPressGesture:" title="didChangeLongPressGesture:"></a>
 	<h3 class="subsubtitle method-title">didChangeLongPressGesture:</h3>
 	
 	
 	
 	<div class="method-subsection brief-description">
-		<p>To be written</p>
+		<p>Callback method for the UILongPressGestureRecognizer object.</p>
 	</div>		
 	
     
@@ -777,7 +828,7 @@ The delegate is sent messages when contents are selected and tapped.</p>
 		
 		<dl class="argument-def parameter-def">
 			<dt><em>gestureRecognizer</em></dt>
-			<dd><p>To be written</p></dd>
+			<dd><p>The UILongPressGestureRecognizer object tells this method.</p></dd>
 		</dl>
 		
 	</div>
@@ -814,7 +865,7 @@ The delegate is sent messages when contents are selected and tapped.</p>
 	
 	
 	<div class="method-subsection brief-description">
-		<p>To be written</p>
+		<p>Draw all contents.</p>
 	</div>		
 	
     
@@ -855,7 +906,8 @@ The delegate is sent messages when contents are selected and tapped.</p>
 	
 	
 	<div class="method-subsection brief-description">
-		<p>To be written</p>
+		<p>Draw the frame rectangle with tintColor containing the tapped link element of string.
+Draw nothing when user do not tap any links.</p>
 	</div>		
 	
     
@@ -890,69 +942,13 @@ The delegate is sent messages when contents are selected and tapped.</p>
 </div>
 						
 						<div class="section-method">
-	<a name="//api/name/drawSelectedTextFragmentRectsFromIndex:toIndex:" title="drawSelectedTextFragmentRectsFromIndex:toIndex:"></a>
-	<h3 class="subsubtitle method-title">drawSelectedTextFragmentRectsFromIndex:toIndex:</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>To be written</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>- (void)drawSelectedTextFragmentRectsFromIndex:(int)<em>fromIndex</em> toIndex:(int)<em>toIndex</em></code></div>
-
-    
-	
-	<div class="method-subsection arguments-section parameters">
-		<h4 class="method-subtitle parameter-title">Parameters</h4>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>fromIndex</em></dt>
-			<dd><p>To be written</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>toIndex</em></dt>
-			<dd><p>To be written</p></dd>
-		</dl>
-		
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection discussion-section">
-		<h4 class="method-subtitle">Discussion</h4>
-		<div class="warning"><p><strong>Warning:</strong> This is an internal/private method. Use this method in subclass of UZTextView.</p></div>
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">UZTextView.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-						<div class="section-method">
 	<a name="//api/name/drawSelectedTextFragmentRectsFromIndex:toIndex:color:" title="drawSelectedTextFragmentRectsFromIndex:toIndex:color:"></a>
 	<h3 class="subsubtitle method-title">drawSelectedTextFragmentRectsFromIndex:toIndex:color:</h3>
 	
 	
 	
 	<div class="method-subsection brief-description">
-		<p>To be written</p>
+		<p>Draw the frame rectangles with specified color, containing specified string.</p>
 	</div>		
 	
     
@@ -966,17 +962,17 @@ The delegate is sent messages when contents are selected and tapped.</p>
 		
 		<dl class="argument-def parameter-def">
 			<dt><em>fromIndex</em></dt>
-			<dd><p>To be written</p></dd>
+			<dd><p>A beginning index to specify strings. The value must lie within the bounds of the receiver.</p></dd>
 		</dl>
 		
 		<dl class="argument-def parameter-def">
 			<dt><em>toIndex</em></dt>
-			<dd><p>To be written</p></dd>
+			<dd><p>A ending index to specify strings. The value must lie within the bounds of the receiver.</p></dd>
 		</dl>
 		
 		<dl class="argument-def parameter-def">
 			<dt><em>color</em></dt>
-			<dd><p>To be written</p></dd>
+			<dd><p>UIColor object to fill rectangles.</p></dd>
 		</dl>
 		
 	</div>
@@ -1013,7 +1009,7 @@ The delegate is sent messages when contents are selected and tapped.</p>
 	
 	
 	<div class="method-subsection brief-description">
-		<p>To be written</p>
+		<p>Draw the background rectangles of strings for debugging.</p>
 	</div>		
 	
     
@@ -1109,74 +1105,13 @@ The delegate is sent messages when contents are selected and tapped.</p>
 </div>
 						
 						<div class="section-method">
-	<a name="//api/name/fragmentRectForSelectedStringFromIndex:toIndex:" title="fragmentRectForSelectedStringFromIndex:toIndex:"></a>
-	<h3 class="subsubtitle method-title">fragmentRectForSelectedStringFromIndex:toIndex:</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>To be written</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>- (CGRect)fragmentRectForSelectedStringFromIndex:(int)<em>fromIndex</em> toIndex:(int)<em>toIndex</em></code></div>
-
-    
-	
-	<div class="method-subsection arguments-section parameters">
-		<h4 class="method-subtitle parameter-title">Parameters</h4>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>fromIndex</em></dt>
-			<dd><p>To be written</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>toIndex</em></dt>
-			<dd><p>To be written</p></dd>
-		</dl>
-		
-	</div>
-	
-	
-	
-	<div class="method-subsection return">
-		<h4 class="method-subtitle parameter-title">Return Value</h4>
-		<p>To be written</p>
-	</div>
-	
-	
-	
-	
-	
-	<div class="method-subsection discussion-section">
-		<h4 class="method-subtitle">Discussion</h4>
-		<div class="warning"><p><strong>Warning:</strong> This is an internal/private method. Use this method in subclass of UZTextView.</p></div>
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">UZTextView.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-						<div class="section-method">
 	<a name="//api/name/fragmentRectsForGlyphFromIndex:toIndex:" title="fragmentRectsForGlyphFromIndex:toIndex:"></a>
 	<h3 class="subsubtitle method-title">fragmentRectsForGlyphFromIndex:toIndex:</h3>
 	
 	
 	
 	<div class="method-subsection brief-description">
-		<p>To be written</p>
+		<p>Returns the array whose frame rectangles describes regions of strings by specified character indices.</p>
 	</div>		
 	
     
@@ -1190,12 +1125,12 @@ The delegate is sent messages when contents are selected and tapped.</p>
 		
 		<dl class="argument-def parameter-def">
 			<dt><em>fromIndex</em></dt>
-			<dd><p>To be written</p></dd>
+			<dd><p>A beginning index to specify strings. The value must lie within the bounds of the receiver.</p></dd>
 		</dl>
 		
 		<dl class="argument-def parameter-def">
 			<dt><em>toIndex</em></dt>
-			<dd><p>To be written</p></dd>
+			<dd><p>A ending index to specify strings. The value must lie within the bounds of the receiver.</p></dd>
 		</dl>
 		
 	</div>
@@ -1204,7 +1139,7 @@ The delegate is sent messages when contents are selected and tapped.</p>
 	
 	<div class="method-subsection return">
 		<h4 class="method-subtitle parameter-title">Return Value</h4>
-		<p>To be written</p>
+		<p>An NSArray object containing frame rectangles.</p>
 	</div>
 	
 	
@@ -1237,7 +1172,7 @@ The delegate is sent messages when contents are selected and tapped.</p>
 	
 	
 	<div class="method-subsection brief-description">
-		<p>To be written</p>
+		<p>Returns CFIndex object which describes the index of the character locating at the point user tapped.</p>
 	</div>		
 	
     
@@ -1251,7 +1186,7 @@ The delegate is sent messages when contents are selected and tapped.</p>
 		
 		<dl class="argument-def parameter-def">
 			<dt><em>point</em></dt>
-			<dd><p>To be written</p></dd>
+			<dd><p>point The CGPoint object indicates the location user tapped.</p></dd>
 		</dl>
 		
 	</div>
@@ -1260,7 +1195,7 @@ The delegate is sent messages when contents are selected and tapped.</p>
 	
 	<div class="method-subsection return">
 		<h4 class="method-subtitle parameter-title">Return Value</h4>
-		<p>To be written</p>
+		<p>CFIndex object describes the index of the tapped character.</p>
 	</div>
 	
 	
@@ -1293,7 +1228,7 @@ The delegate is sent messages when contents are selected and tapped.</p>
 	
 	
 	<div class="method-subsection brief-description">
-		<p>To be written</p>
+		<p>Initialize all properties. This method is called in <code>init</code> methods.</p>
 	</div>		
 	
     
@@ -1370,7 +1305,7 @@ The delegate is sent messages when contents are selected and tapped.</p>
 	
 	
 	<div class="method-subsection brief-description">
-		<p>To be written</p>
+		<p>Returns the index range of the link element which locates at the point user tapped.</p>
 	</div>		
 	
     
@@ -1384,7 +1319,7 @@ The delegate is sent messages when contents are selected and tapped.</p>
 		
 		<dl class="argument-def parameter-def">
 			<dt><em>point</em></dt>
-			<dd><p>To be written</p></dd>
+			<dd><p>The CGPoint object indicates the location user tapped.</p></dd>
 		</dl>
 		
 	</div>
@@ -1393,7 +1328,7 @@ The delegate is sent messages when contents are selected and tapped.</p>
 	
 	<div class="method-subsection return">
 		<h4 class="method-subtitle parameter-title">Return Value</h4>
-		<p>To be written</p>
+		<p>Returns index range of the link element.</p>
 	</div>
 	
 	
@@ -1477,7 +1412,7 @@ The delegate is sent messages when contents are selected and tapped.</p>
 	
 	
 	<div class="method-subsection brief-description">
-		<p>To be written</p>
+		<p>Extracts and selects a word which locates at the point user tapped, using CFStringTokenizer.</p>
 	</div>		
 	
     
@@ -1491,7 +1426,7 @@ The delegate is sent messages when contents are selected and tapped.</p>
 		
 		<dl class="argument-def parameter-def">
 			<dt><em>point</em></dt>
-			<dd><p>To be written</p></dd>
+			<dd><p>The CGPoint object indicates the location user tapped.</p></dd>
 		</dl>
 		
 	</div>
@@ -1620,7 +1555,7 @@ You have to this method after updating <a href="#//api/name/attributedString">at
 				<div id="footer">
 					<hr />
 					<div class="footer-copyright">
-						<p><span class="copyright">&copy; 2013 sonson. All rights reserved. (Last updated: 2013-10-16)</span><br />
+						<p><span class="copyright">&copy; 2013 sonson. All rights reserved. (Last updated: 2013-10-17)</span><br />
 						
 						<span class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2 (build 961)</a>.</span></p>
 						
