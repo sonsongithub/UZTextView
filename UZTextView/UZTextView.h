@@ -156,7 +156,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 @property (nonatomic, assign) NSRange selectedRange;
 
 /**
- * The duration (in seconds) of a wait before text selection will start.
+ * The duration (in seconds) of a wait before text selection will start. The unit of duration is secondes. The default value is 0.5.
  */
 @property (nonatomic, assign) CFTimeInterval minimumPressDuration;
 
@@ -179,11 +179,11 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 + (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width __attribute__((deprecated));
 
 /**
- * Returns the bounding size required to draw the string.
- * \param attributedString Contents of the string to be drawn.
- * \param width The width constraint to apply when computing the string’s bounding rectangle.
- * \param margin UIEdgeInsets object, describes a margin around the content. The default value is UIEdgeInsetsZero.
- * \return A rectangle whose size component indicates the width and height required to draw the entire contents of the string.
+ * To be written
+ * \param attributedString To be written
+ * \param width To be written
+ * \param margin To be written
+ * \return To be written
  */
 + (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width margin:(UIEdgeInsets)margin;
 

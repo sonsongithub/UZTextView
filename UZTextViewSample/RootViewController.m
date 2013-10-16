@@ -152,7 +152,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 	
-	_margin = UIEdgeInsetsMake(5, 5, 10, 10);
+	_margin = UIEdgeInsetsMake(10, 10, 10, 10);
 	
 	UISearchBar *searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, 240, 44)];
 	self.navigationItem.titleView = searchBar;

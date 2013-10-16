@@ -13,11 +13,19 @@
 
 @interface UIGestureRecognizer (UZTextView)
 - (NSString*)stateDescription;
+
 - (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin;
 @end
 
+/**
+ * To be written
+ */
 @implementation UIGestureRecognizer (UZTextView)
 
+/**
+ * To be written
+ * \return To be written
+ */
 - (NSString*)stateDescription {
 	if (self.state == UIGestureRecognizerStatePossible)
 		return @"UIGestureRecognizerStatePossible";
@@ -34,6 +42,12 @@
 	return @"Unknown state";
 }
 
+/**
+ * To be written
+ * \param view To be written
+ * \param margin To be written
+ * \return To be written
+ */
 - (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin {
 	CGPoint point = [self locationInView:view];
 	point.x -= margin.left;
@@ -47,8 +61,17 @@
 - (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin;
 @end
 
+/**
+ * To be written
+ */
 @implementation UITouch (UZTextView)
 
+/**
+ * To be written
+ * \param view To be written
+ * \param margin To be written
+ * \return To be written
+ */
 - (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin {
 	CGPoint point = [self locationInView:view];
 	point.x -= margin.left;
@@ -62,13 +85,7 @@
 
 #pragma mark - Class method to estimate attributed string size
 
-/**
- * Returns the bounding size required to draw the string.
- * \param attributedString Contents of the string to be drawn.
- * \param width The width constraint to apply when computing the string’s bounding rectangle.
- * \return A rectangle whose size component indicates the width and height required to draw the entire contents of the string.
- */
-+ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width {
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width __attribute__((deprecated)){
 	// CoreText
 	CTFramesetterRef _framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedString);
 	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
@@ -93,9 +110,6 @@
 	return frameSize;
 }
 
-/**
- * Prepares for reusing an object. You have to call this method before you set another attributed string to the object.
- */
 - (void)prepareForReuse {
 	_status = UZTextViewNoSelection;
 	_head = 0;
@@ -440,7 +454,7 @@
 	_durationToCancelSuperViewScrolling = 0.25;
 	
 	_longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(didChangeLongPressGesture:)];
-	_longPressGestureRecognizer.minimumPressDuration = 0.75;
+	_longPressGestureRecognizer.minimumPressDuration = 0.5;
 	[self addGestureRecognizer:_longPressGestureRecognizer];
 	
 	// Initialization code
