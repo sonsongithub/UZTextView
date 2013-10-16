@@ -47,6 +47,8 @@
 	
 	<option value="//api/name/highlightRanges">&nbsp;&nbsp;&nbsp;&nbsp;highlightRanges</option>
 	
+	<option value="//api/name/margin">&nbsp;&nbsp;&nbsp;&nbsp;margin</option>
+	
 	<option value="//api/name/minimumPressDuration">&nbsp;&nbsp;&nbsp;&nbsp;minimumPressDuration</option>
 	
 	<option value="//api/name/selectedRange">&nbsp;&nbsp;&nbsp;&nbsp;selectedRange</option>
@@ -57,6 +59,8 @@
 	<option value="class_methods">Class Methods</option>
 	
 	<option value="//api/name/sizeForAttributedString:withBoundWidth:">&nbsp;&nbsp;&nbsp;&nbsp;+ sizeForAttributedString:withBoundWidth:</option>
+	
+	<option value="//api/name/sizeForAttributedString:withBoundWidth:margin:">&nbsp;&nbsp;&nbsp;&nbsp;+ sizeForAttributedString:withBoundWidth:margin:</option>
 	
 	
 	
@@ -133,6 +137,8 @@
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/highlightRanges">highlightRanges</a></span></li>
 	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/margin">margin</a></span></li>
+	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/minimumPressDuration">minimumPressDuration</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/selectedRange">selectedRange</a></span></li>
@@ -144,6 +150,8 @@
 <li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#class_methods">Class Methods</a></span><ul>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/sizeForAttributedString:withBoundWidth:">sizeForAttributedString:withBoundWidth:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/sizeForAttributedString:withBoundWidth:margin:">sizeForAttributedString:withBoundWidth:margin:</a></span></li>
 	
 </ul></li>
 
@@ -279,7 +287,19 @@ The class supports the display of text using custom style and link information.<
 	
 </li><li>
 	<span class="tooltip">
+		<code><a href="#//api/name/margin">&nbsp;&nbsp;margin</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li><li>
+	<span class="tooltip">
 		<code><a href="#//api/name/sizeForAttributedString:withBoundWidth:">+&nbsp;sizeForAttributedString:withBoundWidth:</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/sizeForAttributedString:withBoundWidth:margin:">+&nbsp;sizeForAttributedString:withBoundWidth:margin:</a></code>
 	</span>
 	
 	
@@ -557,13 +577,49 @@ The delegate is sent messages when contents are selected and tapped.</p>
 </div>
 						
 						<div class="section-method">
+	<a name="//api/name/margin" title="margin"></a>
+	<h3 class="subsubtitle method-title">margin</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>UIEdgeInsets object, describes a margin around the content. The default value is UIEdgeInsetsZero.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) UIEdgeInsets margin</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">UZTextView.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
 	<a name="//api/name/minimumPressDuration" title="minimumPressDuration"></a>
 	<h3 class="subsubtitle method-title">minimumPressDuration</h3>
 	
 	
 	
 	<div class="method-subsection brief-description">
-		<p>The duration (in seconds) of a wait before text selection will start.</p>
+		<p>The duration (in seconds) of a wait before text selection will start. The unit of duration is secondes. The default value is 0.5.</p>
 	</div>		
 	
     
@@ -672,6 +728,67 @@ The delegate is sent messages when contents are selected and tapped.</p>
 	<div class="method-subsection return">
 		<h4 class="method-subtitle parameter-title">Return Value</h4>
 		<p>A rectangle whose size component indicates the width and height required to draw the entire contents of the string.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">UZTextView.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/sizeForAttributedString:withBoundWidth:margin:" title="sizeForAttributedString:withBoundWidth:margin:"></a>
+	<h3 class="subsubtitle method-title">sizeForAttributedString:withBoundWidth:margin:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>To be written</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>+ (CGSize)sizeForAttributedString:(NSAttributedString *)<em>attributedString</em> withBoundWidth:(float)<em>width</em> margin:(UIEdgeInsets)<em>margin</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>attributedString</em></dt>
+			<dd><p>To be written</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>width</em></dt>
+			<dd><p>To be written</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>margin</em></dt>
+			<dd><p>To be written</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>To be written</p>
 	</div>
 	
 	

@@ -95,7 +95,7 @@
 		width = cell.textView.frame.size.width;
 	}
 	for (Tweet *tweet in _tweets) {
-		float height = [UZTextView sizeForAttributedString:tweet.attributedString withBoundWidth:width].height + 36;
+		float height = [UZTextView sizeForAttributedString:tweet.attributedString withBoundWidth:width margin:_margin].height + 36;
 		tweet.height = height;
 	}
 }
@@ -151,6 +151,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+	
+	_margin = UIEdgeInsetsMake(10, 10, 10, 10);
 	
 	UISearchBar *searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, 240, 44)];
 	self.navigationItem.titleView = searchBar;
@@ -243,6 +245,7 @@
     
 	Tweet *tweet = [_tweets objectAtIndex:indexPath.row];
 	[cell.nameButton setTitle:tweet.info[@"user"][@"screen_name"] forState:UIControlStateNormal];
+	cell.textView.margin = _margin;
 	cell.textView.attributedString = tweet.attributedString;
 	cell.textView.delegate = self;
 	cell.textView.highlightRanges = tweet.highlightRanges;

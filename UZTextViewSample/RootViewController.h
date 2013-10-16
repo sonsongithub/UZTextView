@@ -13,6 +13,7 @@
 @interface RootViewController : UITableViewController <UZTextViewDelegate, UISearchBarDelegate> {
 	NSArray *_tweets;
 	NSString *_URLString;
+	UIEdgeInsets _margin;
 }
 
 @end

@@ -15,8 +15,7 @@ typedef enum _UZTextViewCursorDirection {
 
 @interface UZCursorView : UIView {
 	UZTextViewCursorDirection	_direction;
-	float						_cursorCirclrRadius;
-	float						_cursorLineWidth;
 }
 - (id)initWithCursorDirection:(UZTextViewCursorDirection)direction;
++ (CGRect)cursorRectWithEdgeRect:(CGRect)rect cursorDirection:(UZTextViewCursorDirection)direction;
 @end

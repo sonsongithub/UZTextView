@@ -13,10 +13,19 @@
 
 @interface UIGestureRecognizer (UZTextView)
 - (NSString*)stateDescription;
+
+- (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin;
 @end
 
+/**
+ * To be written
+ */
 @implementation UIGestureRecognizer (UZTextView)
 
+/**
+ * To be written
+ * \return To be written
+ */
 - (NSString*)stateDescription {
 	if (self.state == UIGestureRecognizerStatePossible)
 		return @"UIGestureRecognizerStatePossible";
@@ -33,19 +42,50 @@
 	return @"Unknown state";
 }
 
+/**
+ * To be written
+ * \param view To be written
+ * \param margin To be written
+ * \return To be written
+ */
+- (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin {
+	CGPoint point = [self locationInView:view];
+	point.x -= margin.left;
+	point.y -= margin.top;
+	return point;
+}
+
+@end
+
+@interface UITouch (UZTextView)
+- (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin;
+@end
+
+/**
+ * To be written
+ */
+@implementation UITouch (UZTextView)
+
+/**
+ * To be written
+ * \param view To be written
+ * \param margin To be written
+ * \return To be written
+ */
+- (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin {
+	CGPoint point = [self locationInView:view];
+	point.x -= margin.left;
+	point.y -= margin.top;
+	return point;
+}
+
 @end
 
 @implementation UZTextView
 
 #pragma mark - Class method to estimate attributed string size
 
-/**
- * Returns the bounding size required to draw the string.
- * \param attributedString Contents of the string to be drawn.
- * \param width The width constraint to apply when computing the string’s bounding rectangle.
- * \return A rectangle whose size component indicates the width and height required to draw the entire contents of the string.
- */
-+ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width {
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width __attribute__((deprecated)){
 	// CoreText
 	CTFramesetterRef _framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedString);
 	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
@@ -57,9 +97,19 @@
 	return frameSize;
 }
 
-/**
- * Prepares for reusing an object. You have to call this method before you set another attributed string to the object.
- */
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width margin:(UIEdgeInsets)margin {
+	// CoreText
+	CTFramesetterRef _framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedString);
+	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
+                                                                    CFRangeMake(0, attributedString.length),
+                                                                    NULL,
+                                                                    CGSizeMake(width - (margin.left + margin.right), CGFLOAT_MAX),
+                                                                    NULL);
+	frameSize.height += (margin.top + margin.bottom);
+	CFRelease(_framesetter);
+	return frameSize;
+}
+
 - (void)prepareForReuse {
 	_status = UZTextViewNoSelection;
 	_head = 0;
@@ -123,8 +173,15 @@
 #pragma mark - Instance method
 
 - (void)setCursorHidden:(BOOL)hidden {
-	[_leftCursor setFrame:[self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge]];
-	[_rightCursor setFrame:[self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge]];
+	CGRect leftFrame = [self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge];
+	leftFrame.origin.x += _margin.left;
+	leftFrame.origin.y += _margin.top;
+	[_leftCursor setFrame:leftFrame];
+	
+	CGRect rightFrame = [self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge];
+	rightFrame.origin.x += _margin.left;
+	rightFrame.origin.y += _margin.top;
+	[_rightCursor setFrame:rightFrame];
 	_leftCursor.hidden = hidden;
 	_rightCursor.hidden = hidden;
 }
@@ -147,7 +204,7 @@
 	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
                                                                     CFRangeMake(0, _attributedString.length),
                                                                     NULL,
-                                                                    CGSizeMake(self.frame.size.width, CGFLOAT_MAX),
+                                                                    CGSizeMake(self.frame.size.width - (_margin.left + _margin.right), CGFLOAT_MAX),
                                                                     NULL);
 	_contentRect = CGRectZero;
 	_contentRect.size = frameSize;
@@ -181,9 +238,8 @@
 		CGRect rect = CGRectZero;
 		if ([rects count]) {
 			rect = [[rects objectAtIndex:0] CGRectValue];
-			rect.size.width = 0;
 		}
-		return CGRectInset(rect, -6, -12);
+		return [UZCursorView cursorRectWithEdgeRect:rect cursorDirection:UZTextViewUpCursor];
 	}
 	else {
 		NSArray *rects = [self fragmentRectsForGlyphFromIndex:index toIndex:index];
@@ -191,9 +247,8 @@
 		if ([rects count]) {
 			rect = [[rects objectAtIndex:0] CGRectValue];
 			rect.origin.x += rect.size.width;
-			rect.size.width = 0;
 		}
-		return CGRectInset(rect, -6, -12);
+		return [UZCursorView cursorRectWithEdgeRect:rect cursorDirection:UZTextViewDownCursor];
 	}
 }
 
@@ -323,6 +378,14 @@
 - (void)drawContent {
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	
+	// draw frame for debug
+	[[UIColor redColor] setStroke];
+	CGContextStrokeRect(context, self.bounds);
+	[[UIColor blueColor] setStroke];
+	CGContextStrokeRect(context, UIEdgeInsetsInsetRect(self.bounds, _margin));
+	
+	CGContextTranslateCTM(context, _margin.left, _margin.top);
+	
 	// draw text
 	CGContextSaveGState(context);
     CGContextTranslateCTM(context, 0, _contentRect.size.height);
@@ -358,7 +421,7 @@
 	DNSLogMethod
 	DNSLog(@"%@", [_longPressGestureRecognizer stateDescription]);
     if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
-		[self setSelectionWithPoint:[gestureRecognizer locationInView:self]];
+		[self setSelectionWithPoint:[gestureRecognizer locationInView:self margin:_margin]];
 		_status = UZTextViewSelected;
 		[self setCursorHidden:YES];
 		[self setNeedsDisplay];
@@ -366,7 +429,7 @@
 		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
     }
 	else if (gestureRecognizer.state == UIGestureRecognizerStateChanged) {
-		[self setSelectionWithPoint:[gestureRecognizer locationInView:self]];
+		[self setSelectionWithPoint:[gestureRecognizer locationInView:self margin:_margin]];
 		[self setCursorHidden:YES];
 		[self setNeedsDisplay];
 		[_loupeView setVisible:YES animated:YES];
@@ -391,7 +454,7 @@
 	_durationToCancelSuperViewScrolling = 0.25;
 	
 	_longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(didChangeLongPressGesture:)];
-	_longPressGestureRecognizer.minimumPressDuration = 0.75;
+	_longPressGestureRecognizer.minimumPressDuration = 0.5;
 	[self addGestureRecognizer:_longPressGestureRecognizer];
 	
 	// Initialization code
@@ -522,7 +585,7 @@
 	
 	_headWhenBegan = _head;
 	_tailWhenBegan = _tail;
-	if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge], [touch locationInView:self]) && !_leftCursor.hidden && !_rightCursor.hidden) {
+	if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge], [touch locationInView:self margin:_margin]) && !_leftCursor.hidden && !_rightCursor.hidden) {
 		_status = UZTextViewEditingFromSelection;
 		[_loupeView setVisible:YES animated:YES];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
@@ -530,7 +593,7 @@
 			[self.delegate selectionDidBeginTextView:self];
 		[self setCursorHidden:NO];
 	}
-	else if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge], [touch locationInView:self]) && !_leftCursor.hidden && !_rightCursor.hidden) {
+	else if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge], [touch locationInView:self margin:_margin]) && !_leftCursor.hidden && !_rightCursor.hidden) {
 		_status = UZTextViewEditingToSelection;
 		[_loupeView setVisible:YES animated:YES];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
@@ -539,7 +602,7 @@
 		[self setCursorHidden:NO];
 	}
 	else {
-		_tappedLinkRange = [self rangeOfLinkStringAtPoint:[touch locationInView:self]];
+		_tappedLinkRange = [self rangeOfLinkStringAtPoint:[touch locationInView:self margin:_margin]];
 		[self setNeedsDisplay];
 	}
 }
@@ -547,7 +610,7 @@
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [touches anyObject];
 	if (_status == UZTextViewEditingFromSelection) {
-		int newHead = [self indexForPoint:[touch locationInView:self]];
+		int newHead = [self indexForPoint:[touch locationInView:self margin:_margin]];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 		if (newHead != kCFNotFound) {
 			if (newHead <= _tail) {
@@ -557,7 +620,7 @@
 		[self setCursorHidden:NO];
 	}
 	else if (_status == UZTextViewEditingToSelection) {
-		int newTail = [self indexForPoint:[touch locationInView:self]];
+		int newTail = [self indexForPoint:[touch locationInView:self margin:_margin]];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 		if (newTail != kCFNotFound) {
 			if (newTail >= _head) {
@@ -674,13 +737,16 @@
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
     if (CGRectContainsPoint(self.bounds, point)) {
+		CGPoint pointForUZTextViewContent = point;
+		pointForUZTextViewContent.x -= _margin.left;
+		pointForUZTextViewContent.y -= _margin.top;
 		NSMutableArray *rects = [NSMutableArray array];
 		[rects addObjectsFromArray:[self fragmentRectsForGlyphFromIndex:0 toIndex:self.attributedString.length-1]];
 		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge]]];
 		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge]]];
 		
 		for (NSValue *rectValue in rects) {
-			if (CGRectContainsPoint([rectValue CGRectValue], point))
+			if (CGRectContainsPoint([rectValue CGRectValue], pointForUZTextViewContent))
 				return [super hitTest:point withEvent:event];
 		}
 		if (_status != UZTextViewNoSelection) {
