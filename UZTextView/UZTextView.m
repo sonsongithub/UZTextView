@@ -73,6 +73,49 @@
 	
 	SAFE_CFRELEASE(_tokenizer);
 }
+
+#pragma mark - Setter and getter
+
+- (void)setAttributedString:(NSMutableAttributedString *)attributedString {
+	[self prepareForReuse];
+	_attributedString = attributedString;
+	
+	[self updateLayout];
+	[self setNeedsDisplay];
+}
+
+- (NSRange)selectedRange {
+	return NSMakeRange(_head, _tail - _head + 1);
+}
+
+- (void)setHighlightRanges:(NSArray *)highlightRanges {
+	_highlightRanges = [highlightRanges copy];
+	[self setNeedsDisplay];
+}
+
+- (void)setSelectedRange:(NSRange)selectedRange {
+	if (selectedRange.location >= self.attributedString.length)
+		return;
+	if (selectedRange.length > self.attributedString.length || selectedRange.location + selectedRange.length - 1 <= 0)
+		return;
+	_head = selectedRange.location;
+	_tail = selectedRange.location + selectedRange.length - 1;
+	_status = UZTextViewSelected;
+	[self setCursorHidden:NO];
+	[self setNeedsDisplay];
+	
+	[self showUIMenu];
+}
+
+- (void)setMinimumPressDuration:(CFTimeInterval)minimumPressDuration {
+	_minimumPressDuration = minimumPressDuration;
+	_longPressGestureRecognizer.minimumPressDuration = minimumPressDuration;
+}
+
+- (CFTimeInterval)minimumPressDuration {
+	return _longPressGestureRecognizer.minimumPressDuration;
+}
+
 @end
 
 @implementation UZTextView(Internal)
@@ -593,48 +636,6 @@
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
 	[self touchesEnded:touches withEvent:event];
-}
-
-#pragma mark - Setter and getter
-
-- (void)setAttributedString:(NSMutableAttributedString *)attributedString {
-	[self prepareForReuse];
-	_attributedString = attributedString;
-	
-	[self updateLayout];
-	[self setNeedsDisplay];
-}
-
-- (NSRange)selectedRange {
-	return NSMakeRange(_head, _tail - _head + 1);
-}
-
-- (void)setHighlightRanges:(NSArray *)highlightRanges {
-	_highlightRanges = [highlightRanges copy];
-	[self setNeedsDisplay];
-}
-
-- (void)setSelectedRange:(NSRange)selectedRange {
-	if (selectedRange.location >= self.attributedString.length)
-		return;
-	if (selectedRange.length > self.attributedString.length || selectedRange.location + selectedRange.length - 1 <= 0)
-		return;
-	_head = selectedRange.location;
-	_tail = selectedRange.location + selectedRange.length - 1;
-	_status = UZTextViewSelected;
-	[self setCursorHidden:NO];
-	[self setNeedsDisplay];
-	
-	[self showUIMenu];
-}
-
-- (void)setMinimumPressDuration:(CFTimeInterval)minimumPressDuration {
-	_minimumPressDuration = minimumPressDuration;
-	_longPressGestureRecognizer.minimumPressDuration = minimumPressDuration;
-}
-
-- (CFTimeInterval)minimumPressDuration {
-	return _longPressGestureRecognizer.minimumPressDuration;
 }
 
 #pragma mark - for UIMenuController(Override)
