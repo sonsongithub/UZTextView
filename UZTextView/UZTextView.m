@@ -227,7 +227,7 @@
 			rect = [[rects objectAtIndex:0] CGRectValue];
 			rect.size.width = 0;
 		}
-		return CGRectInset(rect, -6, -12);
+		return CGRectMake(rect.origin.x - 17, rect.origin.y - 10, 23, rect.size.height + 16);
 	}
 	else {
 		NSArray *rects = [self fragmentRectsForGlyphFromIndex:index toIndex:index];
@@ -237,7 +237,7 @@
 			rect.origin.x += rect.size.width;
 			rect.size.width = 0;
 		}
-		return CGRectInset(rect, -6, -12);
+		return CGRectMake(rect.origin.x - 6, rect.origin.y - 10, 23, rect.size.height + 16);
 	}
 }
 

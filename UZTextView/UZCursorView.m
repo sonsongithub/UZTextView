@@ -16,6 +16,10 @@
 	_cursorCirclrRadius = 6;
 	_cursorLineWidth = 2;
 	self.backgroundColor = [UIColor clearColor];
+	
+	// for debug
+	self.backgroundColor = [[UIColor greenColor] colorWithAlphaComponent:0.5];
+	
 	return self;
 }
 
@@ -31,17 +35,17 @@
 	CGPoint circleCenter;
 	
 	if (_direction == UZTextViewUpCursor) {
-		circleCenter = CGPointMake(CGRectGetMidX(rect), rect.origin.y + _cursorCirclrRadius);
+		circleCenter = CGPointMake(rect.size.width - _cursorCirclrRadius, rect.origin.y + _cursorCirclrRadius);
 		lineRect = CGRectMake(
 							  circleCenter.x - _cursorLineWidth/2, circleCenter.y,
-							  _cursorLineWidth, rect.size.height - _cursorCirclrRadius * 2
+							  _cursorLineWidth, rect.size.height - circleCenter.y
 							  );
 	}
 	else {
-		circleCenter = CGPointMake(CGRectGetMidX(rect), rect.origin.y + rect.size.height - _cursorCirclrRadius);
+		circleCenter = CGPointMake(_cursorCirclrRadius, rect.origin.y + rect.size.height - _cursorCirclrRadius);
 		lineRect = CGRectMake(
-							  circleCenter.x - _cursorLineWidth/2, rect.origin.y + _cursorCirclrRadius,
-							  _cursorLineWidth, rect.size.height - _cursorCirclrRadius * 2
+							  circleCenter.x - _cursorLineWidth/2, rect.origin.y,
+							  _cursorLineWidth, rect.origin.y + rect.size.height
 							  );
 	}
 	CGContextAddArc(context, circleCenter.x, circleCenter.y, _cursorCirclrRadius, 0, 2 * M_PI, 0);
