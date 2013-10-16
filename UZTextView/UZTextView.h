@@ -85,6 +85,9 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 	// Data
 	NSAttributedString				*_attributedString;
 	
+	// Layout
+	UIEdgeInsets					_margin;
+	
 	// CoreText
 	CTFramesetterRef				_framesetter;
     CTFrameRef						_frame;
@@ -163,12 +166,26 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 @property (nonatomic, copy) NSArray *highlightRanges;
 
 /**
+ * UIEdgeInsets object, describes a margin around the content. The default value is UIEdgeInsetsZero.
+ */
+@property (nonatomic, assign) UIEdgeInsets margin;
+
+/**
  * Returns the bounding size required to draw the string.
  * \param attributedString Contents of the string to be drawn.
  * \param width The width constraint to apply when computing the string’s bounding rectangle.
  * \return A rectangle whose size component indicates the width and height required to draw the entire contents of the string.
  */
-+ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width;
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width __attribute__((deprecated));
+
+/**
+ * Returns the bounding size required to draw the string.
+ * \param attributedString Contents of the string to be drawn.
+ * \param width The width constraint to apply when computing the string’s bounding rectangle.
+ * \param margin UIEdgeInsets object, describes a margin around the content. The default value is UIEdgeInsetsZero.
+ * \return A rectangle whose size component indicates the width and height required to draw the entire contents of the string.
+ */
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width margin:(UIEdgeInsets)margin;
 
 /**
  * Prepares for reusing an object. You have to call this method before you set another attributed string to the object.

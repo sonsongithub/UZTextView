@@ -95,7 +95,7 @@
 		width = cell.textView.frame.size.width;
 	}
 	for (Tweet *tweet in _tweets) {
-		float height = [UZTextView sizeForAttributedString:tweet.attributedString withBoundWidth:width].height + 36;
+		float height = [UZTextView sizeForAttributedString:tweet.attributedString withBoundWidth:width margin:UIEdgeInsetsMake(5, 5, 5, 5)].height + 36;
 		tweet.height = height;
 	}
 }
@@ -243,6 +243,7 @@
     
 	Tweet *tweet = [_tweets objectAtIndex:indexPath.row];
 	[cell.nameButton setTitle:tweet.info[@"user"][@"screen_name"] forState:UIControlStateNormal];
+	cell.textView.margin = UIEdgeInsetsMake(5, 5, 5, 5);
 	cell.textView.attributedString = tweet.attributedString;
 	cell.textView.delegate = self;
 	cell.textView.highlightRanges = tweet.highlightRanges;

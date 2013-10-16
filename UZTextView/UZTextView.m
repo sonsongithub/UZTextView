@@ -13,6 +13,7 @@
 
 @interface UIGestureRecognizer (UZTextView)
 - (NSString*)stateDescription;
+- (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin;
 @end
 
 @implementation UIGestureRecognizer (UZTextView)
@@ -31,6 +32,28 @@
 	if (self.state == UIGestureRecognizerStateRecognized)
 		return @"UIGestureRecognizerStateRecognized";
 	return @"Unknown state";
+}
+
+- (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin {
+	CGPoint point = [self locationInView:view];
+	point.x -= margin.left;
+	point.y -= margin.top;
+	return point;
+}
+
+@end
+
+@interface UITouch (UZTextView)
+- (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin;
+@end
+
+@implementation UITouch (UZTextView)
+
+- (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin {
+	CGPoint point = [self locationInView:view];
+	point.x -= margin.left;
+	point.y -= margin.top;
+	return point;
 }
 
 @end
@@ -53,6 +76,19 @@
                                                                     NULL,
                                                                     CGSizeMake(width, CGFLOAT_MAX),
                                                                     NULL);
+	CFRelease(_framesetter);
+	return frameSize;
+}
+
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width margin:(UIEdgeInsets)margin {
+	// CoreText
+	CTFramesetterRef _framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedString);
+	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
+                                                                    CFRangeMake(0, attributedString.length),
+                                                                    NULL,
+                                                                    CGSizeMake(width - (margin.left + margin.right), CGFLOAT_MAX),
+                                                                    NULL);
+	frameSize.height += (margin.top + margin.bottom);
 	CFRelease(_framesetter);
 	return frameSize;
 }
@@ -123,8 +159,15 @@
 #pragma mark - Instance method
 
 - (void)setCursorHidden:(BOOL)hidden {
-	[_leftCursor setFrame:[self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge]];
-	[_rightCursor setFrame:[self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge]];
+	CGRect leftFrame = [self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge];
+	leftFrame.origin.x += _margin.left;
+	leftFrame.origin.y += _margin.top;
+	[_leftCursor setFrame:leftFrame];
+	
+	CGRect rightFrame = [self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge];
+	rightFrame.origin.x += _margin.left;
+	rightFrame.origin.y += _margin.top;
+	[_rightCursor setFrame:rightFrame];
 	_leftCursor.hidden = hidden;
 	_rightCursor.hidden = hidden;
 }
@@ -147,9 +190,10 @@
 	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
                                                                     CFRangeMake(0, _attributedString.length),
                                                                     NULL,
-                                                                    CGSizeMake(self.frame.size.width, CGFLOAT_MAX),
+                                                                    CGSizeMake(self.frame.size.width - (_margin.left + _margin.right), CGFLOAT_MAX),
                                                                     NULL);
 	_contentRect = CGRectZero;
+	frameSize.height += (_margin.top + _margin.bottom);
 	_contentRect.size = frameSize;
 	
 	CGMutablePathRef path = CGPathCreateMutable();
@@ -323,6 +367,14 @@
 - (void)drawContent {
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	
+	// draw frame for debug
+	[[UIColor redColor] setFill];
+	CGContextFillRect(context, self.bounds);
+	[[UIColor blueColor] setFill];
+	CGContextFillRect(context, UIEdgeInsetsInsetRect(self.bounds, _margin));
+	
+	CGContextTranslateCTM(context, _margin.left, _margin.top);
+	
 	// draw text
 	CGContextSaveGState(context);
     CGContextTranslateCTM(context, 0, _contentRect.size.height);
@@ -358,25 +410,25 @@
 	DNSLogMethod
 	DNSLog(@"%@", [_longPressGestureRecognizer stateDescription]);
     if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
-		[self setSelectionWithPoint:[gestureRecognizer locationInView:self]];
+		[self setSelectionWithPoint:[gestureRecognizer locationInView:self margin:_margin]];
 		_status = UZTextViewSelected;
 		[self setCursorHidden:YES];
 		[self setNeedsDisplay];
 		[_loupeView setVisible:YES animated:YES];
-		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
+		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self margin:_margin] textView:self];
     }
 	else if (gestureRecognizer.state == UIGestureRecognizerStateChanged) {
-		[self setSelectionWithPoint:[gestureRecognizer locationInView:self]];
+		[self setSelectionWithPoint:[gestureRecognizer locationInView:self margin:_margin]];
 		[self setCursorHidden:YES];
 		[self setNeedsDisplay];
 		[_loupeView setVisible:YES animated:YES];
-		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
+		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self margin:_margin] textView:self];
     }
 	else if (gestureRecognizer.state == UIGestureRecognizerStateEnded || gestureRecognizer.state == UIGestureRecognizerStateCancelled || gestureRecognizer.state == UIGestureRecognizerStateFailed) {
 		[self setCursorHidden:NO];
 		[self setNeedsDisplay];
 		[_loupeView setVisible:NO animated:YES];
-		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
+		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self  margin:_margin] textView:self];
 		[self becomeFirstResponder];
 		[self showUIMenu];
     }
@@ -522,24 +574,24 @@
 	
 	_headWhenBegan = _head;
 	_tailWhenBegan = _tail;
-	if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge], [touch locationInView:self]) && !_leftCursor.hidden && !_rightCursor.hidden) {
+	if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge], [touch locationInView:self margin:_margin]) && !_leftCursor.hidden && !_rightCursor.hidden) {
 		_status = UZTextViewEditingFromSelection;
 		[_loupeView setVisible:YES animated:YES];
-		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
+		[_loupeView updateAtLocation:[touch locationInView:self margin:_margin] textView:self];
 		if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 			[self.delegate selectionDidBeginTextView:self];
 		[self setCursorHidden:NO];
 	}
-	else if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge], [touch locationInView:self]) && !_leftCursor.hidden && !_rightCursor.hidden) {
+	else if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge], [touch locationInView:self margin:_margin]) && !_leftCursor.hidden && !_rightCursor.hidden) {
 		_status = UZTextViewEditingToSelection;
 		[_loupeView setVisible:YES animated:YES];
-		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
+		[_loupeView updateAtLocation:[touch locationInView:self margin:_margin] textView:self];
 		if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 			[self.delegate selectionDidBeginTextView:self];
 		[self setCursorHidden:NO];
 	}
 	else {
-		_tappedLinkRange = [self rangeOfLinkStringAtPoint:[touch locationInView:self]];
+		_tappedLinkRange = [self rangeOfLinkStringAtPoint:[touch locationInView:self margin:_margin]];
 		[self setNeedsDisplay];
 	}
 }
@@ -547,8 +599,8 @@
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [touches anyObject];
 	if (_status == UZTextViewEditingFromSelection) {
-		int newHead = [self indexForPoint:[touch locationInView:self]];
-		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
+		int newHead = [self indexForPoint:[touch locationInView:self margin:_margin]];
+		[_loupeView updateAtLocation:[touch locationInView:self margin:_margin] textView:self];
 		if (newHead != kCFNotFound) {
 			if (newHead <= _tail) {
 				_head = newHead;
@@ -557,8 +609,8 @@
 		[self setCursorHidden:NO];
 	}
 	else if (_status == UZTextViewEditingToSelection) {
-		int newTail = [self indexForPoint:[touch locationInView:self]];
-		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
+		int newTail = [self indexForPoint:[touch locationInView:self margin:_margin]];
+		[_loupeView updateAtLocation:[touch locationInView:self margin:_margin] textView:self];
 		if (newTail != kCFNotFound) {
 			if (newTail >= _head) {
 				_tail = newTail;
@@ -674,13 +726,16 @@
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
     if (CGRectContainsPoint(self.bounds, point)) {
+		CGPoint pointForUZTextViewContent = point;
+		pointForUZTextViewContent.x -= _margin.left;
+		pointForUZTextViewContent.y -= _margin.top;
 		NSMutableArray *rects = [NSMutableArray array];
 		[rects addObjectsFromArray:[self fragmentRectsForGlyphFromIndex:0 toIndex:self.attributedString.length-1]];
 		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge]]];
 		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge]]];
 		
 		for (NSValue *rectValue in rects) {
-			if (CGRectContainsPoint([rectValue CGRectValue], point))
+			if (CGRectContainsPoint([rectValue CGRectValue], pointForUZTextViewContent))
 				return [super hitTest:point withEvent:event];
 		}
 		if (_status != UZTextViewNoSelection) {
