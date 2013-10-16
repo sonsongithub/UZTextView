@@ -247,12 +247,12 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 - (void)drawSelectedLinkFragments;
 
 /**
- * To be written
+ * Draw the frame rectangles with specified color, containing specified string.
  * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  *
- * \param fromIndex To be written
- * \param toIndex To be written
- * \param color To be written
+ * \param fromIndex A beginning index to specify strings. The value must lie within the bounds of the receiver.
+ * \param toIndex A ending index to specify strings. The value must lie within the bounds of the receiver.
+ * \param color UIColor object to fill rectangles.
  */
 - (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex color:(UIColor*)color;
 
@@ -269,33 +269,33 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 - (void)drawContent;
 
 /**
- * To be written
+ * Callback method for the UILongPressGestureRecognizer object.
  * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  *
- * \param gestureRecognizer To be written
+ * \param gestureRecognizer The UILongPressGestureRecognizer object tells this method.
  */
 - (void)didChangeLongPressGesture:(UILongPressGestureRecognizer *)gestureRecognizer;
 
 /**
- * To be written
+ * Initialize all properties. This method is called in `init` methods.
  * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  */
 - (void)prepareForInitialization;
 
 /**
- * To be written
+ * Returns the index range of the link element which locates at the point user tapped.
  * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  *
- * \param point To be written
- * \return To be written
+ * \param point The CGPoint object indicates the location user tapped.
+ * \return Returns index range of the link element.
  */
 - (NSRange)rangeOfLinkStringAtPoint:(CGPoint)point;
 
 /**
- * To be written
+ * Extract and select a word which locates at the point user tapped, using CFStringTokenizer.
  * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  *
- * \param point To be written
+ * \param point The CGPoint object indicates the location user tapped.
  */
 - (void)setSelectionWithPoint:(CGPoint)point;
 
