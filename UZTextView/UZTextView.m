@@ -193,7 +193,6 @@
                                                                     CGSizeMake(self.frame.size.width - (_margin.left + _margin.right), CGFLOAT_MAX),
                                                                     NULL);
 	_contentRect = CGRectZero;
-	frameSize.height += (_margin.top + _margin.bottom);
 	_contentRect.size = frameSize;
 	
 	CGMutablePathRef path = CGPathCreateMutable();
@@ -368,10 +367,10 @@
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	
 	// draw frame for debug
-	[[UIColor redColor] setFill];
-	CGContextFillRect(context, self.bounds);
-	[[UIColor blueColor] setFill];
-	CGContextFillRect(context, UIEdgeInsetsInsetRect(self.bounds, _margin));
+	[[UIColor redColor] setStroke];
+	CGContextStrokeRect(context, self.bounds);
+	[[UIColor blueColor] setStroke];
+	CGContextStrokeRect(context, UIEdgeInsetsInsetRect(self.bounds, _margin));
 	
 	CGContextTranslateCTM(context, _margin.left, _margin.top);
 	
