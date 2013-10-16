@@ -294,16 +294,6 @@
 	}
 }
 
-- (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex {
-	// Set drawing color
-	[[self.tintColor colorWithAlphaComponent:_tintAlpha] setFill];
-	CGContextRef context = UIGraphicsGetCurrentContext();
-	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:fromIndex toIndex:toIndex];
-	for (NSValue *rectValue in fragmentRects) {
-		CGContextFillRect(context, [rectValue CGRectValue]);
-	}
-}
-
 - (void)drawStringRectForDebug {
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	
@@ -351,11 +341,15 @@
 	}
 	// draw selected strings
 	if (_status > 0)
-		[self drawSelectedTextFragmentRectsFromIndex:_head toIndex:_tail];
+		[self drawSelectedTextFragmentRectsFromIndex:_head
+											 toIndex:_tail
+											   color:[self.tintColor colorWithAlphaComponent:_tintAlpha]];
 	
 	// draw tapped link range background
 	if (_tappedLinkRange.length > 0)
-		[self drawSelectedTextFragmentRectsFromIndex:_tappedLinkRange.location toIndex:_tappedLinkRange.location + _tappedLinkRange.length - 1];
+		[self drawSelectedTextFragmentRectsFromIndex:_tappedLinkRange.location
+											 toIndex:_tappedLinkRange.location + _tappedLinkRange.length - 1
+											   color:[self.tintColor colorWithAlphaComponent:_tintAlpha]];
 }
 
 #pragma mark - UILongPressGestureDelegate

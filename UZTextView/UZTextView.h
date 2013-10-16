@@ -256,22 +256,13 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 - (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex color:(UIColor*)color;
 
 /**
- * To be written
- * \warning This is an internal/private method. Use this method in subclass of UZTextView.
- *
- * \param fromIndex To be written
- * \param toIndex To be written
- */
-- (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex;
-
-/**
- * To be written
+ * Draw the background rectangles of strings for debugging.
  * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  */
 - (void)drawStringRectForDebug;
 
 /**
- * To be written
+ * Draw all contents.
  * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  */
 - (void)drawContent;
