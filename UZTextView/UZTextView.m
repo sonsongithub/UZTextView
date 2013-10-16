@@ -73,6 +73,49 @@
 	
 	SAFE_CFRELEASE(_tokenizer);
 }
+
+#pragma mark - Setter and getter
+
+- (void)setAttributedString:(NSMutableAttributedString *)attributedString {
+	[self prepareForReuse];
+	_attributedString = attributedString;
+	
+	[self updateLayout];
+	[self setNeedsDisplay];
+}
+
+- (NSRange)selectedRange {
+	return NSMakeRange(_head, _tail - _head + 1);
+}
+
+- (void)setHighlightRanges:(NSArray *)highlightRanges {
+	_highlightRanges = [highlightRanges copy];
+	[self setNeedsDisplay];
+}
+
+- (void)setSelectedRange:(NSRange)selectedRange {
+	if (selectedRange.location >= self.attributedString.length)
+		return;
+	if (selectedRange.length > self.attributedString.length || selectedRange.location + selectedRange.length - 1 <= 0)
+		return;
+	_head = selectedRange.location;
+	_tail = selectedRange.location + selectedRange.length - 1;
+	_status = UZTextViewSelected;
+	[self setCursorHidden:NO];
+	[self setNeedsDisplay];
+	
+	[self showUIMenu];
+}
+
+- (void)setMinimumPressDuration:(CFTimeInterval)minimumPressDuration {
+	_minimumPressDuration = minimumPressDuration;
+	_longPressGestureRecognizer.minimumPressDuration = minimumPressDuration;
+}
+
+- (CFTimeInterval)minimumPressDuration {
+	return _longPressGestureRecognizer.minimumPressDuration;
+}
+
 @end
 
 @implementation UZTextView(Internal)
@@ -115,12 +158,8 @@
 	CGPathRelease(path);
 }
 
-- (NSRange)selectedRange {
-	return NSMakeRange(_head, _tail - _head + 1);
-}
-
 - (void)showUIMenu {
-	[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_head toIndex:_tail] inView:self];
+	[[UIMenuController sharedMenuController] setTargetRect:[self circumscribingRectForStringFromIndex:_head toIndex:_tail] inView:self];
 	[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
 }
 
@@ -206,7 +245,7 @@
 	return [NSArray arrayWithArray:fragmentRects];
 }
 
-- (CGRect)fragmentRectForSelectedStringFromIndex:(int)fromIndex toIndex:(int)toIndex {
+- (CGRect)circumscribingRectForStringFromIndex:(int)fromIndex toIndex:(int)toIndex {
 	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:fromIndex toIndex:toIndex];
 	CGRect unifiedRect = [[fragmentRects objectAtIndex:0] CGRectValue];
 	for (NSValue *rectValue in fragmentRects) {
@@ -248,16 +287,6 @@
 - (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex color:(UIColor*)color {
 	// Set drawing color
 	[color setFill];
-	CGContextRef context = UIGraphicsGetCurrentContext();
-	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:fromIndex toIndex:toIndex];
-	for (NSValue *rectValue in fragmentRects) {
-		CGContextFillRect(context, [rectValue CGRectValue]);
-	}
-}
-
-- (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex {
-	// Set drawing color
-	[[self.tintColor colorWithAlphaComponent:_tintAlpha] setFill];
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:fromIndex toIndex:toIndex];
 	for (NSValue *rectValue in fragmentRects) {
@@ -312,11 +341,15 @@
 	}
 	// draw selected strings
 	if (_status > 0)
-		[self drawSelectedTextFragmentRectsFromIndex:_head toIndex:_tail];
+		[self drawSelectedTextFragmentRectsFromIndex:_head
+											 toIndex:_tail
+											   color:[self.tintColor colorWithAlphaComponent:_tintAlpha]];
 	
 	// draw tapped link range background
 	if (_tappedLinkRange.length > 0)
-		[self drawSelectedTextFragmentRectsFromIndex:_tappedLinkRange.location toIndex:_tappedLinkRange.location + _tappedLinkRange.length - 1];
+		[self drawSelectedTextFragmentRectsFromIndex:_tappedLinkRange.location
+											 toIndex:_tappedLinkRange.location + _tappedLinkRange.length - 1
+											   color:[self.tintColor colorWithAlphaComponent:_tintAlpha]];
 }
 
 #pragma mark - UILongPressGestureDelegate
@@ -597,44 +630,6 @@
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
 	[self touchesEnded:touches withEvent:event];
-}
-
-#pragma mark - Setter and getter
-
-- (void)setAttributedString:(NSMutableAttributedString *)attributedString {
-	[self prepareForReuse];
-	_attributedString = attributedString;
-	
-	[self updateLayout];
-	[self setNeedsDisplay];
-}
-
-- (void)setHighlightRanges:(NSArray *)highlightRanges {
-	_highlightRanges = [highlightRanges copy];
-	[self setNeedsDisplay];
-}
-
-- (void)setSelectedRange:(NSRange)selectedRange {
-	if (selectedRange.location >= self.attributedString.length)
-		return;
-	if (selectedRange.length > self.attributedString.length || selectedRange.location + selectedRange.length - 1 <= 0)
-		return;
-	_head = selectedRange.location;
-	_tail = selectedRange.location + selectedRange.length - 1;
-	_status = UZTextViewSelected;
-	[self setCursorHidden:NO];
-	[self setNeedsDisplay];
-	
-	[self showUIMenu];
-}
-
-- (void)setMinimumPressDuration:(CFTimeInterval)minimumPressDuration {
-	_minimumPressDuration = minimumPressDuration;
-	_longPressGestureRecognizer.minimumPressDuration = minimumPressDuration;
-}
-
-- (CFTimeInterval)minimumPressDuration {
-	return _longPressGestureRecognizer.minimumPressDuration;
 }
 
 #pragma mark - for UIMenuController(Override)
