@@ -220,12 +220,12 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 - (CGRect)fragmentRectForCursorAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side;
 
 /**
- * To be written
+ * Returns the array whose frame rectangles describes regions of strings by specified character indices.
  * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  *
- * \param fromIndex To be written
- * \param toIndex To be written
- * \return To be written
+ * \param fromIndex A beginning index to specify strings. The value must lie within the bounds of the receiver.
+ * \param toIndex A ending index to specify strings. The value must lie within the bounds of the receiver.
+ * \return An NSArray object containing frame rectangles.
  */
 - (NSArray*)fragmentRectsForGlyphFromIndex:(int)fromIndex toIndex:(int)toIndex;
 
@@ -240,7 +240,8 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 - (CGRect)circumscribingRectForStringFromIndex:(int)fromIndex toIndex:(int)toIndex;
 
 /**
- * To be written
+ * Draw the frame rectangle with tintColor containing the tapped link element of string.
+ * Draw nothing when user do not tap any links.
  * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  */
 - (void)drawSelectedLinkFragments;
