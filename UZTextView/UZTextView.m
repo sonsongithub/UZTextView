@@ -224,9 +224,8 @@
 		CGRect rect = CGRectZero;
 		if ([rects count]) {
 			rect = [[rects objectAtIndex:0] CGRectValue];
-			rect.size.width = 0;
 		}
-		return CGRectMake(rect.origin.x - 17, rect.origin.y - 10, 23, rect.size.height + 16);
+		return [UZCursorView cursorRectWithEdgeRect:rect cursorDirection:UZTextViewUpCursor];
 	}
 	else {
 		NSArray *rects = [self fragmentRectsForGlyphFromIndex:index toIndex:index];
@@ -234,9 +233,8 @@
 		if ([rects count]) {
 			rect = [[rects objectAtIndex:0] CGRectValue];
 			rect.origin.x += rect.size.width;
-			rect.size.width = 0;
 		}
-		return CGRectMake(rect.origin.x - 6, rect.origin.y - 10, 23, rect.size.height + 16);
+		return [UZCursorView cursorRectWithEdgeRect:rect cursorDirection:UZTextViewDownCursor];
 	}
 }
 

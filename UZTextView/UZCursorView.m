@@ -8,13 +8,32 @@
 
 #import "UZCursorView.h"
 
+#define UZ_CURSOR_BALL_RADIUS	6
+#define UZ_CURSOR_POLE_WIDTH	2
+
+#define UZ_CURSOR_HORIZONTAL_MARGIN 10
+#define UZ_CURSOR_VERTICAL_MARGIN 10
+
 @implementation UZCursorView
+
++ (CGRect)cursorRectWithEdgeRect:(CGRect)rect cursorDirection:(UZTextViewCursorDirection)direction {
+	if (direction == UZTextViewUpCursor) {
+		return CGRectMake(rect.origin.x - UZ_CURSOR_BALL_RADIUS - UZ_CURSOR_HORIZONTAL_MARGIN,
+						  rect.origin.y - UZ_CURSOR_VERTICAL_MARGIN,
+						  UZ_CURSOR_HORIZONTAL_MARGIN + UZ_CURSOR_BALL_RADIUS * 2,
+						  rect.size.height + UZ_CURSOR_VERTICAL_MARGIN * 2);
+	}
+	else {
+		return CGRectMake(rect.origin.x - UZ_CURSOR_BALL_RADIUS,
+						  rect.origin.y - UZ_CURSOR_VERTICAL_MARGIN,
+						  UZ_CURSOR_HORIZONTAL_MARGIN + UZ_CURSOR_BALL_RADIUS * 2,
+						  rect.size.height + UZ_CURSOR_VERTICAL_MARGIN * 2);
+	}
+}
 
 - (id)initWithCursorDirection:(UZTextViewCursorDirection)direction {
 	self = [super initWithFrame:CGRectZero];
 	_direction = direction;
-	_cursorCirclrRadius = 6;
-	_cursorLineWidth = 2;
 	self.backgroundColor = [UIColor clearColor];
 	
 	// for debug
@@ -35,20 +54,20 @@
 	CGPoint circleCenter;
 	
 	if (_direction == UZTextViewUpCursor) {
-		circleCenter = CGPointMake(rect.size.width - _cursorCirclrRadius, rect.origin.y + _cursorCirclrRadius);
+		circleCenter = CGPointMake(rect.size.width - UZ_CURSOR_BALL_RADIUS, rect.origin.y + UZ_CURSOR_BALL_RADIUS);
 		lineRect = CGRectMake(
-							  circleCenter.x - _cursorLineWidth/2, circleCenter.y,
-							  _cursorLineWidth, rect.size.height - circleCenter.y
+							  circleCenter.x - UZ_CURSOR_POLE_WIDTH/2, circleCenter.y,
+							  UZ_CURSOR_POLE_WIDTH, rect.size.height - circleCenter.y
 							  );
 	}
 	else {
-		circleCenter = CGPointMake(_cursorCirclrRadius, rect.origin.y + rect.size.height - _cursorCirclrRadius);
+		circleCenter = CGPointMake(UZ_CURSOR_BALL_RADIUS, rect.origin.y + rect.size.height - UZ_CURSOR_BALL_RADIUS);
 		lineRect = CGRectMake(
-							  circleCenter.x - _cursorLineWidth/2, rect.origin.y,
-							  _cursorLineWidth, rect.origin.y + rect.size.height
+							  circleCenter.x - UZ_CURSOR_POLE_WIDTH/2, rect.origin.y,
+							  UZ_CURSOR_POLE_WIDTH, rect.origin.y + rect.size.height
 							  );
 	}
-	CGContextAddArc(context, circleCenter.x, circleCenter.y, _cursorCirclrRadius, 0, 2 * M_PI, 0);
+	CGContextAddArc(context, circleCenter.x, circleCenter.y, UZ_CURSOR_BALL_RADIUS, 0, 2 * M_PI, 0);
 	CGContextClosePath(context);
 	[[self.tintColor colorWithAlphaComponent:1] setFill];
 	CGContextFillPath(context);
