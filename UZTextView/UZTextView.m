@@ -115,10 +115,6 @@
 	CGPathRelease(path);
 }
 
-- (NSRange)selectedRange {
-	return NSMakeRange(_head, _tail - _head + 1);
-}
-
 - (void)showUIMenu {
 	[[UIMenuController sharedMenuController] setTargetRect:[self fragmentRectForSelectedStringFromIndex:_head toIndex:_tail] inView:self];
 	[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
@@ -607,6 +603,10 @@
 	
 	[self updateLayout];
 	[self setNeedsDisplay];
+}
+
+- (NSRange)selectedRange {
+	return NSMakeRange(_head, _tail - _head + 1);
 }
 
 - (void)setHighlightRanges:(NSArray *)highlightRanges {

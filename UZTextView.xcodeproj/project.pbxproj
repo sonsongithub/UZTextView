@@ -45,9 +45,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		14B29459180E2542000DCA46 /* UZTextView-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UZTextView-Prefix.pch"; sourceTree = SOURCE_ROOT; };
 		14F8866817C2BB02006F5514 /* libUZTextView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libUZTextView.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		14F8866B17C2BB02006F5514 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		14F8866F17C2BB02006F5514 /* UZTextView-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UZTextView-Prefix.pch"; sourceTree = "<group>"; };
 		14F8867017C2BB02006F5514 /* UZTextView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UZTextView.h; sourceTree = "<group>"; };
 		14F8867217C2BB02006F5514 /* UZTextView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UZTextView.m; sourceTree = "<group>"; };
 		14F8867917C2BB02006F5514 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
@@ -141,7 +141,6 @@
 				14F886E517C2BFA0006F5514 /* UZCursorView.m */,
 				14F886E617C2BFA0006F5514 /* UZLoupeView.h */,
 				14F886E717C2BFA0006F5514 /* UZLoupeView.m */,
-				14F8866F17C2BB02006F5514 /* UZTextView-Prefix.pch */,
 			);
 			path = UZTextView;
 			sourceTree = "<group>";
@@ -179,6 +178,7 @@
 				14F8869C17C2BB4A006F5514 /* UZTextViewSample-Info.plist */,
 				14F8869D17C2BB4A006F5514 /* InfoPlist.strings */,
 				14F886A017C2BB4A006F5514 /* main.m */,
+				14B29459180E2542000DCA46 /* UZTextView-Prefix.pch */,
 				14F886A217C2BB4A006F5514 /* UZTextViewSample-Prefix.pch */,
 			);
 			name = "Supporting Files";
@@ -410,7 +410,7 @@
 			buildSettings = {
 				DSTROOT = /tmp/UZTextView.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "UZTextView/UZTextView-Prefix.pch";
+				GCC_PREFIX_HEADER = "UZTextView-Prefix.pch";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -422,7 +422,7 @@
 			buildSettings = {
 				DSTROOT = /tmp/UZTextView.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "UZTextView/UZTextView-Prefix.pch";
+				GCC_PREFIX_HEADER = "UZTextView-Prefix.pch";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

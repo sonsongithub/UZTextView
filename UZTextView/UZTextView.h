@@ -171,22 +171,51 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 - (void)prepareForReuse;
 @end
 
-@interface UZTextView(internal)
+@interface UZTextView(Internal)
 
-- (CGRect)rectForTappingPoint:(CGPoint)point withMargin:(float)margin;
-
+/**
+ * Hides/shows the cursors on UZTextView.
+ *
+ * \param hidden Specify YES to hide the cursors or NO to show it.
+ */
 - (void)setCursorHidden:(BOOL)hidden;
 
+/**s
+ * Update layout of UZTextView.
+ * CTFrameSetter, CTFrame is created, and the content size is calculated.
+ * You have to this method after updating attributedString.
+ */
 - (void)updateLayout;
 
-- (NSRange)selectedRange;
-
+/**
+ * Shows UIMenuController on the receiver.
+ * \discussion You have to override `canBecomeFirstResponder` or this method if you want to make it hide or edit its items forcely.
+ */
 - (void)showUIMenu;
 
+/**
+ * Deselects selected text of the receiver.
+ *
+ * \return YES if the receiver's text is selected or NO if it's not.
+ */
 - (BOOL)cancelSelectedText;
 
+/**
+ * Returns the frame rectangle, which describes the cursor location and size.
+ *
+ * \param index Index value to show the cursor.
+ * \param side The left of right position to show the cursor. See UZTextViewGlyphEdgeType.
+ * \return The frame rectangle of the cursor.
+ */
 - (CGRect)fragmentRectForCursorAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side;
 
+/**
+ * Returns the array whose frame rectangles which describes the
+ *
+ * \param fromIndex a
+ * \param toIndex b
+ * \return c
+ */
 - (NSArray*)fragmentRectsForGlyphFromIndex:(int)fromIndex toIndex:(int)toIndex;
 
 - (CGRect)fragmentRectForSelectedStringFromIndex:(int)fromIndex toIndex:(int)toIndex;
