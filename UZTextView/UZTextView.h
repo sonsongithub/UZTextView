@@ -124,6 +124,11 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 	float							_tintAlpha;
 	float							_durationToCancelSuperViewScrolling;
 }
+
+/**
+ * \name Public methods
+ */
+
 /**
  * Receiver's delegate.
  * The delegate is sent messages when contents are selected and tapped.
@@ -175,26 +180,30 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 
 /**
  * Hides/shows the cursors on UZTextView.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  *
  * \param hidden Specify YES to hide the cursors or NO to show it.
  */
 - (void)setCursorHidden:(BOOL)hidden;
 
-/**s
- * Update layout of UZTextView.
+/**
+ * Updates layout of UZTextView.
  * CTFrameSetter, CTFrame is created, and the content size is calculated.
  * You have to this method after updating attributedString.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  */
 - (void)updateLayout;
 
 /**
  * Shows UIMenuController on the receiver.
  * \discussion You have to override `canBecomeFirstResponder` or this method if you want to make it hide or edit its items forcely.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  */
 - (void)showUIMenu;
 
 /**
  * Deselects selected text of the receiver.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  *
  * \return YES if the receiver's text is selected or NO if it's not.
  */
@@ -202,6 +211,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 
 /**
  * Returns the frame rectangle, which describes the cursor location and size.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  *
  * \param index Index value to show the cursor.
  * \param side The left of right position to show the cursor. See UZTextViewGlyphEdgeType.
@@ -210,33 +220,99 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 - (CGRect)fragmentRectForCursorAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side;
 
 /**
- * Returns the array whose frame rectangles which describes the
+ * To be written
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  *
- * \param fromIndex a
- * \param toIndex b
- * \return c
+ * \param fromIndex To be written
+ * \param toIndex To be written
+ * \return To be written
  */
 - (NSArray*)fragmentRectsForGlyphFromIndex:(int)fromIndex toIndex:(int)toIndex;
 
+/**
+ * To be written
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \param fromIndex To be written
+ * \param toIndex To be written
+ * \return To be written
+ */
 - (CGRect)fragmentRectForSelectedStringFromIndex:(int)fromIndex toIndex:(int)toIndex;
 
+/**
+ * To be written
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ */
 - (void)drawSelectedLinkFragments;
 
+/**
+ * To be written
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \param fromIndex To be written
+ * \param toIndex To be written
+ * \param color To be written
+ */
 - (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex color:(UIColor*)color;
 
+/**
+ * To be written
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \param fromIndex To be written
+ * \param toIndex To be written
+ */
 - (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex;
 
+/**
+ * To be written
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ */
 - (void)drawStringRectForDebug;
 
+/**
+ * To be written
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ */
 - (void)drawContent;
 
+/**
+ * To be written
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \param gestureRecognizer To be written
+ */
 - (void)didChangeLongPressGesture:(UILongPressGestureRecognizer *)gestureRecognizer;
 
+/**
+ * To be written
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ */
 - (void)prepareForInitialization;
 
+/**
+ * To be written
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \param point To be written
+ * \return To be written
+ */
 - (NSRange)rangeOfLinkStringAtPoint:(CGPoint)point;
 
+/**
+ * To be written
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \param point To be written
+ */
 - (void)setSelectionWithPoint:(CGPoint)point;
 
+/**
+ * To be written
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \param point To be written
+ * \return To be written
+ */
 - (CFIndex)indexForPoint:(CGPoint)point;
 @end
