@@ -292,7 +292,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 - (NSRange)rangeOfLinkStringAtPoint:(CGPoint)point;
 
 /**
- * Extract and select a word which locates at the point user tapped, using CFStringTokenizer.
+ * Extracts and selects a word which locates at the point user tapped, using CFStringTokenizer.
  * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  *
  * \param point The CGPoint object indicates the location user tapped.
@@ -300,11 +300,11 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 - (void)setSelectionWithPoint:(CGPoint)point;
 
 /**
- * To be written
+ * Returns CFIndex object which describes the index of the character locating at the point user tapped.
  * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  *
- * \param point To be written
- * \return To be written
+ * \param point point The CGPoint object indicates the location user tapped.
+ * \return CFIndex object describes the index of the tapped character.
  */
 - (CFIndex)indexForPoint:(CGPoint)point;
 @end
