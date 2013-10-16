@@ -49,6 +49,9 @@
 	[self performSegueWithIdentifier:@"WebViewControllerSegue" sender:nil];
 }
 
+- (void)didTapTextDoesNotIncludeLinkTextView:(UZTextView*)textView {
+}
+
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
 	if ([segue.identifier isEqualToString:@"WebViewControllerSegue"]) {
 		WebViewController *controller = (WebViewController*)[((UINavigationController*)segue.destinationViewController) topViewController];
