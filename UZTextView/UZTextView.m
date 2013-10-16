@@ -414,20 +414,20 @@
 		[self setCursorHidden:YES];
 		[self setNeedsDisplay];
 		[_loupeView setVisible:YES animated:YES];
-		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self margin:_margin] textView:self];
+		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
     }
 	else if (gestureRecognizer.state == UIGestureRecognizerStateChanged) {
 		[self setSelectionWithPoint:[gestureRecognizer locationInView:self margin:_margin]];
 		[self setCursorHidden:YES];
 		[self setNeedsDisplay];
 		[_loupeView setVisible:YES animated:YES];
-		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self margin:_margin] textView:self];
+		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
     }
 	else if (gestureRecognizer.state == UIGestureRecognizerStateEnded || gestureRecognizer.state == UIGestureRecognizerStateCancelled || gestureRecognizer.state == UIGestureRecognizerStateFailed) {
 		[self setCursorHidden:NO];
 		[self setNeedsDisplay];
 		[_loupeView setVisible:NO animated:YES];
-		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self  margin:_margin] textView:self];
+		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
 		[self becomeFirstResponder];
 		[self showUIMenu];
     }
@@ -576,7 +576,7 @@
 	if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge], [touch locationInView:self margin:_margin]) && !_leftCursor.hidden && !_rightCursor.hidden) {
 		_status = UZTextViewEditingFromSelection;
 		[_loupeView setVisible:YES animated:YES];
-		[_loupeView updateAtLocation:[touch locationInView:self margin:_margin] textView:self];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 		if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 			[self.delegate selectionDidBeginTextView:self];
 		[self setCursorHidden:NO];
@@ -584,7 +584,7 @@
 	else if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge], [touch locationInView:self margin:_margin]) && !_leftCursor.hidden && !_rightCursor.hidden) {
 		_status = UZTextViewEditingToSelection;
 		[_loupeView setVisible:YES animated:YES];
-		[_loupeView updateAtLocation:[touch locationInView:self margin:_margin] textView:self];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 		if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
 			[self.delegate selectionDidBeginTextView:self];
 		[self setCursorHidden:NO];
@@ -599,7 +599,7 @@
 	UITouch *touch = [touches anyObject];
 	if (_status == UZTextViewEditingFromSelection) {
 		int newHead = [self indexForPoint:[touch locationInView:self margin:_margin]];
-		[_loupeView updateAtLocation:[touch locationInView:self margin:_margin] textView:self];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 		if (newHead != kCFNotFound) {
 			if (newHead <= _tail) {
 				_head = newHead;
@@ -609,7 +609,7 @@
 	}
 	else if (_status == UZTextViewEditingToSelection) {
 		int newTail = [self indexForPoint:[touch locationInView:self margin:_margin]];
-		[_loupeView updateAtLocation:[touch locationInView:self margin:_margin] textView:self];
+		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 		if (newTail != kCFNotFound) {
 			if (newTail >= _head) {
 				_tail = newTail;
