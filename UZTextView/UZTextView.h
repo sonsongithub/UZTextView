@@ -230,14 +230,14 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 - (NSArray*)fragmentRectsForGlyphFromIndex:(int)fromIndex toIndex:(int)toIndex;
 
 /**
- * To be written
+ * Returns the frame rectangle circumscribing the specified string.
  * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  *
- * \param fromIndex To be written
- * \param toIndex To be written
- * \return To be written
+ * \param fromIndex A beginning index to specify strings. The value must lie within the bounds of the receiver.
+ * \param toIndex A ending index to specify strings. The value must lie within the bounds of the receiver.
+ * \return CGRect object circumscribing the specified strings.
  */
-- (CGRect)fragmentRectForSelectedStringFromIndex:(int)fromIndex toIndex:(int)toIndex;
+- (CGRect)circumscribingRectForStringFromIndex:(int)fromIndex toIndex:(int)toIndex;
 
 /**
  * To be written
