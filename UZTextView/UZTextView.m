@@ -379,10 +379,10 @@
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	
 	// draw frame for debug
-	[[UIColor redColor] setStroke];
-	CGContextStrokeRect(context, self.bounds);
-	[[UIColor blueColor] setStroke];
-	CGContextStrokeRect(context, UIEdgeInsetsInsetRect(self.bounds, _margin));
+//	[[UIColor redColor] setStroke];
+//	CGContextStrokeRect(context, self.bounds);
+//	[[UIColor blueColor] setStroke];
+//	CGContextStrokeRect(context, UIEdgeInsetsInsetRect(self.bounds, _margin));
 	
 	CGContextTranslateCTM(context, _margin.left, _margin.top);
 	
