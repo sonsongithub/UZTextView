@@ -37,7 +37,7 @@
 	self.backgroundColor = [UIColor clearColor];
 	
 	// for debug
-//	self.backgroundColor = [[UIColor greenColor] colorWithAlphaComponent:0.5];
+	self.backgroundColor = [[UIColor greenColor] colorWithAlphaComponent:0.5];
 	
 	return self;
 }

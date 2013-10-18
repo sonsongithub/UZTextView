@@ -11,12 +11,6 @@
 #import "UZLoupeView.h"
 #import "UZCursorView.h"
 
-@interface UIGestureRecognizer (UZTextView)
-- (NSString*)stateDescription;
-
-- (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin;
-@end
-
 /**
  * To be written
  */
@@ -55,10 +49,6 @@
 	return point;
 }
 
-@end
-
-@interface UITouch (UZTextView)
-- (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin;
 @end
 
 /**
@@ -173,17 +163,22 @@
 #pragma mark - Instance method
 
 - (void)setCursorHidden:(BOOL)hidden {
+	// Update cursor's frame
 	CGRect leftFrame = [self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge];
 	leftFrame.origin.x += _margin.left;
 	leftFrame.origin.y += _margin.top;
 	[_leftCursor setFrame:leftFrame];
-	
 	CGRect rightFrame = [self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge];
 	rightFrame.origin.x += _margin.left;
 	rightFrame.origin.y += _margin.top;
 	[_rightCursor setFrame:rightFrame];
+	
+	// Update cursor appearance
 	_leftCursor.hidden = hidden;
 	_rightCursor.hidden = hidden;
+	
+	// Enable/disable gesture recognizer
+	_longPressGestureRecognizer.enabled = hidden;
 }
 
 - (void)updateLayout {
@@ -586,19 +581,19 @@
 	_headWhenBegan = _head;
 	_tailWhenBegan = _tail;
 	if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge], [touch locationInView:self margin:_margin]) && !_leftCursor.hidden && !_rightCursor.hidden) {
+		if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
+			[self.delegate selectionDidBeginTextView:self];
 		_status = UZTextViewEditingFromSelection;
 		[_loupeView setVisible:YES animated:YES];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
-		if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
-			[self.delegate selectionDidBeginTextView:self];
 		[self setCursorHidden:NO];
 	}
 	else if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge], [touch locationInView:self margin:_margin]) && !_leftCursor.hidden && !_rightCursor.hidden) {
+		if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
+			[self.delegate selectionDidBeginTextView:self];
 		_status = UZTextViewEditingToSelection;
 		[_loupeView setVisible:YES animated:YES];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
-		if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
-			[self.delegate selectionDidBeginTextView:self];
 		[self setCursorHidden:NO];
 	}
 	else {

@@ -9,6 +9,37 @@
 #import <UIKit/UIKit.h>
 #import <CoreText/CoreText.h>
 
+/**
+ * To be written
+ */
+@interface UIGestureRecognizer (UZTextView)
+/**
+ * To be written
+ * \return To be written
+ */
+- (NSString*)stateDescription;
+/**
+ * To be written
+ * \param view To be written
+ * \param margin To be written
+ * \return To be written
+ */
+- (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin;
+@end
+
+/**
+ * To be written
+ */
+@interface UITouch (UZTextView)
+/**
+ * To be written
+ * \param view To be written
+ * \param margin To be written
+ * \return To be written
+ */
+- (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin;
+@end
+
 #define SAFE_CFRELEASE(p) if(p){CFRelease(p);p=NULL;}
 
 @class UZLoupeView;
