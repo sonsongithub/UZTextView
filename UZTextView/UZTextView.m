@@ -372,12 +372,14 @@
 
 - (void)drawContent {
 	CGContextRef context = UIGraphicsGetCurrentContext();
-	
+
+#ifdef _UZTEXTVIEW_DEBUG_
 	// draw frame for debug
-//	[[UIColor redColor] setStroke];
-//	CGContextStrokeRect(context, self.bounds);
-//	[[UIColor blueColor] setStroke];
-//	CGContextStrokeRect(context, UIEdgeInsetsInsetRect(self.bounds, _margin));
+	[[UIColor redColor] setStroke];
+	CGContextStrokeRect(context, self.bounds);
+	[[UIColor blueColor] setStroke];
+	CGContextStrokeRect(context, UIEdgeInsetsInsetRect(self.bounds, _margin));
+#endif
 	
 	CGContextTranslateCTM(context, _margin.left, _margin.top);
 	
@@ -389,8 +391,10 @@
 	CTFrameDraw(_frame, context);
 	CGContextRestoreGState(context);
 	
+#ifdef _UZTEXTVIEW_DEBUG_
 	// for debug
-	// [self drawStringRectForDebug];
+	 [self drawStringRectForDebug];
+#endif
 	
 	// draw hightlighted text
 	for (NSValue *value in _highlightRanges) {
@@ -463,10 +467,6 @@
 	_rightCursor = [[UZCursorView alloc] initWithCursorDirection:UZTextViewDownCursor];
 	_rightCursor.userInteractionEnabled = NO;
 	[self addSubview:_rightCursor];
-	
-	// for debug
-	//_leftCursor.backgroundColor = [UIColor redColor];
-	//_rightCursor.backgroundColor = [UIColor redColor];
 }
 
 #pragma mark - CoreText

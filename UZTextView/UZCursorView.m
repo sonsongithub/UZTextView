@@ -36,8 +36,10 @@
 	_direction = direction;
 	self.backgroundColor = [UIColor clearColor];
 	
+#ifdef _UZTEXTVIEW_DEBUG_
 	// for debug
 	self.backgroundColor = [[UIColor greenColor] colorWithAlphaComponent:0.5];
+#endif
 	
 	return self;
 }
