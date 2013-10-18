@@ -458,6 +458,7 @@
 	
 	// Initialization code
 	_loupeView = [[UZLoupeView alloc] initWithRadius:60];
+	_loupeView.textViewBackgroundColor = self.backgroundColor;
 	[self addSubview:_loupeView];
 	
 	_leftCursor = [[UZCursorView alloc] initWithCursorDirection:UZTextViewUpCursor];
@@ -729,6 +730,11 @@
 }
 
 #pragma mark - Override
+
+- (void)setBackgroundColor:(UIColor *)backgroundColor {
+	[super setBackgroundColor:backgroundColor];
+	_loupeView.textViewBackgroundColor = backgroundColor;
+}
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
     if (CGRectContainsPoint(self.bounds, point)) {

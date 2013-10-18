@@ -245,6 +245,8 @@
     
 	Tweet *tweet = [_tweets objectAtIndex:indexPath.row];
 	[cell.nameButton setTitle:tweet.info[@"user"][@"screen_name"] forState:UIControlStateNormal];
+	
+	cell.textView.backgroundColor = [UIColor whiteColor];
 	cell.textView.margin = _margin;
 	cell.textView.attributedString = tweet.attributedString;
 	cell.textView.delegate = self;

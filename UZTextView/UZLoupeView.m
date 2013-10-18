@@ -214,7 +214,7 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
     self = [super initWithFrame:CGRectMake(0, 0, radius * 2, radius * 2)];
     if (self) {
 		_loupeRadius = radius;
-		[self setBackgroundColor:[UIColor clearColor]];
+		self.backgroundColor = [UIColor clearColor];
 		self.hidden = YES;
     }
     return self;
@@ -224,7 +224,7 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	
 	// draw back ground fill
-	[[[UIColor whiteColor] colorWithAlphaComponent:0.95] setFill];
+	[self.textViewBackgroundColor setFill];
 	CGContextAddArc(context, _loupeRadius, _loupeRadius, _loupeRadius, 0, M_PI * 2, 0);
 	CGContextClosePath(context);
 	CGContextDrawPath(context, kCGPathFill);
