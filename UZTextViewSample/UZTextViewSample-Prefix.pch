@@ -20,7 +20,7 @@
 #import <objc/runtime.h>
 #endif
 
-#define _UZTEXTVIEW_DEBUG_
+//#define _UZTEXTVIEW_DEBUG_
 
 #define _DEBUG
 

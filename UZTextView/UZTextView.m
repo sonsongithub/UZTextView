@@ -663,8 +663,15 @@
 	else if (_longPressGestureRecognizer.state != UIGestureRecognizerStateBegan) {
 		if (_tappedLinkRange.length == 0) {
 			if (_status != UZTextViewNoSelection) {
-				// selection is cancelled when some strings are selected.
-				[self cancelSelectedText];
+				int tappedCharacterIndex = [self indexForPoint:[[touches anyObject] locationInView:self margin:_margin]];
+				if (_head <= tappedCharacterIndex && tappedCharacterIndex <= _tail) {
+					// show uimenu if user tapped selected text range.
+					[self showUIMenu];
+				}
+				else {
+					// selection is cancelled when some strings are selected.
+					[self cancelSelectedText];
+				}
 			}
 			else {
 				// tells the event to tap any region which has not include any links to the delegtae
