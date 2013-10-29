@@ -417,8 +417,7 @@
 #pragma mark - UILongPressGestureDelegate
 
 - (void)didChangeLongPressGesture:(UILongPressGestureRecognizer *)gestureRecognizer {
-	DNSLogMethod
-	DNSLog(@"%@", [_longPressGestureRecognizer stateDescription]);
+//	NSLog(@"%@", [_longPressGestureRecognizer stateDescription]);
     if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
 		[self setSelectionWithPoint:[gestureRecognizer locationInView:self margin:_margin]];
 		_status = UZTextViewSelected;
@@ -631,13 +630,10 @@
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	DNSLogMethod
-	
-	DNSLog(@"%@", [_longPressGestureRecognizer stateDescription]);
-	
+//	NSLog(@"%@", [_longPressGestureRecognizer stateDescription]);
 	if (_longPressGestureRecognizer.state == UIGestureRecognizerStatePossible) {
 		if (_tappedLinkAttribute[NSLinkAttributeName] && _tappedLinkRange.length) {
-			DNSLog(@"%@", _tappedLinkAttribute);
+//			NSLog(@"%@", _tappedLinkAttribute);
 			if ([self.delegate respondsToSelector:@selector(textView:didClickLinkAttribute:)]) {
 				[self.delegate textView:self didClickLinkAttribute:_tappedLinkAttribute];
 			}
