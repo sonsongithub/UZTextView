@@ -9,8 +9,38 @@
 #import <UIKit/UIKit.h>
 #import <CoreText/CoreText.h>
 
+/**
+ * To be written
+ */
+@interface UIGestureRecognizer (UZTextView)
+/**
+ * To be written
+ * \return To be written
+ */
+- (NSString*)stateDescription;
+/**
+ * To be written
+ * \param view To be written
+ * \param margin To be written
+ * \return To be written
+ */
+- (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin;
+@end
+
+/**
+ * To be written
+ */
+@interface UITouch (UZTextView)
+/**
+ * To be written
+ * \param view To be written
+ * \param margin To be written
+ * \return To be written
+ */
+- (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin;
+@end
+
 #define SAFE_CFRELEASE(p) if(p){CFRelease(p);p=NULL;}
-#define TAP_MARGIN 10
 
 @class UZLoupeView;
 @class UZCursorView;
@@ -83,6 +113,12 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  Create subclass of the class and use UZTextView internal category methods if you want to expand the UZTextView class.
  */
 @interface UZTextView : UIView {
+	// Data
+	NSAttributedString				*_attributedString;
+	
+	// Layout
+	UIEdgeInsets					_margin;
+	
 	// CoreText
 	CTFramesetterRef				_framesetter;
     CTFrameRef						_frame;
@@ -122,6 +158,11 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 	float							_tintAlpha;
 	float							_durationToCancelSuperViewScrolling;
 }
+
+/**
+ * \name Public methods
+ */
+
 /**
  * Receiver's delegate.
  * The delegate is sent messages when contents are selected and tapped.
@@ -146,7 +187,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 @property (nonatomic, assign) NSRange selectedRange;
 
 /**
- * The duration (in seconds) of a wait before text selection will start.
+ * The duration (in seconds) of a wait before text selection will start. The unit of duration is secondes. The default value is 0.5.
  */
 @property (nonatomic, assign) CFTimeInterval minimumPressDuration;
 
@@ -156,12 +197,26 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 @property (nonatomic, copy) NSArray *highlightRanges;
 
 /**
+ * UIEdgeInsets object, describes a margin around the content. The default value is UIEdgeInsetsZero.
+ */
+@property (nonatomic, assign) UIEdgeInsets margin;
+
+/**
  * Returns the bounding size required to draw the string.
  * \param attributedString Contents of the string to be drawn.
  * \param width The width constraint to apply when computing the string’s bounding rectangle.
  * \return A rectangle whose size component indicates the width and height required to draw the entire contents of the string.
  */
-+ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width;
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width __attribute__((deprecated));
+
+/**
+ * To be written
+ * \param attributedString To be written
+ * \param width To be written
+ * \param margin To be written
+ * \return To be written
+ */
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width margin:(UIEdgeInsets)margin;
 
 /**
  * Prepares for reusing an object. You have to call this method before you set another attributed string to the object.
@@ -169,43 +224,135 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 - (void)prepareForReuse;
 @end
 
-@interface UZTextView(internal)
+@interface UZTextView(Internal)
 
-- (CGRect)rectForTappingPoint:(CGPoint)point withMargin:(float)margin;
-
+/**
+ * Hides/shows the cursors on UZTextView.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \param hidden Specify YES to hide the cursors or NO to show it.
+ */
 - (void)setCursorHidden:(BOOL)hidden;
 
+/**
+ * Updates layout of UZTextView.
+ * CTFrameSetter, CTFrame is created, and the content size is calculated.
+ * You have to this method after updating attributedString.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ */
 - (void)updateLayout;
 
-- (NSRange)selectedRange;
-
+/**
+ * Shows UIMenuController on the receiver.
+ * \discussion You have to override `canBecomeFirstResponder` or this method if you want to make it hide or edit its items forcely.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ */
 - (void)showUIMenu;
 
+/**
+ * Deselects selected text of the receiver.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \return YES if the receiver's text is selected or NO if it's not.
+ */
 - (BOOL)cancelSelectedText;
 
+/**
+ * Returns the frame rectangle, which describes the cursor location and size.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \param index Index value to show the cursor.
+ * \param side The left of right position to show the cursor. See UZTextViewGlyphEdgeType.
+ * \return The frame rectangle of the cursor.
+ */
 - (CGRect)fragmentRectForCursorAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side;
 
+/**
+ * Returns the array whose frame rectangles describes regions of strings by specified character indices.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \param fromIndex A beginning index to specify strings. The value must lie within the bounds of the receiver.
+ * \param toIndex A ending index to specify strings. The value must lie within the bounds of the receiver.
+ * \return An NSArray object containing frame rectangles.
+ */
 - (NSArray*)fragmentRectsForGlyphFromIndex:(int)fromIndex toIndex:(int)toIndex;
 
-- (CGRect)fragmentRectForSelectedStringFromIndex:(int)fromIndex toIndex:(int)toIndex;
+/**
+ * Returns the frame rectangle circumscribing the specified string.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \param fromIndex A beginning index to specify strings. The value must lie within the bounds of the receiver.
+ * \param toIndex A ending index to specify strings. The value must lie within the bounds of the receiver.
+ * \return CGRect object circumscribing the specified strings.
+ */
+- (CGRect)circumscribingRectForStringFromIndex:(int)fromIndex toIndex:(int)toIndex;
 
+/**
+ * Draw the frame rectangle with tintColor containing the tapped link element of string.
+ * Draw nothing when user do not tap any links.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ */
 - (void)drawSelectedLinkFragments;
 
+/**
+ * Draw the frame rectangles with specified color, containing specified string.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \param fromIndex A beginning index to specify strings. The value must lie within the bounds of the receiver.
+ * \param toIndex A ending index to specify strings. The value must lie within the bounds of the receiver.
+ * \param color UIColor object to fill rectangles.
+ */
 - (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex color:(UIColor*)color;
 
-- (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex;
-
+/**
+ * Draw the background rectangles of strings for debugging.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ */
 - (void)drawStringRectForDebug;
 
+/**
+ * Draw all contents.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ */
 - (void)drawContent;
 
+/**
+ * Callback method for the UILongPressGestureRecognizer object.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \param gestureRecognizer The UILongPressGestureRecognizer object tells this method.
+ */
 - (void)didChangeLongPressGesture:(UILongPressGestureRecognizer *)gestureRecognizer;
 
+/**
+ * Initialize all properties. This method is called in `init` methods.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ */
 - (void)prepareForInitialization;
 
+/**
+ * Returns the index range of the link element which locates at the point user tapped.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \param point The CGPoint object indicates the location user tapped.
+ * \return Returns index range of the link element.
+ */
 - (NSRange)rangeOfLinkStringAtPoint:(CGPoint)point;
 
+/**
+ * Extracts and selects a word which locates at the point user tapped, using CFStringTokenizer.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \param point The CGPoint object indicates the location user tapped.
+ */
 - (void)setSelectionWithPoint:(CGPoint)point;
 
+/**
+ * Returns CFIndex object which describes the index of the character locating at the point user tapped.
+ * \warning This is an internal/private method. Use this method in subclass of UZTextView.
+ *
+ * \param point point The CGPoint object indicates the location user tapped.
+ * \return CFIndex object describes the index of the tapped character.
+ */
 - (CFIndex)indexForPoint:(CGPoint)point;
 @end

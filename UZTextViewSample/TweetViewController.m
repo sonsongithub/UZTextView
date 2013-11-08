@@ -22,7 +22,6 @@
 - (void)viewWillAppear:(BOOL)animated {
 	[super viewWillAppear:animated];
 	
-	self.textView.delegate = self;
 	self.textView.attributedString = self.tweet.attributedString;
 	
 	NSURL *iconURL = [NSURL URLWithString:self.tweet.info[@"user"][@"profile_image_url_https"]];
@@ -48,6 +47,9 @@
 - (void)textView:(UZTextView *)textview didClickLinkAttribute:(id)value {
 	_URLString = [value objectForKey:@"NSLink"];
 	[self performSegueWithIdentifier:@"WebViewControllerSegue" sender:nil];
+}
+
+- (void)didTapTextDoesNotIncludeLinkTextView:(UZTextView*)textView {
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {

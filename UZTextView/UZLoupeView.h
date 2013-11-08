@@ -15,4 +15,5 @@
 - (id)initWithRadius:(float)radius;
 - (void)setVisible:(BOOL)visible animated:(BOOL)animated;
 - (void)updateAtLocation:(CGPoint)location textView:(UIView*)textView;
+@property (nonatomic, copy) UIColor *textViewBackgroundColor;
 @end

@@ -22,6 +22,9 @@
 - (void)selectionDidEndTextView:(UZTextView*)textView {
 }
 
+- (void)didTapTextDoesNotIncludeLinkTextView:(UZTextView*)textView {
+}
+
 - (void)viewDidAppear:(BOOL)animated {
 	[super viewDidAppear:animated];
 	NSString *string = @"hoge\rhoge\rhttp://www.yahoo.co.jp\r\rあれから吉田悠一012345678901234567890123456789012345678901234567890123456789hoge>>190";
