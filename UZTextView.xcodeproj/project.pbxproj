@@ -7,6 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		146B91DC1835AC44009EB5D4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14F8866B17C2BB02006F5514 /* Foundation.framework */; };
+		146B91DD1835AC44009EB5D4 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14F8869717C2BB4A006F5514 /* CoreGraphics.framework */; };
+		146B91DF1835AC44009EB5D4 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 146B91DE1835AC44009EB5D4 /* UIKit.framework */; };
+		146B91E51835AC44009EB5D4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 146B91E31835AC44009EB5D4 /* InfoPlist.strings */; };
+		146B91E71835AC44009EB5D4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 146B91E61835AC44009EB5D4 /* main.m */; };
+		146B91EB1835AC44009EB5D4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 146B91EA1835AC44009EB5D4 /* AppDelegate.m */; };
+		146B91F11835AC44009EB5D4 /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 146B91EF1835AC44009EB5D4 /* Main_iPad.storyboard */; };
+		146B91F41835AC44009EB5D4 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 146B91F31835AC44009EB5D4 /* ViewController.m */; };
+		146B91F61835AC44009EB5D4 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 146B91F51835AC44009EB5D4 /* Images.xcassets */; };
+		146B920F1835AC64009EB5D4 /* UZTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F8867217C2BB02006F5514 /* UZTextView.m */; };
+		146B92101835AC64009EB5D4 /* UZCursorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886E517C2BFA0006F5514 /* UZCursorView.m */; };
+		146B92111835AC64009EB5D4 /* UZLoupeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886E717C2BFA0006F5514 /* UZLoupeView.m */; };
+		146B92141835AE65009EB5D4 /* TextViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 146B92131835AE65009EB5D4 /* TextViewController.m */; };
 		147737D217C2F3C400A4F04B /* UZCursorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886E517C2BFA0006F5514 /* UZCursorView.m */; };
 		147737D317C2F3C700A4F04B /* UZLoupeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886E717C2BFA0006F5514 /* UZLoupeView.m */; };
 		14F8866C17C2BB02006F5514 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14F8866B17C2BB02006F5514 /* Foundation.framework */; };
@@ -45,6 +58,20 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		146B91DB1835AC44009EB5D4 /* ParagraphStyle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ParagraphStyle.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		146B91DE1835AC44009EB5D4 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		146B91E21835AC44009EB5D4 /* ParagraphStyle-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ParagraphStyle-Info.plist"; sourceTree = "<group>"; };
+		146B91E41835AC44009EB5D4 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		146B91E61835AC44009EB5D4 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		146B91E81835AC44009EB5D4 /* ParagraphStyle-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ParagraphStyle-Prefix.pch"; sourceTree = "<group>"; };
+		146B91E91835AC44009EB5D4 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		146B91EA1835AC44009EB5D4 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		146B91F01835AC44009EB5D4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
+		146B91F21835AC44009EB5D4 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		146B91F31835AC44009EB5D4 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		146B91F51835AC44009EB5D4 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		146B92121835AE65009EB5D4 /* TextViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextViewController.h; sourceTree = "<group>"; };
+		146B92131835AE65009EB5D4 /* TextViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextViewController.m; sourceTree = "<group>"; };
 		14B29459180E2542000DCA46 /* UZTextView-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UZTextView-Prefix.pch"; sourceTree = SOURCE_ROOT; };
 		14F8866817C2BB02006F5514 /* libUZTextView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libUZTextView.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		14F8866B17C2BB02006F5514 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -83,6 +110,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		146B91D81835AC44009EB5D4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				146B91DD1835AC44009EB5D4 /* CoreGraphics.framework in Frameworks */,
+				146B91DF1835AC44009EB5D4 /* UIKit.framework in Frameworks */,
+				146B91DC1835AC44009EB5D4 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		14F8866517C2BB02006F5514 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -103,11 +140,39 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		146B91E01835AC44009EB5D4 /* ParagraphStyle */ = {
+			isa = PBXGroup;
+			children = (
+				146B91E91835AC44009EB5D4 /* AppDelegate.h */,
+				146B91EA1835AC44009EB5D4 /* AppDelegate.m */,
+				146B91EF1835AC44009EB5D4 /* Main_iPad.storyboard */,
+				146B91F21835AC44009EB5D4 /* ViewController.h */,
+				146B91F31835AC44009EB5D4 /* ViewController.m */,
+				146B91F51835AC44009EB5D4 /* Images.xcassets */,
+				146B91E11835AC44009EB5D4 /* Supporting Files */,
+				146B92121835AE65009EB5D4 /* TextViewController.h */,
+				146B92131835AE65009EB5D4 /* TextViewController.m */,
+			);
+			path = ParagraphStyle;
+			sourceTree = "<group>";
+		};
+		146B91E11835AC44009EB5D4 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				146B91E21835AC44009EB5D4 /* ParagraphStyle-Info.plist */,
+				146B91E31835AC44009EB5D4 /* InfoPlist.strings */,
+				146B91E61835AC44009EB5D4 /* main.m */,
+				146B91E81835AC44009EB5D4 /* ParagraphStyle-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		14F8865F17C2BB02006F5514 = {
 			isa = PBXGroup;
 			children = (
 				14F8866D17C2BB02006F5514 /* UZTextView */,
 				14F8869A17C2BB4A006F5514 /* UZTextViewSample */,
+				146B91E01835AC44009EB5D4 /* ParagraphStyle */,
 				14F8866A17C2BB02006F5514 /* Frameworks */,
 				14F8866917C2BB02006F5514 /* Products */,
 			);
@@ -118,6 +183,7 @@
 			children = (
 				14F8866817C2BB02006F5514 /* libUZTextView.a */,
 				14F8869517C2BB4A006F5514 /* UZTextViewSample.app */,
+				146B91DB1835AC44009EB5D4 /* ParagraphStyle.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -128,6 +194,7 @@
 				14F8866B17C2BB02006F5514 /* Foundation.framework */,
 				14F8867917C2BB02006F5514 /* XCTest.framework */,
 				14F8869717C2BB4A006F5514 /* CoreGraphics.framework */,
+				146B91DE1835AC44009EB5D4 /* UIKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -187,6 +254,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		146B91DA1835AC44009EB5D4 /* ParagraphStyle */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 146B920D1835AC44009EB5D4 /* Build configuration list for PBXNativeTarget "ParagraphStyle" */;
+			buildPhases = (
+				146B91D71835AC44009EB5D4 /* Sources */,
+				146B91D81835AC44009EB5D4 /* Frameworks */,
+				146B91D91835AC44009EB5D4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ParagraphStyle;
+			productName = ParagraphStyle;
+			productReference = 146B91DB1835AC44009EB5D4 /* ParagraphStyle.app */;
+			productType = "com.apple.product-type.application";
+		};
 		14F8866717C2BB02006F5514 /* UZTextView */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 14F8868B17C2BB02006F5514 /* Build configuration list for PBXNativeTarget "UZTextView" */;
@@ -246,11 +330,22 @@
 			targets = (
 				14F8866717C2BB02006F5514 /* UZTextView */,
 				14F8869417C2BB4A006F5514 /* UZTextViewSample */,
+				146B91DA1835AC44009EB5D4 /* ParagraphStyle */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		146B91D91835AC44009EB5D4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				146B91F11835AC44009EB5D4 /* Main_iPad.storyboard in Resources */,
+				146B91F61835AC44009EB5D4 /* Images.xcassets in Resources */,
+				146B91E51835AC44009EB5D4 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		14F8869317C2BB4A006F5514 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -280,6 +375,20 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		146B91D71835AC44009EB5D4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				146B91F41835AC44009EB5D4 /* ViewController.m in Sources */,
+				146B91EB1835AC44009EB5D4 /* AppDelegate.m in Sources */,
+				146B92141835AE65009EB5D4 /* TextViewController.m in Sources */,
+				146B920F1835AC64009EB5D4 /* UZTextView.m in Sources */,
+				146B92101835AC64009EB5D4 /* UZCursorView.m in Sources */,
+				146B91E71835AC44009EB5D4 /* main.m in Sources */,
+				146B92111835AC64009EB5D4 /* UZLoupeView.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		14F8866417C2BB02006F5514 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -312,6 +421,22 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		146B91E31835AC44009EB5D4 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				146B91E41835AC44009EB5D4 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		146B91EF1835AC44009EB5D4 /* Main_iPad.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				146B91F01835AC44009EB5D4 /* Base */,
+			);
+			name = Main_iPad.storyboard;
+			sourceTree = "<group>";
+		};
 		14F8869D17C2BB4A006F5514 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -339,6 +464,46 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		146B92091835AC44009EB5D4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ParagraphStyle/ParagraphStyle-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "ParagraphStyle/ParagraphStyle-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 2;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		146B920A1835AC44009EB5D4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ParagraphStyle/ParagraphStyle-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "ParagraphStyle/ParagraphStyle-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 2;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
 		14F8868917C2BB02006F5514 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -476,6 +641,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		146B920D1835AC44009EB5D4 /* Build configuration list for PBXNativeTarget "ParagraphStyle" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				146B92091835AC44009EB5D4 /* Debug */,
+				146B920A1835AC44009EB5D4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		14F8866317C2BB02006F5514 /* Build configuration list for PBXProject "UZTextView" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

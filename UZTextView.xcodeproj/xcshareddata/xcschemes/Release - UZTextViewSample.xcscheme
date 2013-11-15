@@ -28,6 +28,16 @@
       shouldUseLaunchSchemeArgsEnv = "YES"
       buildConfiguration = "Debug">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "146B91FA1835AC44009EB5D4"
+               BuildableName = "ParagraphStyleTests.xctest"
+               BlueprintName = "ParagraphStyleTests"
+               ReferencedContainer = "container:UZTextView.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference
