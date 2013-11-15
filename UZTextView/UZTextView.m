@@ -696,6 +696,11 @@
 
 #pragma mark - for UIMenuController(Override)
 
+- (BOOL)resignFirstResponder {
+	[[UIMenuController sharedMenuController] setMenuItems:nil];
+	return [super resignFirstResponder];
+}
+
 - (BOOL)canBecomeFirstResponder {
 	return YES;
 }
@@ -724,7 +729,6 @@
 	[self updateLayout];
 	[self setNeedsDisplay];
 }
-
 
 - (void)setBounds:(CGRect)bounds {
 	[super setBounds:bounds];
