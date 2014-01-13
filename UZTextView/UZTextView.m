@@ -468,6 +468,7 @@
 	[self addSubview:_rightCursor];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(menuControllerDidHideMenuNotification:) name:UIMenuControllerDidHideMenuNotification object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidChangeStatusBarOrientationNotification:) name:UIApplicationDidChangeStatusBarOrientationNotification object:nil];
 }
 
 #pragma mark - CoreText
@@ -697,6 +698,11 @@
 
 - (void)menuControllerDidHideMenuNotification:(NSNotification*)notification {
 	[[UIMenuController sharedMenuController] setMenuItems:nil];
+}
+
+- (void)applicationDidChangeStatusBarOrientationNotification:(NSNotification*)notification {
+	[_loupeView setVisible:NO animated:NO];
+	[_loupeView updateAtLocation:CGPointZero textView:self];
 }
 
 #pragma mark - for UIMenuController(Override)
