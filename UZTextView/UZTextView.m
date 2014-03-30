@@ -75,7 +75,7 @@
 
 #pragma mark - Class method to estimate attributed string size
 
-+ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width __attribute__((deprecated)){
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(CGFloat)width __attribute__((deprecated)){
 	// CoreText
 	CTFramesetterRef _framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedString);
 	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
@@ -87,7 +87,7 @@
 	return frameSize;
 }
 
-+ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width margin:(UIEdgeInsets)margin {
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(CGFloat)width margin:(UIEdgeInsets)margin {
 	// CoreText
 	CTFramesetterRef _framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedString);
 	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
@@ -227,7 +227,7 @@
 
 #pragma mark - Layout information
 
-- (CGRect)fragmentRectForCursorAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side {
+- (CGRect)fragmentRectForCursorAtIndex:(NSInteger)index side:(UZTextViewGlyphEdgeType)side {
 	if (side == UZTextViewLeftEdge) {
 		NSArray *rects = [self fragmentRectsForGlyphFromIndex:index toIndex:index];
 		CGRect rect = CGRectZero;
@@ -247,7 +247,7 @@
 	}
 }
 
-- (NSArray*)fragmentRectsForGlyphFromIndex:(int)fromIndex toIndex:(int)toIndex {
+- (NSArray*)fragmentRectsForGlyphFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex {
 	if (!(fromIndex <= toIndex && fromIndex >=0 && toIndex >=0))
 		return @[];
 	
@@ -295,7 +295,7 @@
 	return [NSArray arrayWithArray:fragmentRects];
 }
 
-- (CGRect)circumscribingRectForStringFromIndex:(int)fromIndex toIndex:(int)toIndex {
+- (CGRect)circumscribingRectForStringFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex {
 	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:fromIndex toIndex:toIndex];
 	CGRect unifiedRect = [[fragmentRects objectAtIndex:0] CGRectValue];
 	for (NSValue *rectValue in fragmentRects) {
@@ -334,7 +334,7 @@
 	}
 }
 
-- (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex color:(UIColor*)color {
+- (void)drawSelectedTextFragmentRectsFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex color:(UIColor*)color {
 	// Set drawing color
 	[color setFill];
 	CGContextRef context = UIGraphicsGetCurrentContext();

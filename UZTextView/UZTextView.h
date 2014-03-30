@@ -154,9 +154,9 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 	CGPoint							_locationWhenTapBegan;
 	
 	// invaliables
-	float							_cursorMargin;
-	float							_tintAlpha;
-	float							_durationToCancelSuperViewScrolling;
+	CGFloat							_cursorMargin;
+	CGFloat							_tintAlpha;
+	CGFloat							_durationToCancelSuperViewScrolling;
 }
 
 /**
@@ -207,7 +207,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * \param width The width constraint to apply when computing the string’s bounding rectangle.
  * \return A rectangle whose size component indicates the width and height required to draw the entire contents of the string.
  */
-+ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width __attribute__((deprecated));
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(CGFloat)width __attribute__((deprecated));
 
 /**
  * To be written
@@ -216,7 +216,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * \param margin To be written
  * \return To be written
  */
-+ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width margin:(UIEdgeInsets)margin;
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(CGFloat)width margin:(UIEdgeInsets)margin;
 
 /**
  * Prepares for reusing an object. You have to call this method before you set another attributed string to the object.
@@ -265,7 +265,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * \param side The left of right position to show the cursor. See UZTextViewGlyphEdgeType.
  * \return The frame rectangle of the cursor.
  */
-- (CGRect)fragmentRectForCursorAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side;
+- (CGRect)fragmentRectForCursorAtIndex:(NSInteger)index side:(UZTextViewGlyphEdgeType)side;
 
 /**
  * Returns the array whose frame rectangles describes regions of strings by specified character indices.
@@ -275,7 +275,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * \param toIndex A ending index to specify strings. The value must lie within the bounds of the receiver.
  * \return An NSArray object containing frame rectangles.
  */
-- (NSArray*)fragmentRectsForGlyphFromIndex:(int)fromIndex toIndex:(int)toIndex;
+- (NSArray*)fragmentRectsForGlyphFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex;
 
 /**
  * Returns the frame rectangle circumscribing the specified string.
@@ -285,7 +285,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * \param toIndex A ending index to specify strings. The value must lie within the bounds of the receiver.
  * \return CGRect object circumscribing the specified strings.
  */
-- (CGRect)circumscribingRectForStringFromIndex:(int)fromIndex toIndex:(int)toIndex;
+- (CGRect)circumscribingRectForStringFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex;
 
 /**
  * Draw the frame rectangle with tintColor containing the tapped link element of string.
@@ -302,7 +302,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * \param toIndex A ending index to specify strings. The value must lie within the bounds of the receiver.
  * \param color UIColor object to fill rectangles.
  */
-- (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex color:(UIColor*)color;
+- (void)drawSelectedTextFragmentRectsFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex color:(UIColor*)color;
 
 /**
  * Draw the background rectangles of strings for debugging.

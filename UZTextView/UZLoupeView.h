@@ -9,10 +9,10 @@
 #import <UIKit/UIKit.h>
 
 @interface UZLoupeView : UIView {
-	float		_loupeRadius;
+	CGFloat		_loupeRadius;
 	UIImage		*_image;
 }
-- (id)initWithRadius:(float)radius;
+- (id)initWithRadius:(CGFloat)radius;
 - (void)setVisible:(BOOL)visible animated:(BOOL)animated;
 - (void)updateAtLocation:(CGPoint)location textView:(UIView*)textView;
 @property (nonatomic, copy) UIColor *textViewBackgroundColor;
