@@ -310,7 +310,7 @@
 	NSRange range;
 	if (CGPointEqualToPoint(_locationWhenTapBegan, CGPointZero))
 		return;
-	int tappedIndex = [self indexForPoint:_locationWhenTapBegan];
+	NSInteger tappedIndex = [self indexForPoint:_locationWhenTapBegan];
 	NSDictionary *dict = [self.attributedString attributesAtIndex:tappedIndex effectiveRange:&range];
 	if (dict[NSLinkAttributeName]) {		
 		NSArray *rects = [self fragmentRectsForGlyphFromIndex:tappedIndex toIndex:tappedIndex+1];
@@ -607,7 +607,7 @@
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [touches anyObject];
 	if (_status == UZTextViewEditingFromSelection) {
-		int newHead = [self indexForPoint:[touch locationInView:self margin:_margin]];
+		NSInteger newHead = [self indexForPoint:[touch locationInView:self margin:_margin]];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 		if (newHead != kCFNotFound) {
 			if (newHead <= _tail) {
@@ -617,7 +617,7 @@
 		[self setCursorHidden:NO];
 	}
 	else if (_status == UZTextViewEditingToSelection) {
-		int newTail = [self indexForPoint:[touch locationInView:self margin:_margin]];
+		NSInteger newTail = [self indexForPoint:[touch locationInView:self margin:_margin]];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 		if (newTail != kCFNotFound) {
 			if (newTail >= _head) {
@@ -659,7 +659,7 @@
 	else if (_longPressGestureRecognizer.state != UIGestureRecognizerStateBegan) {
 		if (_tappedLinkRange.length == 0) {
 			if (_status != UZTextViewNoSelection) {
-				int tappedCharacterIndex = [self indexForPoint:[[touches anyObject] locationInView:self margin:_margin]];
+				NSInteger tappedCharacterIndex = [self indexForPoint:[[touches anyObject] locationInView:self margin:_margin]];
 				if (_head <= tappedCharacterIndex && tappedCharacterIndex <= _tail) {
 					// show uimenu if user tapped selected text range.
 					[self showUIMenu];

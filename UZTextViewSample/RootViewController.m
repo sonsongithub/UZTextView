@@ -230,7 +230,7 @@
     return 1;
 }
 
-- (float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
 	Tweet *tweet = [_tweets objectAtIndex:indexPath.row];
 	return tweet.height;
 }
