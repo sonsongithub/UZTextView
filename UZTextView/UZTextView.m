@@ -417,7 +417,6 @@
 #pragma mark - UILongPressGestureDelegate
 
 - (void)didChangeLongPressGesture:(UILongPressGestureRecognizer *)gestureRecognizer {
-//	NSLog(@"%@", [_longPressGestureRecognizer stateDescription]);
     if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
 		[self setSelectionWithPoint:[gestureRecognizer locationInView:self margin:_margin]];
 		_status = UZTextViewSelected;
@@ -467,6 +466,8 @@
 	_rightCursor = [[UZCursorView alloc] initWithCursorDirection:UZTextViewDownCursor];
 	_rightCursor.userInteractionEnabled = NO;
 	[self addSubview:_rightCursor];
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(menuControllerDidHideMenuNotification:) name:UIMenuControllerDidHideMenuNotification object:nil];
 }
 
 #pragma mark - CoreText
@@ -630,10 +631,8 @@
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-//	NSLog(@"%@", [_longPressGestureRecognizer stateDescription]);
 	if (_longPressGestureRecognizer.state == UIGestureRecognizerStatePossible) {
 		if (_tappedLinkAttribute[NSLinkAttributeName] && _tappedLinkRange.length) {
-//			NSLog(@"%@", _tappedLinkAttribute);
 			if ([self.delegate respondsToSelector:@selector(textView:didClickLinkAttribute:)]) {
 				[self.delegate textView:self didClickLinkAttribute:_tappedLinkAttribute];
 			}
@@ -694,14 +693,23 @@
 	[self touchesEnded:touches withEvent:event];
 }
 
+#pragma mark - NSNotification
+
+- (void)menuControllerDidHideMenuNotification:(NSNotification*)notification {
+	[[UIMenuController sharedMenuController] setMenuItems:nil];
+}
+
 #pragma mark - for UIMenuController(Override)
+
+- (BOOL)resignFirstResponder {
+	return [super resignFirstResponder];
+}
 
 - (BOOL)canBecomeFirstResponder {
 	return YES;
 }
 
 - (void)copy:(id)sender {
-	NSLog(@"%@", [self.attributedString.string substringWithRange:self.selectedRange]);
 	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:self.selectedRange];
 }
 
@@ -725,7 +733,6 @@
 	[self setNeedsDisplay];
 }
 
-
 - (void)setBounds:(CGRect)bounds {
 	[super setBounds:bounds];
 	[self updateLayout];
@@ -733,6 +740,10 @@
 }
 
 #pragma mark - Override
+
+- (void)dealloc {
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 
 - (void)setBackgroundColor:(UIColor *)backgroundColor {
 	[super setBackgroundColor:backgroundColor];
