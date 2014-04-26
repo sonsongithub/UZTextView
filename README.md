@@ -8,7 +8,7 @@ Clickable and selectable text view for iOS
 - Create subclass of the class and use UZTextView internal category methods if you want to expand the UZTextView class. For example, you have to override some methods of the class in order to add your custom UIMenuItem objects.
 - You can use the Class on the UITableView cell and set custom style text using NSAttributedString class objects(like the following image).
 
-![image](https://raw.github.com/sonsongithub/UZTextView/master/screenshot/sample01.jpg)
+![image](https://raw.github.com/sonsongithub/UZTextView/master/screenshot/UZTextView.gif)
 
 ###How to build
 - Use build.sh. Automatically lib and header file generated at ./build/.

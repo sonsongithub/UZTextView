@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                  = "UZTextView"
-  s.version               = "1.0.1"
+  s.version               = "1.0.2"
   s.summary               = "Clickable and selectable text view for iOS."
   s.homepage              = "https://github.com/sonsongithub/UZTextView"
   s.license               = { :type => "BSD", :file => "LICENSE" }
