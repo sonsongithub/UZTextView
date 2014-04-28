@@ -101,7 +101,7 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 
 #pragma mark - Animate
 
-- (void)animateForAppearingWithDuration:(float)duration {
+- (void)animateForAppearingWithDuration:(CGFloat)duration {
 	// decide whether animation should be started or not
 	if (!self.hidden)
 		return;
@@ -120,7 +120,7 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 	[self.layer addAnimation:group forKey:UZLoupeViewAppearingAnimation];
 }
 
-- (void)animateForDisappearingWithDuration:(float)duration {
+- (void)animateForDisappearingWithDuration:(CGFloat)duration {
 	// make group
 	CAAnimationGroup *group = [CAAnimationGroup animation];
 	group.animations = @[[self translationAnimationWhileDisappearing], [self transformScaleAnimationWhileDisapearing], [self alphaAnimationWhileDisappearing]];
@@ -148,7 +148,7 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 #pragma mark - Public
 
 - (void)setVisible:(BOOL)visible animated:(BOOL)animated {
-	float duration = animated ? UZ_LOUPE_ANIMATION_DUARTION : UZ_LOUPE_NO_ANIMATION_DUARTION;
+	CGFloat duration = animated ? UZ_LOUPE_ANIMATION_DUARTION : UZ_LOUPE_NO_ANIMATION_DUARTION;
 	if (visible)
 		[self animateForAppearingWithDuration:duration];
 	else
@@ -156,8 +156,8 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 }
 
 - (void)updateAtLocation:(CGPoint)location textView:(UIView*)textView {
-	float offset = _loupeRadius;
-	float angle = 0;
+	CGFloat offset = _loupeRadius;
+	CGFloat angle = 0;
 	
 	// convert point on key window
 	CGPoint c = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointMake(location.x, location.y) fromView:textView];
@@ -210,7 +210,7 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 	[self setNeedsDisplay];
 }
 
-- (id)initWithRadius:(float)radius {
+- (id)initWithRadius:(CGFloat)radius {
     self = [super initWithFrame:CGRectMake(0, 0, radius * 2, radius * 2)];
     if (self) {
 		_loupeRadius = radius;

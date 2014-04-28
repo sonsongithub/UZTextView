@@ -75,7 +75,7 @@
 
 #pragma mark - Class method to estimate attributed string size
 
-+ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width __attribute__((deprecated)){
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(CGFloat)width __attribute__((deprecated)){
 	// CoreText
 	CTFramesetterRef _framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedString);
 	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
@@ -87,7 +87,7 @@
 	return frameSize;
 }
 
-+ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(float)width margin:(UIEdgeInsets)margin {
++ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(CGFloat)width margin:(UIEdgeInsets)margin {
 	// CoreText
 	CTFramesetterRef _framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedString);
 	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
@@ -227,7 +227,7 @@
 
 #pragma mark - Layout information
 
-- (CGRect)fragmentRectForCursorAtIndex:(int)index side:(UZTextViewGlyphEdgeType)side {
+- (CGRect)fragmentRectForCursorAtIndex:(NSInteger)index side:(UZTextViewGlyphEdgeType)side {
 	if (side == UZTextViewLeftEdge) {
 		NSArray *rects = [self fragmentRectsForGlyphFromIndex:index toIndex:index];
 		CGRect rect = CGRectZero;
@@ -247,7 +247,7 @@
 	}
 }
 
-- (NSArray*)fragmentRectsForGlyphFromIndex:(int)fromIndex toIndex:(int)toIndex {
+- (NSArray*)fragmentRectsForGlyphFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex {
 	if (!(fromIndex <= toIndex && fromIndex >=0 && toIndex >=0))
 		return @[];
 	
@@ -295,7 +295,7 @@
 	return [NSArray arrayWithArray:fragmentRects];
 }
 
-- (CGRect)circumscribingRectForStringFromIndex:(int)fromIndex toIndex:(int)toIndex {
+- (CGRect)circumscribingRectForStringFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex {
 	NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:fromIndex toIndex:toIndex];
 	CGRect unifiedRect = [[fragmentRects objectAtIndex:0] CGRectValue];
 	for (NSValue *rectValue in fragmentRects) {
@@ -310,7 +310,7 @@
 	NSRange range;
 	if (CGPointEqualToPoint(_locationWhenTapBegan, CGPointZero))
 		return;
-	int tappedIndex = [self indexForPoint:_locationWhenTapBegan];
+	NSInteger tappedIndex = [self indexForPoint:_locationWhenTapBegan];
 	NSDictionary *dict = [self.attributedString attributesAtIndex:tappedIndex effectiveRange:&range];
 	if (dict[NSLinkAttributeName]) {		
 		NSArray *rects = [self fragmentRectsForGlyphFromIndex:tappedIndex toIndex:tappedIndex+1];
@@ -334,7 +334,7 @@
 	}
 }
 
-- (void)drawSelectedTextFragmentRectsFromIndex:(int)fromIndex toIndex:(int)toIndex color:(UIColor*)color {
+- (void)drawSelectedTextFragmentRectsFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex color:(UIColor*)color {
 	// Set drawing color
 	[color setFill];
 	CGContextRef context = UIGraphicsGetCurrentContext();
@@ -607,7 +607,7 @@
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [touches anyObject];
 	if (_status == UZTextViewEditingFromSelection) {
-		int newHead = [self indexForPoint:[touch locationInView:self margin:_margin]];
+		NSInteger newHead = [self indexForPoint:[touch locationInView:self margin:_margin]];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 		if (newHead != kCFNotFound) {
 			if (newHead <= _tail) {
@@ -617,7 +617,7 @@
 		[self setCursorHidden:NO];
 	}
 	else if (_status == UZTextViewEditingToSelection) {
-		int newTail = [self indexForPoint:[touch locationInView:self margin:_margin]];
+		NSInteger newTail = [self indexForPoint:[touch locationInView:self margin:_margin]];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 		if (newTail != kCFNotFound) {
 			if (newTail >= _head) {
@@ -659,7 +659,7 @@
 	else if (_longPressGestureRecognizer.state != UIGestureRecognizerStateBegan) {
 		if (_tappedLinkRange.length == 0) {
 			if (_status != UZTextViewNoSelection) {
-				int tappedCharacterIndex = [self indexForPoint:[[touches anyObject] locationInView:self margin:_margin]];
+				NSInteger tappedCharacterIndex = [self indexForPoint:[[touches anyObject] locationInView:self margin:_margin]];
 				if (_head <= tappedCharacterIndex && tappedCharacterIndex <= _tail) {
 					// show uimenu if user tapped selected text range.
 					[self showUIMenu];
