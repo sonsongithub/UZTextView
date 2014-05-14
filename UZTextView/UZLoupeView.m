@@ -181,7 +181,7 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 	}
 	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortraitUpsideDown) {
 		angle = -M_PI;
-		c.y -= offset;
+		c.y += offset;
 	}
 	
 	// adjust orientation
