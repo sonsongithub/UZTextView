@@ -12,7 +12,7 @@ Clickable and selectable text view for iOS
 
 ###How to build
 - Use build.sh. Automatically lib and header file generated at ./build/.
-- Currently, arch64 has not been tested.
+- UZTextView supports [CocoaPods](http://cocoapods.org/).
 
 ###Document
 - See html/index.html
