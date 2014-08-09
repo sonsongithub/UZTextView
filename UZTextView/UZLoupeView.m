@@ -39,12 +39,12 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 }
 
 - (CAAnimation*)translationAnimationWhileAppearing {
-	UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
+	UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
 	
-	if (UIInterfaceOrientationIsPortrait(orientation)) {
+	if (UIDeviceOrientationIsPortrait(orientation)) {
 		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
 		animation.keyTimes = @[@(0), @(1)];
-		if (orientation == UIInterfaceOrientationPortrait)
+		if (orientation == UIDeviceOrientationPortrait)
 			animation.values = @[@(self.frame.size.height/2), @(0)];
 		else
 			animation.values = @[@(-self.frame.size.height/2), @(0)];
@@ -53,7 +53,7 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 	else {
 		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.x"];
 		animation.keyTimes = @[@(0), @(1)];
-		if (orientation == UIInterfaceOrientationLandscapeLeft)
+		if (orientation == UIDeviceOrientationLandscapeRight)
 			animation.values = @[@(self.frame.size.width/2), @(0)];
 		else
 			animation.values = @[@(-self.frame.size.width/2), @(0)];
@@ -78,11 +78,12 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 }
 
 - (CAAnimation*)translationAnimationWhileDisappearing {
-	UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
-	if (UIInterfaceOrientationIsPortrait(orientation)) {
+	UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+	
+	if (UIDeviceOrientationIsPortrait(orientation)) {
 		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
 		animation.keyTimes = @[@(0), @(1)];
-		if (orientation == UIInterfaceOrientationPortrait)
+		if (orientation == UIDeviceOrientationPortrait)
 			animation.values = @[@(0), @(self.frame.size.height/2)];
 		else
 			animation.values = @[@(0), @(-self.frame.size.height/2)];
@@ -91,7 +92,7 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 	else {
 		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.x"];
 		animation.keyTimes = @[@(0), @(1)];
-		if (orientation == UIInterfaceOrientationLandscapeLeft)
+		if (orientation == UIDeviceOrientationLandscapeRight)
 			animation.values = @[@(0), @(self.frame.size.width/2)];
 		else
 			animation.values = @[@(0), @(-self.frame.size.width/2)];
@@ -155,31 +156,42 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 		[self animateForDisappearingWithDuration:duration];
 }
 
+UIView *searchKeyWindow(UIView* view) {
+	UIView *p = view.superview;
+	if (p == nil) {
+		if ([view isKindOfClass:[UIWindow class]])
+			return view;
+		return nil;
+	}
+	return searchKeyWindow(p);
+}
+
 - (void)updateAtLocation:(CGPoint)location textView:(UIView*)textView {
 	CGFloat offset = _loupeRadius;
 	CGFloat angle = 0;
 	
+	UIWindow *keyWindow = (UIWindow*)searchKeyWindow(self);
+	
 	// convert point on key window
-	CGPoint c = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointMake(location.x, location.y) fromView:textView];
+	CGPoint c = [keyWindow convertPoint:CGPointMake(location.x, location.y) fromView:textView];
 	
 	// Create UIImage from source view controller's view.
 	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius * 2, _loupeRadius * 2), NO, 0);
 	CGContextRef ctx = UIGraphicsGetCurrentContext();
 	CGContextTranslateCTM(ctx, -location.x + _loupeRadius, -location.y + _loupeRadius);
 	
-	
-	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft) {
+	if ([UIDevice currentDevice].orientation == UIDeviceOrientationLandscapeRight) {
 		angle = -M_PI * 0.5;
 		c.x -= offset;
 	}
-	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight) {
+	if ([UIDevice currentDevice].orientation == UIDeviceOrientationLandscapeLeft) {
 		angle = M_PI * 0.5;
 		c.x += offset;
 	}
-	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortrait) {
+	if ([UIDevice currentDevice].orientation == UIDeviceOrientationPortrait) {
 		c.y -= offset;
 	}
-	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortraitUpsideDown) {
+	if ([UIDevice currentDevice].orientation == UIDeviceOrientationPortraitUpsideDown) {
 		angle = -M_PI;
 		c.y += offset;
 	}
@@ -199,7 +211,7 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 	UIGraphicsEndImageContext();
 	
 	// update location
-	[[UIApplication sharedApplication].keyWindow addSubview:self];
+	[keyWindow addSubview:self];
 	[self setCenter:c];
 }
 
