@@ -41,12 +41,15 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 - (CAAnimation*)translationAnimationWhileAppearing {
 	UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
 	
+	if (orientation == UIDeviceOrientationUnknown)
+		orientation = UIDeviceOrientationPortrait;
+	
 	if (UIDeviceOrientationIsPortrait(orientation)) {
 		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
 		animation.keyTimes = @[@(0), @(1)];
 		if (orientation == UIDeviceOrientationPortrait)
 			animation.values = @[@(self.frame.size.height/2), @(0)];
-		else
+		else if (orientation == UIDeviceOrientationPortraitUpsideDown)
 			animation.values = @[@(-self.frame.size.height/2), @(0)];
 		return animation;
 	}
@@ -80,13 +83,16 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 - (CAAnimation*)translationAnimationWhileDisappearing {
 	UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
 	
+	if (orientation == UIDeviceOrientationUnknown)
+		orientation = UIDeviceOrientationPortrait;
+	
 	if (UIDeviceOrientationIsPortrait(orientation)) {
 		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
 		animation.keyTimes = @[@(0), @(1)];
-		if (orientation == UIDeviceOrientationPortrait)
-			animation.values = @[@(0), @(self.frame.size.height/2)];
-		else
+		if (orientation == UIDeviceOrientationPortraitUpsideDown)
 			animation.values = @[@(0), @(-self.frame.size.height/2)];
+		else
+			animation.values = @[@(0), @(self.frame.size.height/2)];
 		return animation;
 	}
 	else {
@@ -179,21 +185,31 @@ UIView *searchKeyWindow(UIView* view) {
 	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius * 2, _loupeRadius * 2), NO, 0);
 	CGContextRef ctx = UIGraphicsGetCurrentContext();
 	CGContextTranslateCTM(ctx, -location.x + _loupeRadius, -location.y + _loupeRadius);
+
+	UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
 	
-	if ([UIDevice currentDevice].orientation == UIDeviceOrientationLandscapeRight) {
+	if (orientation == UIDeviceOrientationUnknown)
+		orientation = UIDeviceOrientationPortrait;
+	
+	if (orientation == UIDeviceOrientationLandscapeRight) {
 		angle = -M_PI * 0.5;
 		c.x -= offset;
 	}
-	if ([UIDevice currentDevice].orientation == UIDeviceOrientationLandscapeLeft) {
+	else if (orientation == UIDeviceOrientationLandscapeLeft) {
 		angle = M_PI * 0.5;
 		c.x += offset;
 	}
-	if ([UIDevice currentDevice].orientation == UIDeviceOrientationPortrait) {
+	else if (orientation == UIDeviceOrientationPortrait) {
+		angle = 0;
 		c.y -= offset;
 	}
-	if ([UIDevice currentDevice].orientation == UIDeviceOrientationPortraitUpsideDown) {
+	else if (orientation == UIDeviceOrientationPortraitUpsideDown) {
 		angle = -M_PI;
 		c.y += offset;
+	}
+	else {
+		angle = 0;
+		c.y -= offset;
 	}
 	
 	// adjust orientation
