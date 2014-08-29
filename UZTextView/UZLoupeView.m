@@ -8,31 +8,31 @@
 
 #import "UZLoupeView.h"
 
-#define UZ_LOUPE_NO_ANIMATION_DUARTION	0.0001
-#define UZ_LOUPE_ANIMATION_DUARTION		0.2
-#define UZ_LOUPE_OUTLINE_STROKE_WIDTH	2
+// Animation duration
+#define UZ_LOUPE_NO_ANIMATION_DUARTION						0.0001
+#define UZ_LOUPE_ANIMATION_DUARTION							0.2
 
-#define UZCoreAnimationName (NSString*)_UZCoreAnimationName
-#define UZLoupeViewAppearingAnimation (NSString*)_UZLoupeViewAppearingAnimation
-#define UZLoupeViewDisappearingAnimation (NSString*)_UZLoupeViewDisappearingAnimation
+// Rendering parameter
+#define UZ_LOUPE_OUTLINE_STROKE_WIDTH						2
 
-const NSString *_UZCoreAnimationName = @"_UZCoreAnimationName";
-const NSString *_UZLoupeViewAppearingAnimation = @"_UZLoupeViewAppearingAnimation";
-const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAnimation";
+// Animation identifier
+static NSString * const UZCoreAnimationName					= @"_UZCoreAnimationName";
+static NSString * const UZLoupeViewAppearingAnimation		= @"_UZLoupeViewAppearingAnimation";
+static NSString * const UZLoupeViewDisappearingAnimation	= @"_UZLoupeViewDisappearingAnimation";
+
+// Declare preprocessor 'TARGET_IS_EXTENSION' if you use this class inside extension.
+#ifdef TARGET_IS_EXTENSION
+	#define _WITHOUT_UIAPPLICATION
+#endif
 
 @interface UZLoupeView() {
-#ifdef TARGET_IS_EXTENSION
-	UIInterfaceOrientation intrinsicOrientation;
-#else
-#endif
 }
 @end
 
 @implementation UZLoupeView
 
-#ifdef TARGET_IS_EXTENSION
+#ifdef _WITHOUT_UIAPPLICATION
 
-// code for application
 UIView *searchKeyWindow(UIView* view) {
 	UIView *p = view.superview;
 	if ([p isKindOfClass:[UIWindow class]]) {
@@ -41,44 +41,6 @@ UIView *searchKeyWindow(UIView* view) {
 	if (p == nil)
 		return view;
 	return searchKeyWindow(p);
-}
-
-- (UIInterfaceOrientation)orientation {
-	return intrinsicOrientation;
-}
-
-- (void)startObserveDeviceOrientation {
-	intrinsicOrientation = UIInterfaceOrientationPortrait;
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(orientationChanged:) name:UIDeviceOrientationDidChangeNotification object:nil];
-}
-
-- (void)orientationChanged:(NSNotification*)notification {
-	UIDeviceOrientation deviceOrienation = [UIDevice currentDevice].orientation;
-	if (deviceOrienation != UIDeviceOrientationUnknown && deviceOrienation != UIDeviceOrientationFaceDown && deviceOrienation != UIDeviceOrientationFaceUp) {
-		switch (deviceOrienation) {
-			case UIDeviceOrientationPortrait:
-				intrinsicOrientation = UIInterfaceOrientationPortrait;
-				break;
-			case UIDeviceOrientationPortraitUpsideDown:
-				intrinsicOrientation = UIInterfaceOrientationPortraitUpsideDown;
-				break;
-			case UIDeviceOrientationLandscapeLeft:
-				intrinsicOrientation = UIInterfaceOrientationLandscapeLeft;
-				break;
-			case UIDeviceOrientationLandscapeRight:
-				intrinsicOrientation = UIInterfaceOrientationLandscapeRight;
-				break;
-			default:
-				break;
-		}
-	}
-}
-
-#else
-
-// code for application
-- (UIInterfaceOrientation)orientation {
-	return [UIApplication sharedApplication].statusBarOrientation;
 }
 
 #endif
@@ -100,26 +62,10 @@ UIView *searchKeyWindow(UIView* view) {
 }
 
 - (CAAnimation*)translationAnimationWhileAppearing {
-	UIInterfaceOrientation orientation = [self orientation];
-	
-	if (UIInterfaceOrientationIsPortrait(orientation)) {
-		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
-		animation.keyTimes = @[@(0), @(1)];
-		if (orientation == UIInterfaceOrientationPortrait)
-			animation.values = @[@(self.frame.size.height/2), @(0)];
-		else
-			animation.values = @[@(self.frame.size.height/2), @(0)];
-		return animation;
-	}
-	else {
-		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
-		animation.keyTimes = @[@(0), @(1)];
-		if (orientation == UIInterfaceOrientationLandscapeLeft)
-			animation.values = @[@(self.frame.size.height/2), @(0)];
-		else
-			animation.values = @[@(self.frame.size.height/2), @(0)];
-		return animation;
-	}
+	CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
+	animation.keyTimes = @[@(0), @(1)];
+	animation.values = @[@(self.frame.size.height/2), @(0)];
+	return animation;
 }
 
 #pragma mark - Create Core Animation objects for disappearing
@@ -139,25 +85,10 @@ UIView *searchKeyWindow(UIView* view) {
 }
 
 - (CAAnimation*)translationAnimationWhileDisappearing {
-	UIInterfaceOrientation orientation = [self orientation];
-	if (UIInterfaceOrientationIsPortrait(orientation)) {
-		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
-		animation.keyTimes = @[@(0), @(1)];
-		if (orientation == UIInterfaceOrientationPortrait)
-			animation.values = @[@(0), @(self.frame.size.height/2)];
-		else
-			animation.values = @[@(0), @(self.frame.size.height/2)];
-		return animation;
-	}
-	else {
-		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
-		animation.keyTimes = @[@(0), @(1)];
-		if (orientation == UIInterfaceOrientationLandscapeLeft)
-			animation.values = @[@(0), @(self.frame.size.height/2)];
-		else
-			animation.values = @[@(0), @(self.frame.size.height/2)];
-		return animation;
-	}
+	CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
+	animation.keyTimes = @[@(0), @(1)];
+	animation.values = @[@(0), @(self.frame.size.height/2)];
+	return animation;
 }
 
 #pragma mark - Animate
@@ -220,11 +151,7 @@ UIView *searchKeyWindow(UIView* view) {
 	CGFloat offset = _loupeRadius;
 	CGFloat angle = 0;
 	
-	UIInterfaceOrientation orientation = [self orientation];
-	
-	// convert point on key window
-	
-#ifdef TARGET_IS_EXTENSION
+#ifdef _WITHOUT_UIAPPLICATION
 	UIView *targetView = (UIWindow*)searchKeyWindow(self);
 #else
 	UIView *targetView = [UIApplication sharedApplication].keyWindow.rootViewController.view;
@@ -236,18 +163,7 @@ UIView *searchKeyWindow(UIView* view) {
 	CGContextRef ctx = UIGraphicsGetCurrentContext();
 	CGContextTranslateCTM(ctx, -location.x + _loupeRadius, -location.y + _loupeRadius);
 	
-	if (orientation == UIInterfaceOrientationLandscapeLeft) {
-		c.y -= offset;
-	}
-	else if (orientation == UIInterfaceOrientationLandscapeRight) {
-		c.y -= offset;
-	}
-	else if (orientation == UIInterfaceOrientationPortrait) {
-		c.y -= offset;
-	}
-	else if (orientation == UIInterfaceOrientationPortraitUpsideDown) {
-		c.y -= offset;
-	}
+	c.y -= offset;
 	
 	// adjust orientation
 	CGContextTranslateCTM(ctx, location.x, location.y);
@@ -286,9 +202,6 @@ UIView *searchKeyWindow(UIView* view) {
 		_loupeRadius = radius;
 		self.backgroundColor = [UIColor clearColor];
 		self.hidden = YES;
-#ifdef TARGET_IS_EXTENSION
-		[self startObserveDeviceOrientation];
-#endif
 	}
 	return self;
 }
