@@ -69,7 +69,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 
 /**
  * UZTextViewDelegate protocol is order to receive selecting, scrolling-related messages for UZTextView objcects.
- * All of the methods in this protocol are optional. 
+ * All of the methods in this protocol are optional.
  * You can use the methods in order to lock parent view's scroll while user selects text on UZTextView object.
  */
 @protocol UZTextViewDelegate <NSObject>
@@ -107,7 +107,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 @end
 
 /**
- The UZTextView class implements the behavior for a scrollable, multiline, selectable, clickable text region. 
+ The UZTextView class implements the behavior for a scrollable, multiline, selectable, clickable text region.
  The class supports the display of text using custom style and link information.
  
  Create subclass of the class and use UZTextView internal category methods if you want to expand the UZTextView class.
@@ -118,10 +118,11 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 	
 	// Layout
 	UIEdgeInsets					_margin;
+	CGFloat							_lastLayoutWidth;					// save the width when view is laytouted previously.
 	
 	// CoreText
 	CTFramesetterRef				_framesetter;
-    CTFrameRef						_frame;
+	CTFrameRef						_frame;
 	CGRect							_contentRect;
 	CFStringTokenizerRef			_tokenizer;
 	

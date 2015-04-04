@@ -8,19 +8,42 @@
 
 #import "UZLoupeView.h"
 
-#define UZ_LOUPE_NO_ANIMATION_DUARTION	0.0001
-#define UZ_LOUPE_ANIMATION_DUARTION		0.1
-#define UZ_LOUPE_OUTLINE_STROKE_WIDTH	2
+// Animation duration
+#define UZ_LOUPE_NO_ANIMATION_DUARTION						0.0001
+#define UZ_LOUPE_ANIMATION_DUARTION							0.2
 
-#define UZCoreAnimationName (NSString*)_UZCoreAnimationName
-#define UZLoupeViewAppearingAnimation (NSString*)_UZLoupeViewAppearingAnimation
-#define UZLoupeViewDisappearingAnimation (NSString*)_UZLoupeViewDisappearingAnimation
+// Rendering parameter
+#define UZ_LOUPE_OUTLINE_STROKE_WIDTH						2
 
-const NSString *_UZCoreAnimationName = @"_UZCoreAnimationName";
-const NSString *_UZLoupeViewAppearingAnimation = @"_UZLoupeViewAppearingAnimation";
-const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAnimation";
+// Animation identifier
+static NSString * const UZCoreAnimationName					= @"_UZCoreAnimationName";
+static NSString * const UZLoupeViewAppearingAnimation		= @"_UZLoupeViewAppearingAnimation";
+static NSString * const UZLoupeViewDisappearingAnimation	= @"_UZLoupeViewDisappearingAnimation";
+
+// Declare preprocessor 'TARGET_IS_EXTENSION' if you use this class inside extension.
+#ifdef TARGET_IS_EXTENSION
+	#define _WITHOUT_UIAPPLICATION
+#endif
+
+@interface UZLoupeView() {
+}
+@end
 
 @implementation UZLoupeView
+
+#ifdef _WITHOUT_UIAPPLICATION
+
+UIView *searchKeyWindow(UIView* view) {
+	UIView *p = view.superview;
+	if ([p isKindOfClass:[UIWindow class]]) {
+		return view;
+	}
+	if (p == nil)
+		return view;
+	return searchKeyWindow(p);
+}
+
+#endif
 
 #pragma mark - Create Core Animation objects for appearing
 
@@ -39,26 +62,10 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 }
 
 - (CAAnimation*)translationAnimationWhileAppearing {
-	UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
-	
-	if (UIInterfaceOrientationIsPortrait(orientation)) {
-		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
-		animation.keyTimes = @[@(0), @(1)];
-		if (orientation == UIInterfaceOrientationPortrait)
-			animation.values = @[@(self.frame.size.height/2), @(0)];
-		else
-			animation.values = @[@(-self.frame.size.height/2), @(0)];
-		return animation;
-	}
-	else {
-		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.x"];
-		animation.keyTimes = @[@(0), @(1)];
-		if (orientation == UIInterfaceOrientationLandscapeLeft)
-			animation.values = @[@(self.frame.size.width/2), @(0)];
-		else
-			animation.values = @[@(-self.frame.size.width/2), @(0)];
-		return animation;
-	}
+	CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
+	animation.keyTimes = @[@(0), @(1)];
+	animation.values = @[@(self.frame.size.height/2), @(0)];
+	return animation;
 }
 
 #pragma mark - Create Core Animation objects for disappearing
@@ -78,25 +85,10 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 }
 
 - (CAAnimation*)translationAnimationWhileDisappearing {
-	UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
-	if (UIInterfaceOrientationIsPortrait(orientation)) {
-		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
-		animation.keyTimes = @[@(0), @(1)];
-		if (orientation == UIInterfaceOrientationPortrait)
-			animation.values = @[@(0), @(self.frame.size.height/2)];
-		else
-			animation.values = @[@(0), @(-self.frame.size.height/2)];
-		return animation;
-	}
-	else {
-		CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.x"];
-		animation.keyTimes = @[@(0), @(1)];
-		if (orientation == UIInterfaceOrientationLandscapeLeft)
-			animation.values = @[@(0), @(self.frame.size.width/2)];
-		else
-			animation.values = @[@(0), @(-self.frame.size.width/2)];
-		return animation;
-	}
+	CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
+	animation.keyTimes = @[@(0), @(1)];
+	animation.values = @[@(0), @(self.frame.size.height/2)];
+	return animation;
 }
 
 #pragma mark - Animate
@@ -159,30 +151,19 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 	CGFloat offset = _loupeRadius;
 	CGFloat angle = 0;
 	
-	// convert point on key window
-	CGPoint c = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointMake(location.x, location.y) fromView:textView];
+#ifdef _WITHOUT_UIAPPLICATION
+	UIView *targetView = (UIWindow*)searchKeyWindow(self);
+#else
+	UIView *targetView = [UIApplication sharedApplication].keyWindow.rootViewController.view;
+#endif
+	CGPoint c = [targetView convertPoint:CGPointMake(location.x, location.y) fromView:textView];
 	
 	// Create UIImage from source view controller's view.
 	UIGraphicsBeginImageContextWithOptions(CGSizeMake(_loupeRadius * 2, _loupeRadius * 2), NO, 0);
 	CGContextRef ctx = UIGraphicsGetCurrentContext();
 	CGContextTranslateCTM(ctx, -location.x + _loupeRadius, -location.y + _loupeRadius);
 	
-	
-	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft) {
-		angle = -M_PI * 0.5;
-		c.x -= offset;
-	}
-	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight) {
-		angle = M_PI * 0.5;
-		c.x += offset;
-	}
-	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortrait) {
-		c.y -= offset;
-	}
-	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortraitUpsideDown) {
-		angle = -M_PI;
-		c.y -= offset;
-	}
+	c.y -= offset;
 	
 	// adjust orientation
 	CGContextTranslateCTM(ctx, location.x, location.y);
@@ -199,11 +180,16 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 	UIGraphicsEndImageContext();
 	
 	// update location
-	[[UIApplication sharedApplication].keyWindow addSubview:self];
+	[targetView addSubview:self];
+	
 	[self setCenter:c];
 }
 
 #pragma mark - Override
+
+- (void)dealloc {
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 
 - (void)setCenter:(CGPoint)center {
 	[super setCenter:center];
@@ -211,13 +197,13 @@ const NSString *_UZLoupeViewDisappearingAnimation = @"_UZLoupeViewDisappearingAn
 }
 
 - (id)initWithRadius:(CGFloat)radius {
-    self = [super initWithFrame:CGRectMake(0, 0, radius * 2, radius * 2)];
-    if (self) {
+	self = [super initWithFrame:CGRectMake(0, 0, radius * 2, radius * 2)];
+	if (self) {
 		_loupeRadius = radius;
 		self.backgroundColor = [UIColor clearColor];
 		self.hidden = YES;
-    }
-    return self;
+	}
+	return self;
 }
 
 - (void)drawRect:(CGRect)rect {
