@@ -79,10 +79,10 @@
 	// CoreText
 	CTFramesetterRef _framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedString);
 	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
-                                                                    CFRangeMake(0, attributedString.length),
-                                                                    NULL,
-                                                                    CGSizeMake(width, CGFLOAT_MAX),
-                                                                    NULL);
+																	CFRangeMake(0, attributedString.length),
+																	NULL,
+																	CGSizeMake(width, CGFLOAT_MAX),
+																	NULL);
 	CFRelease(_framesetter);
 	return frameSize;
 }
@@ -91,16 +91,17 @@
 	// CoreText
 	CTFramesetterRef _framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedString);
 	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
-                                                                    CFRangeMake(0, attributedString.length),
-                                                                    NULL,
-                                                                    CGSizeMake(width - (margin.left + margin.right), CGFLOAT_MAX),
-                                                                    NULL);
+																	CFRangeMake(0, attributedString.length),
+																	NULL,
+																	CGSizeMake(width - (margin.left + margin.right), CGFLOAT_MAX),
+																	NULL);
 	frameSize.height += (margin.top + margin.bottom);
 	CFRelease(_framesetter);
 	return frameSize;
 }
 
 - (void)prepareForReuse {
+	_lastLayoutWidth = 0;
 	_status = UZTextViewNoSelection;
 	_head = 0;
 	_tail = 0;
@@ -182,25 +183,31 @@
 }
 
 - (void)updateLayout {
+	if (_lastLayoutWidth == (self.frame.size.width - (_margin.left + _margin.right))) {
+		return;
+	}
+	
 	// CoreText
 	SAFE_CFRELEASE(_framesetter);
 	SAFE_CFRELEASE(_frame);
 	
-    CFAttributedStringRef p = (__bridge CFAttributedStringRef)_attributedString;
-    if (p) {
-        _framesetter = CTFramesetterCreateWithAttributedString(p);
-    }
+	CFAttributedStringRef p = (__bridge CFAttributedStringRef)_attributedString;
+	if (p) {
+		_framesetter = CTFramesetterCreateWithAttributedString(p);
+	}
 	else {
-        p = CFAttributedStringCreate(NULL, CFSTR(""), NULL);
-        _framesetter = CTFramesetterCreateWithAttributedString(p);
-        CFRelease(p);
-    }
-    
+		p = CFAttributedStringCreate(NULL, CFSTR(""), NULL);
+		_framesetter = CTFramesetterCreateWithAttributedString(p);
+		CFRelease(p);
+	}
+	
+	_lastLayoutWidth = self.frame.size.width - (_margin.left + _margin.right);
+	
 	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
-                                                                    CFRangeMake(0, _attributedString.length),
-                                                                    NULL,
-                                                                    CGSizeMake(self.frame.size.width - (_margin.left + _margin.right), CGFLOAT_MAX),
-                                                                    NULL);
+																	CFRangeMake(0, _attributedString.length),
+																	NULL,
+																	CGSizeMake(_lastLayoutWidth, CGFLOAT_MAX),
+																	NULL);
 	_contentRect = CGRectZero;
 	_contentRect.size = frameSize;
 	
@@ -252,9 +259,9 @@
 		return @[];
 	
 	CFArrayRef lines = CTFrameGetLines(_frame);
-    CFIndex lineCount = CFArrayGetCount(lines);
-    CGPoint lineOrigins[lineCount];
-    CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
+	CFIndex lineCount = CFArrayGetCount(lines);
+	CGPoint lineOrigins[lineCount];
+	CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
 	
 	NSMutableArray *fragmentRects = [NSMutableArray array];
 	
@@ -263,23 +270,23 @@
 	if (range.length <= 0)
 		range.length = 1;
 	
-    for (NSInteger index = 0; index < lineCount; index++) {
-        CGPoint origin = lineOrigins[index];
-        CTLineRef line = CFArrayGetValueAtIndex(lines, index);
-        
+	for (NSInteger index = 0; index < lineCount; index++) {
+		CGPoint origin = lineOrigins[index];
+		CTLineRef line = CFArrayGetValueAtIndex(lines, index);
+		
 		CGRect rect = CGRectZero;
 		CFRange stringRange = CTLineGetStringRange(line);
 		NSRange intersectionRange = NSIntersectionRange(range, NSMakeRange(stringRange.location, stringRange.length));
 		CGFloat ascent;
-        CGFloat descent;
-        CGFloat leading;
-        CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
-        
-        CGRect lineRect = CGRectMake(origin.x,
-                                     ceilf(origin.y - descent),
-                                     width,
-                                     ceilf(ascent + descent));
-        lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
+		CGFloat descent;
+		CGFloat leading;
+		CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+		
+		CGRect lineRect = CGRectMake(origin.x,
+									 ceilf(origin.y - descent),
+									 width,
+									 ceilf(ascent + descent));
+		lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
 		
 		if (intersectionRange.length > 0) {
 			CGFloat startOffset = CTLineGetOffsetForStringIndex(line, intersectionRange.location, NULL);
@@ -291,7 +298,7 @@
 			rect.size.width = rect.size.width - startOffset;
 			[fragmentRects addObject:[NSValue valueWithCGRect:rect]];
 		}
-    }
+	}
 	return [NSArray arrayWithArray:fragmentRects];
 }
 
@@ -312,21 +319,21 @@
 		return;
 	NSInteger tappedIndex = [self indexForPoint:_locationWhenTapBegan];
 	NSDictionary *dict = [self.attributedString attributesAtIndex:tappedIndex effectiveRange:&range];
-	if (dict[NSLinkAttributeName]) {		
+	if (dict[NSLinkAttributeName]) {
 		NSArray *rects = [self fragmentRectsForGlyphFromIndex:tappedIndex toIndex:tappedIndex+1];
 		CGRect rect = CGRectZero;
 		if ([rects count]) {
 			rect = [[rects objectAtIndex:0] CGRectValue];
 			rect.size.width = 0;
 		}
-
+		
 		if (CGRectContainsPoint(rect, _locationWhenTapBegan)) {
 			CGContextRef context = UIGraphicsGetCurrentContext();
-
+			
 			[[self.tintColor colorWithAlphaComponent:_tintAlpha] setFill];
-
+			
 			NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:range.location toIndex:range.location + range.length - 1];
-
+			
 			for (NSValue *rectValue in fragmentRects) {
 				CGContextFillRect(context, [rectValue CGRectValue]);
 			}
@@ -348,31 +355,31 @@
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	
 	CFArrayRef lines = CTFrameGetLines(_frame);
-    CFIndex lineCount = CFArrayGetCount(lines);
-    CGPoint lineOrigins[lineCount];
-    CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
+	CFIndex lineCount = CFArrayGetCount(lines);
+	CGPoint lineOrigins[lineCount];
+	CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
 	
-    for (NSInteger index = 0; index < lineCount; index++) {
-        CGPoint origin = lineOrigins[index];
-        CTLineRef line = CFArrayGetValueAtIndex(lines, index);
+	for (NSInteger index = 0; index < lineCount; index++) {
+		CGPoint origin = lineOrigins[index];
+		CTLineRef line = CFArrayGetValueAtIndex(lines, index);
 		
-        CGFloat ascent;
-        CGFloat descent;
-        CGFloat leading;
-        CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
-        
-        CGRect lineRect = CGRectMake(origin.x,
-                                     ceilf(origin.y - descent),
-                                     width,
-                                     ceilf(ascent + descent));
+		CGFloat ascent;
+		CGFloat descent;
+		CGFloat leading;
+		CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+		
+		CGRect lineRect = CGRectMake(origin.x,
+									 ceilf(origin.y - descent),
+									 width,
+									 ceilf(ascent + descent));
 		lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
 		CGContextStrokeRect(context, lineRect);
-    }
+	}
 }
 
 - (void)drawContent {
 	CGContextRef context = UIGraphicsGetCurrentContext();
-
+	
 #ifdef _UZTEXTVIEW_DEBUG_
 	// draw frame for debug
 	[[UIColor redColor] setStroke];
@@ -385,15 +392,15 @@
 	
 	// draw text
 	CGContextSaveGState(context);
-    CGContextTranslateCTM(context, 0, _contentRect.size.height);
-    CGContextScaleCTM(context, 1.0, -1.0);
+	CGContextTranslateCTM(context, 0, _contentRect.size.height);
+	CGContextScaleCTM(context, 1.0, -1.0);
 	CGContextSetTextMatrix(context, CGAffineTransformIdentity);
 	CTFrameDraw(_frame, context);
 	CGContextRestoreGState(context);
 	
 #ifdef _UZTEXTVIEW_DEBUG_
 	// for debug
-	 [self drawStringRectForDebug];
+	[self drawStringRectForDebug];
 #endif
 	
 	// draw hightlighted text
@@ -417,21 +424,21 @@
 #pragma mark - UILongPressGestureDelegate
 
 - (void)didChangeLongPressGesture:(UILongPressGestureRecognizer *)gestureRecognizer {
-    if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
+	if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
 		[self setSelectionWithPoint:[gestureRecognizer locationInView:self margin:_margin]];
 		_status = UZTextViewSelected;
 		[self setCursorHidden:YES];
 		[self setNeedsDisplay];
 		[_loupeView setVisible:YES animated:YES];
 		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
-    }
+	}
 	else if (gestureRecognizer.state == UIGestureRecognizerStateChanged) {
 		[self setSelectionWithPoint:[gestureRecognizer locationInView:self margin:_margin]];
 		[self setCursorHidden:YES];
 		[self setNeedsDisplay];
 		[_loupeView setVisible:YES animated:YES];
 		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
-    }
+	}
 	else if (gestureRecognizer.state == UIGestureRecognizerStateEnded || gestureRecognizer.state == UIGestureRecognizerStateCancelled || gestureRecognizer.state == UIGestureRecognizerStateFailed) {
 		[self setCursorHidden:NO];
 		[self setNeedsDisplay];
@@ -439,7 +446,7 @@
 		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
 		[self becomeFirstResponder];
 		[self showUIMenu];
-    }
+	}
 }
 
 #pragma mark - Preparation
@@ -478,9 +485,9 @@
 	
 	_tappedLinkAttribute = nil;
 	
-    CFIndex index = [self indexForPoint:point];
-    if (index == kCFNotFound)
-        return resultRange;
+	CFIndex index = [self indexForPoint:point];
+	if (index == kCFNotFound)
+		return resultRange;
 	
 	_tappedLinkAttribute = [self.attributedString attributesAtIndex:index effectiveRange:&resultRange];
 	if (!_tappedLinkAttribute[NSLinkAttributeName])
@@ -489,25 +496,25 @@
 }
 
 - (void)setSelectionWithPoint:(CGPoint)point {
-    CFIndex index = [self indexForPoint:point];
-    if (index == kCFNotFound)
-        return;
-    
-    CFStringRef string = (__bridge CFStringRef)self.attributedString.string;
-    CFRange range = CFRangeMake(0, CFStringGetLength(string));
-  
-
+	CFIndex index = [self indexForPoint:point];
+	if (index == kCFNotFound)
+		return;
+	
+	CFStringRef string = (__bridge CFStringRef)self.attributedString.string;
+	CFRange range = CFRangeMake(0, CFStringGetLength(string));
+	
+	
 	if (_tokenizer == NULL) {
 		_tokenizer = CFStringTokenizerCreate(
-															 NULL,
-															 string,
-															 range,
-															 kCFStringTokenizerUnitWordBoundary,
-															 NULL);
+											 NULL,
+											 string,
+											 range,
+											 kCFStringTokenizerUnitWordBoundary,
+											 NULL);
 	}
-    CFStringTokenizerTokenType tokenType = CFStringTokenizerGoToTokenAtIndex(_tokenizer, 0);
-    while (tokenType != kCFStringTokenizerTokenNone || range.location + range.length < CFStringGetLength(string)) {
-        range = CFStringTokenizerGetCurrentTokenRange(_tokenizer);
+	CFStringTokenizerTokenType tokenType = CFStringTokenizerGoToTokenAtIndex(_tokenizer, 0);
+	while (tokenType != kCFStringTokenizerTokenNone || range.location + range.length < CFStringGetLength(string)) {
+		range = CFStringTokenizerGetCurrentTokenRange(_tokenizer);
 		
 		if (range.location == kCFNotFound) {
 			_head = index;
@@ -515,42 +522,42 @@
 			break;
 		}
 		
-        CFIndex first = range.location;
-        CFIndex second = range.location + range.length - 1;
-        if (first != kCFNotFound && first <= index && index <= second) {
+		CFIndex first = range.location;
+		CFIndex second = range.location + range.length - 1;
+		if (first != kCFNotFound && first <= index && index <= second) {
 			_head = first;
 			_tail = second;
 			break;
-        }
-        tokenType = CFStringTokenizerAdvanceToNextToken(_tokenizer);
-    }
+		}
+		tokenType = CFStringTokenizerAdvanceToNextToken(_tokenizer);
+	}
 }
 
 - (CFIndex)indexForPoint:(CGPoint)point {
 	CFArrayRef lines = CTFrameGetLines(_frame);
-    CFIndex lineCount = CFArrayGetCount(lines);
-    CGPoint lineOrigins[lineCount];
-    CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
+	CFIndex lineCount = CFArrayGetCount(lines);
+	CGPoint lineOrigins[lineCount];
+	CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
 	
 	CGRect previousLineRect = CGRectZero;
-    
-    for (NSInteger index = 0; index < lineCount; index++) {
-        CGPoint origin = lineOrigins[index];
-        CTLineRef line = CFArrayGetValueAtIndex(lines, index);
+	
+	for (NSInteger index = 0; index < lineCount; index++) {
+		CGPoint origin = lineOrigins[index];
+		CTLineRef line = CFArrayGetValueAtIndex(lines, index);
 		
 		CFRange lineCFRange = CTLineGetStringRange(line);
 		NSRange lineRange = NSMakeRange(lineCFRange.location, lineCFRange.length);
-        CGFloat ascent;
-        CGFloat descent;
-        CGFloat leading;
-        CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
-        
-        CGRect lineRect = CGRectMake(origin.x,
-                                     ceilf(origin.y - descent),
-                                     width,
-                                     ceilf(ascent + descent));
+		CGFloat ascent;
+		CGFloat descent;
+		CGFloat leading;
+		CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+		
+		CGRect lineRect = CGRectMake(origin.x,
+									 ceilf(origin.y - descent),
+									 width,
+									 ceilf(ascent + descent));
 		lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
-
+		
 		CGRect temp = lineRect;
 		lineRect.size.height += (lineRect.origin.y - previousLineRect.origin.y - previousLineRect.size.height);
 		lineRect.origin.y = previousLineRect.origin.y + previousLineRect.size.height;
@@ -567,9 +574,9 @@
 		marginArea.size.width = _contentRect.size.width;
 		
 		if (CGRectContainsPoint(marginArea, point)) {
-				return lineRange.location + lineRange.length - 1;
+			return lineRange.location + lineRange.length - 1;
 		}
-    }
+	}
 	return kCFNotFound;
 }
 
@@ -757,7 +764,7 @@
 }
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
-    if (CGRectContainsPoint(self.bounds, point)) {
+	if (CGRectContainsPoint(self.bounds, point)) {
 		CGPoint pointForUZTextViewContent = point;
 		pointForUZTextViewContent.x -= _margin.left;
 		pointForUZTextViewContent.y -= _margin.top;
@@ -775,8 +782,8 @@
 			// when some text is selected.
 			return [super hitTest:point withEvent:event];
 		}
-    }
-    return nil;
+	}
+	return nil;
 }
 
 - (void)layoutSubviews {
@@ -785,15 +792,15 @@
 }
 
 - (id)initWithFrame:(CGRect)frame {
-    self = [super initWithFrame:frame];
-    if (self)
+	self = [super initWithFrame:frame];
+	if (self)
 		[self prepareForInitialization];
-    return self;
+	return self;
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
 	self = [super initWithCoder:aDecoder];
-    if (self)
+	if (self)
 		[self prepareForInitialization];
 	return self;
 }

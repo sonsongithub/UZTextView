@@ -181,7 +181,7 @@ UIView *searchKeyWindow(UIView* view) {
 	
 	// update location
 	[targetView addSubview:self];
-
+	
 	[self setCenter:c];
 }
 
