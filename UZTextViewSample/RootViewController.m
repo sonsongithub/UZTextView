@@ -89,7 +89,7 @@
 }
 
 - (void)updateLayout {
-	float width = 226;
+	float width = self.view.frame.size.width - 63 - 33;
 	if ([[self.tableView visibleCells] count]) {
 		TextCell *cell = (TextCell*)[[self.tableView visibleCells] objectAtIndex:0];
 		width = cell.textView.frame.size.width;
