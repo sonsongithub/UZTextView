@@ -16,15 +16,13 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "UZTextView"
-  s.version      = "1.0.4"
+  s.version      = "1.0.5"
   s.summary      = "Clickable and selectable text view for iOS"
 
   s.description  = <<-DESC
-                   To be written.
-                   To be written.
-                   To be written.
-                   To be written.
-                   To be written.
+                   UZTextView class implements implements the behavior for a scrollable, multiline, selectable, clickable text region. The class supports the display of text using custom style and link information.
+                   Create subclass of the class and use UZTextView internal category methods if you want to expand the UZTextView class. For example, you have to override some methods of the class in order to add your custom UIMenuItem objects.
+                   You can use the Class on the UITableView cell and set custom style text using NSAttributedString class objects.
                    DESC
 
   s.homepage     = "https://github.com/sonsongithub/UZTextView"
@@ -76,7 +74,7 @@ Pod::Spec.new do |s|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  s.source       = { :git => "https://github.com/sonsongithub/UZTextView.git", :tag => "v1.0.4" }
+  s.source       = { :git => "https://github.com/sonsongithub/UZTextView.git", :tag => "v1.0.5" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
