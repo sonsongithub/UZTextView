@@ -351,6 +351,27 @@
 	}
 }
 
+- (void)drawStrikethroughLine {
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    [self.attributedString enumerateAttribute:NSStrikethroughStyleAttributeName inRange:NSMakeRange(0, self.attributedString.length) options:0 usingBlock:^(id  _Nullable value, NSRange range, BOOL * _Nonnull stop) {
+        if ([value isKindOfClass:[NSNumber class]]) {
+            // obtain and set line width from value
+            [[UIColor blackColor] setStroke];
+            CGContextSetLineWidth(context, [value doubleValue]);
+            
+            // draw horizontal lines through the center of fragrmaent rectangles as strike through lines
+            NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:range.location toIndex:range.location+range.length];
+            for (NSValue *rectValue in fragmentRects) {
+                CGRect rect = [rectValue CGRectValue];
+                CGFloat y = CGRectGetMidY(rect);
+                CGContextMoveToPoint(context, rect.origin.x, y);
+                CGContextAddLineToPoint(context, rect.origin.x + rect.size.width, y);
+                CGContextDrawPath(context, kCGPathStroke);
+            }
+        }
+    }];
+}
+
 - (void)drawStringRectForDebug {
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	
@@ -402,6 +423,9 @@
 	// for debug
 	[self drawStringRectForDebug];
 #endif
+    
+    // draw strike through line
+    [self drawStrikethroughLine];
 	
 	// draw hightlighted text
 	for (NSValue *value in _highlightRanges) {

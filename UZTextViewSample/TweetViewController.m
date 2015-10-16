@@ -13,7 +13,7 @@
 #import "SEImageCache.h"
 #import "WebViewController.h"
 
-@interface TweetViewController ()
+@interface TweetViewController  () <UZTextViewDelegate>
 
 @end
 
@@ -24,6 +24,7 @@
 	
 	self.textView.backgroundColor = [UIColor whiteColor];
 	self.textView.attributedString = self.tweet.attributedString;
+    self.textView.delegate = self;
 	
 	NSURL *iconURL = [NSURL URLWithString:self.tweet.info[@"user"][@"profile_image_url_https"]];
     UIImage *iconImage = [[SEImageCache sharedInstance] imageForURL:iconURL

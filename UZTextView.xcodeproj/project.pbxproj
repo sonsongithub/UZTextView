@@ -7,9 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		141040DC1996D38200D96463 /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 14F886E217C2BF29006F5514 /* Main_iPad.storyboard */; };
 		147737D217C2F3C400A4F04B /* UZCursorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886E517C2BFA0006F5514 /* UZCursorView.m */; };
 		147737D317C2F3C700A4F04B /* UZLoupeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886E717C2BFA0006F5514 /* UZLoupeView.m */; };
+		14E539901BD0C1E2009A6004 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 14E5398E1BD0C1E2009A6004 /* Main.storyboard */; settings = {ASSET_TAGS = (); }; };
+		14E539931BD0C3F0009A6004 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 14E539911BD0C3F0009A6004 /* LaunchScreen.storyboard */; settings = {ASSET_TAGS = (); }; };
+		14E539971BD0C55F009A6004 /* TextViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 14E539961BD0C55F009A6004 /* TextViewController.m */; settings = {ASSET_TAGS = (); }; };
 		14F8866C17C2BB02006F5514 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14F8866B17C2BB02006F5514 /* Foundation.framework */; };
 		14F8867117C2BB02006F5514 /* UZTextView.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 14F8867017C2BB02006F5514 /* UZTextView.h */; };
 		14F8867317C2BB02006F5514 /* UZTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F8867217C2BB02006F5514 /* UZTextView.m */; };
@@ -26,7 +28,6 @@
 		14F886DC17C2BEE6006F5514 /* Tweet.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886D417C2BEE6006F5514 /* Tweet.m */; };
 		14F886DD17C2BEE6006F5514 /* TweetViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886D617C2BEE6006F5514 /* TweetViewController.m */; };
 		14F886DE17C2BEE6006F5514 /* WebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886D817C2BEE6006F5514 /* WebViewController.m */; };
-		14F886DF17C2BEEA006F5514 /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 14F886CB17C2BED6006F5514 /* Main_iPhone.storyboard */; };
 		14F886E817C2BFC5006F5514 /* UZTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F8867217C2BB02006F5514 /* UZTextView.m */; };
 		14F886E917C2BFC5006F5514 /* UZCursorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886E517C2BFA0006F5514 /* UZCursorView.m */; };
 		14F886EA17C2BFC5006F5514 /* UZLoupeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886E717C2BFA0006F5514 /* UZLoupeView.m */; };
@@ -47,6 +48,10 @@
 
 /* Begin PBXFileReference section */
 		14B29459180E2542000DCA46 /* UZTextView-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UZTextView-Prefix.pch"; sourceTree = SOURCE_ROOT; };
+		14E5398F1BD0C1E2009A6004 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		14E539921BD0C3F0009A6004 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		14E539951BD0C55F009A6004 /* TextViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextViewController.h; sourceTree = "<group>"; };
+		14E539961BD0C55F009A6004 /* TextViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextViewController.m; sourceTree = "<group>"; };
 		14F8866817C2BB02006F5514 /* libUZTextView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libUZTextView.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		14F8866B17C2BB02006F5514 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		14F8867017C2BB02006F5514 /* UZTextView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UZTextView.h; sourceTree = "<group>"; };
@@ -63,7 +68,6 @@
 		14F886AC17C2BB4A006F5514 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		14F886AD17C2BB4A006F5514 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		14F886AF17C2BB4A006F5514 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		14F886CC17C2BED6006F5514 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPhone.storyboard; sourceTree = "<group>"; };
 		14F886CD17C2BEE6006F5514 /* RootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootViewController.h; sourceTree = "<group>"; };
 		14F886CE17C2BEE6006F5514 /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootViewController.m; sourceTree = "<group>"; };
 		14F886CF17C2BEE6006F5514 /* SEImageCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SEImageCache.h; sourceTree = "<group>"; };
@@ -76,7 +80,6 @@
 		14F886D617C2BEE6006F5514 /* TweetViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TweetViewController.m; sourceTree = "<group>"; };
 		14F886D717C2BEE6006F5514 /* WebViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebViewController.h; sourceTree = "<group>"; };
 		14F886D817C2BEE6006F5514 /* WebViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WebViewController.m; sourceTree = "<group>"; };
-		14F886E317C2BF29006F5514 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
 		14F886E417C2BFA0006F5514 /* UZCursorView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UZCursorView.h; sourceTree = "<group>"; };
 		14F886E517C2BFA0006F5514 /* UZCursorView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UZCursorView.m; sourceTree = "<group>"; };
 		14F886E617C2BFA0006F5514 /* UZLoupeView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UZLoupeView.h; sourceTree = "<group>"; };
@@ -151,6 +154,8 @@
 			children = (
 				14F886CD17C2BEE6006F5514 /* RootViewController.h */,
 				14F886CE17C2BEE6006F5514 /* RootViewController.m */,
+				14E539951BD0C55F009A6004 /* TextViewController.h */,
+				14E539961BD0C55F009A6004 /* TextViewController.m */,
 				14F886CF17C2BEE6006F5514 /* SEImageCache.h */,
 				14F886D017C2BEE6006F5514 /* SEImageCache.m */,
 				14F886D117C2BEE6006F5514 /* TextCell.h */,
@@ -173,14 +178,14 @@
 		14F8869B17C2BB4A006F5514 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				14F886E217C2BF29006F5514 /* Main_iPad.storyboard */,
-				14F886CB17C2BED6006F5514 /* Main_iPhone.storyboard */,
+				14E5398E1BD0C1E2009A6004 /* Main.storyboard */,
 				14F886AF17C2BB4A006F5514 /* Images.xcassets */,
 				14F8869C17C2BB4A006F5514 /* UZTextViewSample-Info.plist */,
 				14F8869D17C2BB4A006F5514 /* InfoPlist.strings */,
 				14F886A017C2BB4A006F5514 /* main.m */,
 				14B29459180E2542000DCA46 /* UZTextView-Prefix.pch */,
 				14F886A217C2BB4A006F5514 /* UZTextViewSample-Prefix.pch */,
+				14E539911BD0C3F0009A6004 /* LaunchScreen.storyboard */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -229,7 +234,7 @@
 		14F8866017C2BB02006F5514 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = sonson;
 			};
 			buildConfigurationList = 14F8866317C2BB02006F5514 /* Build configuration list for PBXProject "UZTextView" */;
@@ -257,9 +262,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				14F886B017C2BB4A006F5514 /* Images.xcassets in Resources */,
-				141040DC1996D38200D96463 /* Main_iPad.storyboard in Resources */,
+				14E539931BD0C3F0009A6004 /* LaunchScreen.storyboard in Resources */,
+				14E539901BD0C1E2009A6004 /* Main.storyboard in Resources */,
 				14F8869F17C2BB4A006F5514 /* InfoPlist.strings in Resources */,
-				14F886DF17C2BEEA006F5514 /* Main_iPhone.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -299,6 +304,7 @@
 				14F886DD17C2BEE6006F5514 /* TweetViewController.m in Sources */,
 				14F886DB17C2BEE6006F5514 /* TextCell.m in Sources */,
 				14F886AE17C2BB4A006F5514 /* ViewController.m in Sources */,
+				14E539971BD0C55F009A6004 /* TextViewController.m in Sources */,
 				14F886A517C2BB4A006F5514 /* AppDelegate.m in Sources */,
 				14F886E817C2BFC5006F5514 /* UZTextView.m in Sources */,
 				14F886DE17C2BEE6006F5514 /* WebViewController.m in Sources */,
@@ -314,28 +320,28 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		14E5398E1BD0C1E2009A6004 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				14E5398F1BD0C1E2009A6004 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		14E539911BD0C3F0009A6004 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				14E539921BD0C3F0009A6004 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
 		14F8869D17C2BB4A006F5514 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
 				14F8869E17C2BB4A006F5514 /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		14F886CB17C2BED6006F5514 /* Main_iPhone.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				14F886CC17C2BED6006F5514 /* Base */,
-			);
-			name = Main_iPhone.storyboard;
-			sourceTree = "<group>";
-		};
-		14F886E217C2BF29006F5514 /* Main_iPad.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				14F886E317C2BF29006F5514 /* Base */,
-			);
-			name = Main_iPad.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -358,6 +364,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -437,7 +444,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Yuichi Yoshida (AK9FYY958C)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -450,6 +456,8 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "UZTextViewSample/UZTextViewSample-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.sonson.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
@@ -460,7 +468,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Yuichi Yoshida (AK9FYY958C)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -469,6 +476,8 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "UZTextViewSample/UZTextViewSample-Prefix.pch";
 				INFOPLIST_FILE = "UZTextViewSample/UZTextViewSample-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.sonson.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
