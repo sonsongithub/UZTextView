@@ -372,6 +372,24 @@
     }];
 }
 
+- (void)drawBackgroundColor {
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    [self.attributedString enumerateAttribute:NSBackgroundColorAttributeName inRange:NSMakeRange(0, self.attributedString.length) options:0 usingBlock:^(id  _Nullable value, NSRange range, BOOL * _Nonnull stop) {
+        if ([value isKindOfClass:[UIColor class]]) {
+            // obtain and set line width from value
+            UIColor *backgroundColor = value;
+            [backgroundColor setFill];
+            
+            // draw horizontal lines through the center of fragrmaent rectangles as strike through lines
+            NSArray *fragmentRects = [self fragmentRectsForGlyphFromIndex:range.location toIndex:range.location+range.length];
+            for (NSValue *rectValue in fragmentRects) {
+                CGRect rect = [rectValue CGRectValue];
+                CGContextFillRect(context, rect);
+            }
+        }
+    }];
+}
+
 - (void)drawStringRectForDebug {
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	
@@ -408,6 +426,9 @@
 	[[UIColor blueColor] setStroke];
 	CGContextStrokeRect(context, UIEdgeInsetsInsetRect(self.bounds, _margin));
 #endif
+    
+    // draw background color
+    [self drawBackgroundColor];
 	
 	CGContextTranslateCTM(context, _margin.left, _margin.top);
 	

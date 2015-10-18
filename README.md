@@ -10,6 +10,13 @@ Clickable and selectable text view for iOS
 
 ![image](https://raw.github.com/sonsongithub/UZTextView/master/screenshot/UZTextView.gif)
 
+###Supported attributes of NSAttributedString
+- NSLinkAttributeName
+- NSFontAttributeName
+- NSStrikethroughStyleAttributeName
+- NSUnderlineStyleAttributeName
+- NSBackgroundColorAttributeName
+
 ###How to build
 - Use build.sh. Automatically lib and header file generated at ./build/.
 - UZTextView supports [CocoaPods](http://cocoapods.org/).

@@ -19,12 +19,13 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    NSString *str = @"test\nte\nst\ntest\n";
+    NSString *str = @"test\nte\nst\ntest\nwww\nUZTextView";
     NSMutableAttributedString *attr = [[NSMutableAttributedString alloc] initWithString:str];
 //    [attr addAttribute:NSStrikethroughStyleAttributeName value:@(1) range:NSMakeRange(0, str.length)];
     [attr addAttribute:NSFontAttributeName value:[UIFont boldSystemFontOfSize:40] range:NSMakeRange(0, str.length)];
     [attr addAttribute:NSUnderlineStyleAttributeName value:@(1) range:NSMakeRange(0, 4)];
     [attr addAttribute:NSStrikethroughStyleAttributeName value:@(3) range:NSMakeRange(5, 4)];
+    [attr addAttribute:NSBackgroundColorAttributeName value:[UIColor grayColor] range:NSMakeRange(24, 4)];
     self.textView.attributedString = attr;
 }
 

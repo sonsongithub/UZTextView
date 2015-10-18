@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "UZTextView"
-  s.version      = "1.0.5"
+  s.version      = "1.0.6"
   s.summary      = "Clickable and selectable text view for iOS"
 
   s.description  = <<-DESC
@@ -74,7 +74,7 @@ Pod::Spec.new do |s|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  s.source       = { :git => "https://github.com/sonsongithub/UZTextView.git", :tag => "v1.0.5" }
+  s.source       = { :git => "https://github.com/sonsongithub/UZTextView.git", :tag => "v1.0.6" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
