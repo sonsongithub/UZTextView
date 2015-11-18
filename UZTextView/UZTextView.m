@@ -144,8 +144,9 @@
 	_status = UZTextViewSelected;
 	[self setCursorHidden:NO];
 	[self setNeedsDisplay];
-	
+#if !defined(TARGET_OS_TV)
 	[self showUIMenu];
+#endif
 }
 
 - (void)setMinimumPressDuration:(CFTimeInterval)minimumPressDuration {
@@ -217,10 +218,12 @@
 	CGPathRelease(path);
 }
 
+#if !defined(TARGET_OS_TV)
 - (void)showUIMenu {
 	[[UIMenuController sharedMenuController] setTargetRect:[self circumscribingRectForStringFromIndex:_head toIndex:_tail] inView:self];
 	[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
 }
+#endif
 
 - (BOOL)cancelSelectedText {
 	if (_status != UZTextViewNoSelection) {
@@ -489,8 +492,10 @@
 		[self setNeedsDisplay];
 		[_loupeView setVisible:NO animated:YES];
 		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
-		[self becomeFirstResponder];
-		[self showUIMenu];
+        [self becomeFirstResponder];
+#if !defined(TARGET_OS_TV)
+        [self showUIMenu];
+#endif
 	}
 }
 
@@ -518,9 +523,11 @@
 	_rightCursor = [[UZCursorView alloc] initWithCursorDirection:UZTextViewDownCursor];
 	_rightCursor.userInteractionEnabled = NO;
 	[self addSubview:_rightCursor];
-	
+
+#if !defined(TARGET_OS_TV)
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(menuControllerDidHideMenuNotification:) name:UIMenuControllerDidHideMenuNotification object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidChangeStatusBarOrientationNotification:) name:UIApplicationDidChangeStatusBarOrientationNotification object:nil];
+#endif
 }
 
 #pragma mark - CoreText
@@ -629,8 +636,10 @@
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [touches anyObject];
-	[self setNeedsDisplay];
+    [self setNeedsDisplay];
+#if !defined(TARGET_OS_TV)
 	[[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
+#endif
 	
 	_headWhenBegan = _head;
 	_tailWhenBegan = _tail;
@@ -698,14 +707,18 @@
 	
 	if (_status == UZTextViewEditingFromSelection) {
 		[_loupeView setVisible:NO animated:YES];
-		[self becomeFirstResponder];
-		[self showUIMenu];
+        [self becomeFirstResponder];
+#if !defined(TARGET_OS_TV)
+        [self showUIMenu];
+#endif
 		_status = UZTextViewSelected;
 	}
 	else if (_status == UZTextViewEditingToSelection) {
 		[_loupeView setVisible:NO animated:YES];
-		[self becomeFirstResponder];
-		[self showUIMenu];
+        [self becomeFirstResponder];
+#if !defined(TARGET_OS_TV)
+        [self showUIMenu];
+#endif
 		_status = UZTextViewSelected;
 	}
 	else if (_longPressGestureRecognizer.state != UIGestureRecognizerStateBegan) {
@@ -713,8 +726,10 @@
 			if (_status != UZTextViewNoSelection) {
 				NSInteger tappedCharacterIndex = [self indexForPoint:[[touches anyObject] locationInView:self margin:_margin]];
 				if (_head <= tappedCharacterIndex && tappedCharacterIndex <= _tail) {
-					// show uimenu if user tapped selected text range.
+                    // show uimenu if user tapped selected text range.
+#if !defined(TARGET_OS_TV)
 					[self showUIMenu];
+#endif
 				}
 				else {
 					// selection is cancelled when some strings are selected.
@@ -748,9 +763,11 @@
 
 #pragma mark - NSNotification
 
+#if !defined(TARGET_OS_TV)
 - (void)menuControllerDidHideMenuNotification:(NSNotification*)notification {
 	[[UIMenuController sharedMenuController] setMenuItems:nil];
 }
+#endif
 
 - (void)applicationDidChangeStatusBarOrientationNotification:(NSNotification*)notification {
 	[_loupeView setVisible:NO animated:NO];
@@ -768,7 +785,9 @@
 }
 
 - (void)copy:(id)sender {
+#if !defined(TARGET_OS_TV)
 	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:self.selectedRange];
+#endif
 }
 
 - (void)selectAll:(id)sender {

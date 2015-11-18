@@ -248,7 +248,9 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * \discussion You have to override `canBecomeFirstResponder` or this method if you want to make it hide or edit its items forcely.
  * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  */
+#if !defined(TARGET_OS_TV)
 - (void)showUIMenu;
+#endif
 
 /**
  * Deselects selected text of the receiver.
