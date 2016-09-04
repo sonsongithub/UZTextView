@@ -81,6 +81,13 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 - (void)textView:(UZTextView*)textView didClickLinkAttribute:(id)value;
 
 /**
+ * Tells the delegate that a link attribute has been tapped for a long time.
+ * \param textView The text view in which the link is tapped.
+ * \param value The link attribute data which is specified as NSAttributedString's methods.
+ */
+- (void)textView:(UZTextView*)textView didLongTapLinkAttribute:(id)value;
+
+/**
  * Tells the delegate that selecting of the specified text view has begun.
  *
  * You can use this delegate method in order to make its parent view disabled scrolling.
@@ -223,6 +230,8 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * Prepares for reusing an object. You have to call this method before you set another attributed string to the object.
  */
 - (void)prepareForReuse;
+
+- (NSDictionary*)attributesAtPoint:(CGPoint)point;
 @end
 
 @interface UZTextView(Internal)
