@@ -684,7 +684,7 @@
 	}
 	else if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge], [touch locationInView:self margin:_margin]) && !_leftCursor.hidden && !_rightCursor.hidden) {
 		if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
-			[self.delegate selectionDidBeginTextView:self];
+            [self.delegate selectionDidBeginTextView:self];
 		_status = UZTextViewEditingToSelection;
 		[_loupeView setVisible:YES animated:YES];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
@@ -702,24 +702,31 @@
     // Z方向への押し込みを無視する
     if (CGPointEqualToPoint([touch locationInView:self], [touch previousLocationInView:self]))
         return;
+    
 	
     if (_status == UZTextViewEditingFromSelection) {
-		NSInteger newHead = [self indexForPoint:[touch locationInView:self margin:_margin]];
+		NSInteger index = [self indexForPoint:[touch locationInView:self margin:_margin]];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
-		if (newHead != kCFNotFound) {
-			if (newHead <= _tail) {
-				_head = newHead;
-			}
+        if (index != kCFNotFound) {
+            if (index < _tailWhenBegan) {
+                _head = index;
+            } else {
+                _head = _tailWhenBegan;
+                _tail = index;
+            }
 		}
 		[self setCursorHidden:NO];
 	}
-	else if (_status == UZTextViewEditingToSelection) {
-		NSInteger newTail = [self indexForPoint:[touch locationInView:self margin:_margin]];
+    else if (_status == UZTextViewEditingToSelection) {
+		NSInteger index = [self indexForPoint:[touch locationInView:self margin:_margin]];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
-		if (newTail != kCFNotFound) {
-			if (newTail >= _head) {
-				_tail = newTail;
-			}
+		if (index != kCFNotFound) {
+            if (index > _headWhenBegan) {
+                _tail = index;
+            } else {
+                _tail = _headWhenBegan;
+                _head = index;
+            }
 		}
 		[self setCursorHidden:NO];
 	}
