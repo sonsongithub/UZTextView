@@ -118,8 +118,6 @@
 - (NSDictionary*)attributesAtPoint:(CGPoint)point {
     __block NSRange resultRange = NSMakeRange(0, 0);
     
-    NSLog(@"%lf,%lf", point.x, point.y);
-    
     _tappedLinkAttribute = nil;
     
     CFIndex index = [self indexForPoint:point];
@@ -490,7 +488,6 @@
 
 - (void)didChangeLongPressGesture:(UILongPressGestureRecognizer *)gestureRecognizer {
 	if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
-        NSLog(@"1");
         if (_tappedLinkRange.length > 0) {
             gestureRecognizer.enabled = NO;
             gestureRecognizer.enabled = YES;
@@ -695,7 +692,6 @@
 	}
 	else {
 		_tappedLinkRange = [self rangeOfLinkStringAtPoint:[touch locationInView:self margin:_margin]];
-        NSLog(@"%ld,%ld", _tappedLinkRange.location, _tappedLinkRange.length);
 		[self setNeedsDisplay];
 	}
 }

@@ -14,6 +14,7 @@ class ViewController: UIViewController, UZTextViewDelegate, UIViewControllerPrev
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        textView?.delegate = self
         do {
             let data = try Data(contentsOf: Bundle.main.url(forResource: "data", withExtension: "html")!)
             let options: [String: Any] = [
@@ -36,22 +37,58 @@ class ViewController: UIViewController, UZTextViewDelegate, UIViewControllerPrev
         // Dispose of any resources that can be recreated.
     }
     
-    func textView(_ textView: UZTextView!, didLongTapLinkAttribute value: Any!) {
-        print(value)
+    func textView(_ textView: UZTextView, didLongTapLinkAttribute value: Any?) {
+        if let attr = value as? [String: Any] {
+            if let url = attr[NSLinkAttributeName] as? URL {
+                let sheet = UIAlertController(title: url.absoluteString, message: nil, preferredStyle: .actionSheet)
+                sheet.addAction(
+                    UIAlertAction(title: "Close", style: .cancel) { (action) in
+                        sheet.dismiss(animated: true, completion: nil)
+                    }
+                )
+                sheet.addAction(
+                    UIAlertAction(title: "Open in Safari", style: .default) { (action) in
+                        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                        sheet.dismiss(animated: true, completion: nil)
+                    }
+                )
+                sheet.addAction(
+                    UIAlertAction(title: "Open", style: .default) { (action) in
+                        let controller = WebViewController(nibName: nil, bundle: nil)
+                        controller.url = url
+                        let nav = UINavigationController(rootViewController: controller)
+                        self.present(nav, animated: true, completion: nil)
+                    }
+                )
+                sheet.addAction(
+                    UIAlertAction(title: "Copy URL", style: .default) { (action) in
+                        UIPasteboard.general.setValue(url, forPasteboardType: "public.url")
+                        sheet.dismiss(animated: true, completion: nil)
+                    }
+                )
+                present(sheet, animated: true, completion: nil)
+            }
+        }
     }
     
-    func textView(_ textView: UZTextView!, didClickLinkAttribute value: Any!) {
-        let sheet = UIAlertController(title: "a", message: "b", preferredStyle: .actionSheet)
-        present(sheet, animated: true, completion: nil)
+    func textView(_ textView: UZTextView, didClickLinkAttribute value: Any?) {
+        if let attr = value as? [String: Any] {
+            if let url = attr[NSLinkAttributeName] as? URL {
+                let controller = WebViewController(nibName: nil, bundle: nil)
+                controller.url = url
+                let nav = UINavigationController(rootViewController: controller)
+                self.present(nav, animated: true, completion: nil)
+            }
+        }
     }
     
-    func selectionDidEnd(_ textView: UZTextView!) {
+    func selectionDidEnd(_ textView: UZTextView) {
     }
     
-    func selectionDidBegin(_ textView: UZTextView!) {
+    func selectionDidBegin(_ textView: UZTextView) {
     }
     
-    func didTapTextDoesNotIncludeLinkTextView(_ textView: UZTextView!) {
+    func didTapTextDoesNotIncludeLinkTextView(_ textView: UZTextView) {
     }
     
     func previewingContext(_ previewingContext: UIViewControllerPreviewing, viewControllerForLocation location: CGPoint) -> UIViewController? {
@@ -64,7 +101,7 @@ class ViewController: UIViewController, UZTextViewDelegate, UIViewControllerPrev
         
         let locationInTextView = self.view.convert(location, to: textView)
         if let attr = textView?.attributes(at: locationInTextView) {
-            if let url = attr["NSLink"] as? URL {
+            if let url = attr[NSLinkAttributeName] as? URL {
                 controller.url = url
             }
         }
