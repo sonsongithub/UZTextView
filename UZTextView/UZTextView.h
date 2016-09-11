@@ -126,6 +126,9 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 	// Layout
 	UIEdgeInsets					_margin;
 	CGFloat							_lastLayoutWidth;					// save the width when view is laytouted previously.
+    
+    // Scaling
+    CGFloat                         _scale;
 	
 	// CoreText
 	CTFramesetterRef				_framesetter;
@@ -190,6 +193,11 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 @property (nonatomic, readonly) CGSize contentSize;
 
 /**
+ * The rendering scaling parameter.
+ */
+@property (nonatomic, assign) CGFloat scale;
+
+/**
  * The current selection range of the receiver.
  */
 @property (nonatomic, assign) NSRange selectedRange;
@@ -237,6 +245,11 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * \return The attributes for the character at the specified point.
  */
 - (NSDictionary* __nullable)attributesAtPoint:(CGPoint)point;
+
+- (void)selectAll;
+
+- (BOOL)isSelectingAnyText;
+
 @end
 
 @interface UZTextView(Internal)

@@ -116,6 +116,11 @@
 }
 
 - (NSDictionary*)attributesAtPoint:(CGPoint)point {
+    if (_scale != 1) {
+        point.x /= _scale;
+        point.y /= _scale;
+    }
+    
     __block NSRange resultRange = NSMakeRange(0, 0);
     
     _tappedLinkAttribute = nil;
@@ -130,7 +135,20 @@
     return nil;
 }
 
+- (BOOL)isSelectingAnyText {
+    return (_status > 0);
+}
+
+- (void)selectAll {
+    [self setSelectedRange:NSMakeRange(0, self.attributedString.length)];
+}
+
 #pragma mark - Setter and getter
+
+- (void)setScale:(CGFloat)value {
+    _scale = value;
+    _longPressGestureRecognizer.enabled = (_scale == 1);
+}
 
 - (void)setAttributedString:(NSMutableAttributedString *)attributedString {
 	[self prepareForReuse];
@@ -198,39 +216,48 @@
 	_longPressGestureRecognizer.enabled = hidden;
 }
 
+
 - (void)updateLayout {
-	if (_lastLayoutWidth == (self.frame.size.width - (_margin.left + _margin.right))) {
-		return;
-	}
-	
-	// CoreText
-	SAFE_CFRELEASE(_framesetter);
-	SAFE_CFRELEASE(_frame);
-	
-	CFAttributedStringRef p = (__bridge CFAttributedStringRef)_attributedString;
-	if (p) {
-		_framesetter = CTFramesetterCreateWithAttributedString(p);
-	}
-	else {
-		p = CFAttributedStringCreate(NULL, CFSTR(""), NULL);
-		_framesetter = CTFramesetterCreateWithAttributedString(p);
-		CFRelease(p);
-	}
-	
-	_lastLayoutWidth = self.frame.size.width - (_margin.left + _margin.right);
-	
-	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
-																	CFRangeMake(0, _attributedString.length),
-																	NULL,
-																	CGSizeMake(_lastLayoutWidth, CGFLOAT_MAX),
-																	NULL);
-	_contentRect = CGRectZero;
-	_contentRect.size = frameSize;
-	
-	CGMutablePathRef path = CGPathCreateMutable();
-	CGPathAddRect(path, NULL, _contentRect);
-	_frame = CTFramesetterCreateFrame(_framesetter, CFRangeMake(0, 0), path, NULL);
-	CGPathRelease(path);
+    if (_lastLayoutWidth == (self.frame.size.width - (_margin.left + _margin.right))) {
+        return;
+    }
+    
+    // CoreText
+    SAFE_CFRELEASE(_framesetter);
+    SAFE_CFRELEASE(_frame);
+    
+    CFAttributedStringRef p = (__bridge CFAttributedStringRef)_attributedString;
+    if (p) {
+        _framesetter = CTFramesetterCreateWithAttributedString(p);
+    }
+    else {
+        p = CFAttributedStringCreate(NULL, CFSTR(""), NULL);
+        _framesetter = CTFramesetterCreateWithAttributedString(p);
+        CFRelease(p);
+    }
+    
+    _lastLayoutWidth = self.frame.size.width - (_margin.left + _margin.right);
+    
+    if (_scale != 1) {
+        _lastLayoutWidth = CGFLOAT_MAX;
+    }
+    
+    CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
+                                                                    CFRangeMake(0, _attributedString.length),
+                                                                    NULL,
+                                                                    CGSizeMake(_lastLayoutWidth, CGFLOAT_MAX),
+                                                                    NULL);
+    
+    
+    
+    frameSize.width = _lastLayoutWidth;
+    _contentRect = CGRectZero;
+    _contentRect.size = frameSize;
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGPathAddRect(path, NULL, _contentRect);
+    _frame = CTFramesetterCreateFrame(_framesetter, CFRangeMake(0, 0), path, NULL);
+    CGPathRelease(path);
+    
 }
 
 #if !defined(TARGET_OS_TV)
@@ -435,53 +462,51 @@
 }
 
 - (void)drawContent {
-	CGContextRef context = UIGraphicsGetCurrentContext();
-	
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
 #ifdef _UZTEXTVIEW_DEBUG_
-	// draw frame for debug
-	[[UIColor redColor] setStroke];
-	CGContextStrokeRect(context, self.bounds);
-	[[UIColor blueColor] setStroke];
-	CGContextStrokeRect(context, UIEdgeInsetsInsetRect(self.bounds, _margin));
+    [[UIColor redColor] setStroke];
+    CGContextStrokeRect(context, self.bounds);
+    [[UIColor blueColor] setStroke];
+    CGContextStrokeRect(context, UIEdgeInsetsInsetRect(self.bounds, _margin));
 #endif
     
-    // draw background color
-    [self drawBackgroundColor];
-	
-	CGContextTranslateCTM(context, _margin.left, _margin.top);
-	
-	// draw text
-	CGContextSaveGState(context);
-	CGContextTranslateCTM(context, 0, _contentRect.size.height);
-	CGContextScaleCTM(context, 1.0, -1.0);
-	CGContextSetTextMatrix(context, CGAffineTransformIdentity);
-	CTFrameDraw(_frame, context);
-	CGContextRestoreGState(context);
-	
+    CGContextTranslateCTM(context, _margin.left, _margin.top);
+    
+    if (_scale != 1)
+        CGContextScaleCTM(context, _scale, _scale);
+    
+    // draw text
+    CGContextSaveGState(context);
+    CGContextTranslateCTM(context, 0, _contentRect.size.height);
+    CGContextScaleCTM(context, 1.0, -1.0);
+    CGContextSetTextMatrix(context, CGAffineTransformIdentity);
+    CTFrameDraw(_frame, context);
+    CGContextRestoreGState(context);
+    
 #ifdef _UZTEXTVIEW_DEBUG_
-	// for debug
-	[self drawStringRectForDebug];
+    [self drawStringRectForDebug];
 #endif
     
     // draw strike through line
     [self drawStrikethroughLine];
-	
-	// draw hightlighted text
-	for (NSValue *value in _highlightRanges) {
-		NSRange range = [value rangeValue];
-		[self drawSelectedTextFragmentRectsFromIndex:range.location toIndex:range.location + range.length - 1 color:[[UIColor yellowColor] colorWithAlphaComponent:0.5]];
-	}
-	// draw selected strings
-	if (_status > 0)
-		[self drawSelectedTextFragmentRectsFromIndex:_head
-											 toIndex:_tail
-											   color:[self.tintColor colorWithAlphaComponent:_tintAlpha]];
-	
-	// draw tapped link range background
-	if (_tappedLinkRange.length > 0)
-		[self drawSelectedTextFragmentRectsFromIndex:_tappedLinkRange.location
-											 toIndex:_tappedLinkRange.location + _tappedLinkRange.length - 1
-											   color:[self.tintColor colorWithAlphaComponent:_tintAlpha]];
+    
+    // draw hightlighted text
+    for (NSValue *value in _highlightRanges) {
+        NSRange range = [value rangeValue];
+        [self drawSelectedTextFragmentRectsFromIndex:range.location toIndex:range.location + range.length - 1 color:[[UIColor yellowColor] colorWithAlphaComponent:0.5]];
+    }
+    // draw selected strings
+    if (_status > 0)
+        [self drawSelectedTextFragmentRectsFromIndex:_head
+                                             toIndex:_tail
+                                               color:[self.tintColor colorWithAlphaComponent:_tintAlpha]];
+    
+    // draw tapped link range background
+    if (_tappedLinkRange.length > 0)
+        [self drawSelectedTextFragmentRectsFromIndex:_tappedLinkRange.location
+                                             toIndex:_tappedLinkRange.location + _tappedLinkRange.length - 1
+                                               color:[self.tintColor colorWithAlphaComponent:_tintAlpha]];
 }
 
 #pragma mark - UILongPressGestureDelegate
@@ -537,6 +562,7 @@
 	_cursorMargin = 10;
 	_tintAlpha = 0.5;
 	_durationToCancelSuperViewScrolling = 0.25;
+    _scale = 1;
 	
 	_longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(didChangeLongPressGesture:)];
 	_longPressGestureRecognizer.minimumPressDuration = 0.5;
@@ -617,50 +643,56 @@
 }
 
 - (CFIndex)indexForPoint:(CGPoint)point {
-	CFArrayRef lines = CTFrameGetLines(_frame);
-	CFIndex lineCount = CFArrayGetCount(lines);
-	CGPoint lineOrigins[lineCount];
-	CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
-	
-	CGRect previousLineRect = CGRectZero;
-	
-	for (NSInteger index = 0; index < lineCount; index++) {
-		CGPoint origin = lineOrigins[index];
-		CTLineRef line = CFArrayGetValueAtIndex(lines, index);
-		
-		CFRange lineCFRange = CTLineGetStringRange(line);
-		NSRange lineRange = NSMakeRange(lineCFRange.location, lineCFRange.length);
-		CGFloat ascent;
-		CGFloat descent;
-		CGFloat leading;
-		CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
-		
-		CGRect lineRect = CGRectMake(origin.x,
-									 ceilf(origin.y - descent),
-									 width,
-									 ceilf(ascent + descent));
-		lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
-		
-		CGRect temp = lineRect;
-		lineRect.size.height += (lineRect.origin.y - previousLineRect.origin.y - previousLineRect.size.height);
-		lineRect.origin.y = previousLineRect.origin.y + previousLineRect.size.height;
-		previousLineRect = temp;
-		
-		if (CGRectContainsPoint(lineRect, point)) {
-			CFIndex result = CTLineGetStringIndexForPosition(line, point);
-			if (result != kCFNotFound && NSLocationInRange(result, lineRange))
-				return result;
-		}
-		
-		CGRect marginArea = lineRect;
-		marginArea.origin.x = _contentRect.origin.x;
-		marginArea.size.width = _contentRect.size.width;
-		
-		if (CGRectContainsPoint(marginArea, point)) {
-			return lineRange.location + lineRange.length - 1;
-		}
-	}
-	return kCFNotFound;
+    CFArrayRef lines = CTFrameGetLines(_frame);
+    CFIndex lineCount = CFArrayGetCount(lines);
+    CGPoint lineOrigins[lineCount];
+    CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
+    
+    CGRect previousLineRect = CGRectZero;
+    
+    for (NSInteger index = 0; index < lineCount; index++) {
+        CGPoint origin = lineOrigins[index];
+        CTLineRef line = CFArrayGetValueAtIndex(lines, index);
+        
+        CFRange lineCFRange = CTLineGetStringRange(line);
+        NSRange lineRange = NSMakeRange(lineCFRange.location, lineCFRange.length);
+        CGFloat ascent;
+        CGFloat descent;
+        CGFloat leading;
+        CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+        
+        CGRect lineRect = CGRectMake(origin.x,
+                                     ceilf(origin.y - descent),
+                                     width,
+                                     ceilf(ascent + descent));
+        lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
+        
+        CGRect temp = lineRect;
+        lineRect.size.height += (lineRect.origin.y - previousLineRect.origin.y - previousLineRect.size.height);
+        lineRect.origin.y = previousLineRect.origin.y + previousLineRect.size.height;
+        previousLineRect = temp;
+        
+        // UZTextViewとの変更点
+        CGRect tapRect = CGRectInset(CGRectMake(point.x, point.y, 0, 0), -10, -10);
+        
+        if (CGRectIntersectsRect(lineRect, tapRect)) {
+            CFIndex result = CTLineGetStringIndexForPosition(line, point);
+            if (result != kCFNotFound && NSLocationInRange(result, lineRange)) {
+                if (result > 1)
+                    return (result - 1);		// UZTextViewとの変更点
+                return result;
+            }
+        }
+        
+        CGRect marginArea = lineRect;
+        marginArea.origin.x = _contentRect.origin.x;
+        marginArea.size.width = _contentRect.size.width;
+        
+        if (CGRectContainsPoint(marginArea, point)) {
+            return lineRange.location + lineRange.length - 1;
+        }
+    }
+    return kCFNotFound;
 }
 
 #pragma mark - Touch event(Override)
@@ -690,9 +722,15 @@
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 		[self setCursorHidden:NO];
 	}
-	else {
-		_tappedLinkRange = [self rangeOfLinkStringAtPoint:[touch locationInView:self margin:_margin]];
-		[self setNeedsDisplay];
+    else {
+        // UZTextViewとの変更点
+        CGPoint p = [touch locationInView:self margin:_margin];
+        if (_scale != 1) {
+            p.x /= _scale;
+            p.y /= _scale;
+        }
+        _tappedLinkRange = [self rangeOfLinkStringAtPoint:p];
+        [self setNeedsDisplay];
 	}
 }
 
@@ -703,7 +741,6 @@
     if (CGPointEqualToPoint([touch locationInView:self], [touch previousLocationInView:self]))
         return;
     
-	
     if (_status == UZTextViewEditingFromSelection) {
 		NSInteger index = [self indexForPoint:[touch locationInView:self margin:_margin]];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
@@ -871,7 +908,7 @@
 }
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
-	if (CGRectContainsPoint(self.bounds, point)) {
+    if (CGRectContainsPoint(self.bounds, point)) {
 		CGPoint pointForUZTextViewContent = point;
 		pointForUZTextViewContent.x -= _margin.left;
 		pointForUZTextViewContent.y -= _margin.top;
@@ -879,18 +916,27 @@
 		[rects addObjectsFromArray:[self fragmentRectsForGlyphFromIndex:0 toIndex:self.attributedString.length-1]];
 		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge]]];
 		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge]]];
-		
+
 		for (NSValue *rectValue in rects) {
 			if (CGRectContainsPoint([rectValue CGRectValue], pointForUZTextViewContent))
 				return [super hitTest:point withEvent:event];
 		}
-		if (_status != UZTextViewNoSelection) {
-			// does not pass tap event to the other view
-			// when some text is selected.
-			return [super hitTest:point withEvent:event];
+		if (_scale != 1) {
+			pointForUZTextViewContent.x /= _scale;
+			pointForUZTextViewContent.y /= _scale;
 		}
-	}
-	return nil;
+        
+        for (NSValue *rectValue in rects) {
+            if (CGRectContainsPoint([rectValue CGRectValue], pointForUZTextViewContent))
+                return [super hitTest:point withEvent:event];
+        }
+        if (_status != UZTextViewNoSelection) {
+            // does not pass tap event to the other view
+            // when some text is selected.
+            return [super hitTest:point withEvent:event];
+        }
+    }
+    return nil;
 }
 
 - (void)layoutSubviews {

@@ -15,6 +15,7 @@ class ViewController: UIViewController, UZTextViewDelegate, UIViewControllerPrev
     override func viewDidLoad() {
         super.viewDidLoad()
         textView?.delegate = self
+        textView?.scale = 1.5
         do {
             let data = try Data(contentsOf: Bundle.main.url(forResource: "data", withExtension: "html")!)
             let options: [String: Any] = [
