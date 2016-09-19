@@ -12,6 +12,25 @@ import WebKit
 class WebViewController: UIViewController {
     let webView = WKWebView(frame: CGRect.zero)
     
+    override var previewActionItems : [UIPreviewActionItem] {
+        get {
+            func previewActionForTitle(_ title: String, style: UIPreviewActionStyle = .default) -> UIPreviewAction {
+                return UIPreviewAction(title: title, style: style) { previewAction, viewController in
+                    print(title)
+                }
+            }
+            
+            let action1 = previewActionForTitle("Action1")
+            let action2 = previewActionForTitle("Destructive Action", style: .destructive)
+            
+            let subAction1 = previewActionForTitle("Sub1")
+            let subAction2 = previewActionForTitle("Sub2")
+            let groupedActions = UIPreviewActionGroup(title: "Sub Actions", style: .default, actions: [subAction1, subAction2] )
+            
+            return [action1, action2, groupedActions]
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.addSubview(webView)

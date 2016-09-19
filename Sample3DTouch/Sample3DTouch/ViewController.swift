@@ -15,7 +15,7 @@ class ViewController: UIViewController, UZTextViewDelegate, UIViewControllerPrev
     override func viewDidLoad() {
         super.viewDidLoad()
         textView?.delegate = self
-        textView?.scale = 1.5
+        textView?.scale = 1
         do {
             let data = try Data(contentsOf: Bundle.main.url(forResource: "data", withExtension: "html")!)
             let options: [String: Any] = [
@@ -106,6 +106,8 @@ class ViewController: UIViewController, UZTextViewDelegate, UIViewControllerPrev
                 controller.url = url
             }
         }
+        
+        controller.preferredContentSize = CGSize(width: 0.0, height: 200)
         
         return controller
     }
