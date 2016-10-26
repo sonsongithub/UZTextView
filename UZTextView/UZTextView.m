@@ -130,8 +130,14 @@
         return nil;
     
     NSDictionary *attribute = [self.attributedString attributesAtIndex:index effectiveRange:&resultRange];
-    if (attribute[NSLinkAttributeName])
-        return attribute;
+    CGRect rect = [self circumscribingRectForStringFromIndex:resultRange.location toIndex:resultRange.location + resultRange.length - 1];
+    
+    if (attribute[NSLinkAttributeName]) {
+        NSMutableDictionary *attr = [NSMutableDictionary dictionaryWithDictionary:attribute];
+        attr[UZTextViewClickedRect] = [NSValue valueWithCGRect:rect];
+        return attr;
+    }
+    
     return nil;
 }
 

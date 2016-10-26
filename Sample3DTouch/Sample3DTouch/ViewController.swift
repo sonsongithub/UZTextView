@@ -98,6 +98,7 @@ class ViewController: UIViewController, UZTextViewDelegate, UIViewControllerPrev
         
         
         
+        var rect = CGRect.zero
         let controller = WebViewController(nibName: nil, bundle: nil)
         
         let locationInTextView = self.view.convert(location, to: textView)
@@ -105,8 +106,15 @@ class ViewController: UIViewController, UZTextViewDelegate, UIViewControllerPrev
             if let url = attr[NSLinkAttributeName] as? URL {
                 controller.url = url
             }
+            if let value = attr[UZTextViewClickedRect] as? CGRect {
+                rect = value
+            }
         }
         
+        if let textView = self.textView {
+            rect = self.view.convert(rect, from: textView)
+            previewingContext.sourceRect = rect
+        }
         controller.preferredContentSize = CGSize(width: 0.0, height: 200)
         
         return controller

@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import <CoreText/CoreText.h>
 
+static NSString * const UZTextViewClickedRect	= @"_UZTextViewClickedRect";
+
 /**
  * To be written
  */
