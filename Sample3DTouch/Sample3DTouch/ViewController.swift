@@ -10,7 +10,7 @@ import UIKit
 
 class ViewController: UIViewController, UZTextViewDelegate, UIViewControllerPreviewingDelegate {
 
-    @IBOutlet var textView: UZTextView? = nil
+    @IBOutlet var textView: UZTextView! = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,7 +23,9 @@ class ViewController: UIViewController, UZTextViewDelegate, UIViewControllerPrev
                 NSCharacterEncodingDocumentAttribute: String.Encoding.utf8.rawValue
             ]
             let attr = try NSMutableAttributedString(data: data, options: options, documentAttributes: nil)
-                attr.addAttribute(NSFontAttributeName, value: UIFont.systemFont(ofSize: 20), range: NSRange(location: 0, length: attr.length))
+                attr.addAttribute(NSFontAttributeName,
+                                  value: UIFont.systemFont(ofSize: 20),
+                                  range: NSRange(location: 0, length: attr.length))
                 textView?.attributedString = attr
             
         } catch {
@@ -92,32 +94,29 @@ class ViewController: UIViewController, UZTextViewDelegate, UIViewControllerPrev
     func didTapTextDoesNotIncludeLinkTextView(_ textView: UZTextView) {
     }
     
-    func previewingContext(_ previewingContext: UIViewControllerPreviewing, viewControllerForLocation location: CGPoint) -> UIViewController? {
-        print(location)
-        print("viewControllerForLocation")
-        
-        
-        
-        var rect = CGRect.zero
-        let controller = WebViewController(nibName: nil, bundle: nil)
+    func getInfo(locationInTextView: CGPoint) -> (URL, CGRect)? {
+        if let attr = textView?.attributes(at: locationInTextView) {
+            if let url = attr[NSLinkAttributeName] as? URL,
+                let value = attr[UZTextViewClickedRect] as? CGRect {
+                return (url, value)
+            }
+        }
+        return nil
+    }
+    
+    func previewingContext(_ previewingContext: UIViewControllerPreviewing,
+                           viewControllerForLocation location: CGPoint) -> UIViewController? {
         
         let locationInTextView = self.view.convert(location, to: textView)
-        if let attr = textView?.attributes(at: locationInTextView) {
-            if let url = attr[NSLinkAttributeName] as? URL {
-                controller.url = url
-            }
-            if let value = attr[UZTextViewClickedRect] as? CGRect {
-                rect = value
-            }
+
+        if let (url, rect) = getInfo(locationInTextView: locationInTextView) {
+            previewingContext.sourceRect = self.view.convert(rect, from: textView)
+            let controller = WebViewController(nibName: nil, bundle: nil)
+            controller.url = url
+            return controller
         }
         
-        if let textView = self.textView {
-            rect = self.view.convert(rect, from: textView)
-            previewingContext.sourceRect = rect
-        }
-        controller.preferredContentSize = CGSize(width: 0.0, height: 200)
-        
-        return controller
+        return nil
     }
     
     func previewingContext(_ previewingContext: UIViewControllerPreviewing, commit viewControllerToCommit: UIViewController) {
