@@ -32,6 +32,9 @@
 	self.tableView.scrollEnabled = YES;
 }
 
+- (void)textView:(UZTextView* __nonnull)textView didLongTapLinkAttribute:(id __nullable)value {
+}
+
 - (void)textView:(UZTextView *)textview didClickLinkAttribute:(id)value {
 	NSLog(@"%@", value);
 	if ([value[@"type"] isEqualToString:@"link"]) {

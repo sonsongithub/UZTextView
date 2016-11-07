@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface UZLoupeView : UIView {
+@interface UZLoupeView : UIView <CAAnimationDelegate> {
 	CGFloat		_loupeRadius;
 	UIImage		*_image;
 }

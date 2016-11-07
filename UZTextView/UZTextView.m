@@ -115,7 +115,46 @@
 	SAFE_CFRELEASE(_tokenizer);
 }
 
+- (NSDictionary*)attributesAtPoint:(CGPoint)point {
+    if (_scale != 1) {
+        point.x /= _scale;
+        point.y /= _scale;
+    }
+    
+    __block NSRange resultRange = NSMakeRange(0, 0);
+    
+    _tappedLinkAttribute = nil;
+    
+    CFIndex index = [self indexForPoint:point];
+    if (index == kCFNotFound)
+        return nil;
+    
+    NSDictionary *attribute = [self.attributedString attributesAtIndex:index effectiveRange:&resultRange];
+    CGRect rect = [self circumscribingRectForStringFromIndex:resultRange.location toIndex:resultRange.location + resultRange.length - 1];
+    
+    if (attribute[NSLinkAttributeName]) {
+        NSMutableDictionary *attr = [NSMutableDictionary dictionaryWithDictionary:attribute];
+        attr[UZTextViewClickedRect] = [NSValue valueWithCGRect:rect];
+        return attr;
+    }
+    
+    return nil;
+}
+
+- (BOOL)isSelectingAnyText {
+    return (_status > 0);
+}
+
+- (void)selectAll {
+    [self setSelectedRange:NSMakeRange(0, self.attributedString.length)];
+}
+
 #pragma mark - Setter and getter
+
+- (void)setScale:(CGFloat)value {
+    _scale = value;
+    _longPressGestureRecognizer.enabled = (_scale == 1);
+}
 
 - (void)setAttributedString:(NSMutableAttributedString *)attributedString {
 	[self prepareForReuse];
@@ -144,8 +183,9 @@
 	_status = UZTextViewSelected;
 	[self setCursorHidden:NO];
 	[self setNeedsDisplay];
-	
+#if !defined(TARGET_OS_TV)
 	[self showUIMenu];
+#endif
 }
 
 - (void)setMinimumPressDuration:(CFTimeInterval)minimumPressDuration {
@@ -182,45 +222,56 @@
 	_longPressGestureRecognizer.enabled = hidden;
 }
 
+
 - (void)updateLayout {
-	if (_lastLayoutWidth == (self.frame.size.width - (_margin.left + _margin.right))) {
-		return;
-	}
-	
-	// CoreText
-	SAFE_CFRELEASE(_framesetter);
-	SAFE_CFRELEASE(_frame);
-	
-	CFAttributedStringRef p = (__bridge CFAttributedStringRef)_attributedString;
-	if (p) {
-		_framesetter = CTFramesetterCreateWithAttributedString(p);
-	}
-	else {
-		p = CFAttributedStringCreate(NULL, CFSTR(""), NULL);
-		_framesetter = CTFramesetterCreateWithAttributedString(p);
-		CFRelease(p);
-	}
-	
-	_lastLayoutWidth = self.frame.size.width - (_margin.left + _margin.right);
-	
-	CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
-																	CFRangeMake(0, _attributedString.length),
-																	NULL,
-																	CGSizeMake(_lastLayoutWidth, CGFLOAT_MAX),
-																	NULL);
-	_contentRect = CGRectZero;
-	_contentRect.size = frameSize;
-	
-	CGMutablePathRef path = CGPathCreateMutable();
-	CGPathAddRect(path, NULL, _contentRect);
-	_frame = CTFramesetterCreateFrame(_framesetter, CFRangeMake(0, 0), path, NULL);
-	CGPathRelease(path);
+    if (_lastLayoutWidth == (self.frame.size.width - (_margin.left + _margin.right))) {
+        return;
+    }
+    
+    // CoreText
+    SAFE_CFRELEASE(_framesetter);
+    SAFE_CFRELEASE(_frame);
+    
+    CFAttributedStringRef p = (__bridge CFAttributedStringRef)_attributedString;
+    if (p) {
+        _framesetter = CTFramesetterCreateWithAttributedString(p);
+    }
+    else {
+        p = CFAttributedStringCreate(NULL, CFSTR(""), NULL);
+        _framesetter = CTFramesetterCreateWithAttributedString(p);
+        CFRelease(p);
+    }
+    
+    _lastLayoutWidth = self.frame.size.width - (_margin.left + _margin.right);
+    
+    if (_scale != 1) {
+        _lastLayoutWidth = CGFLOAT_MAX;
+    }
+    
+    CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(_framesetter,
+                                                                    CFRangeMake(0, _attributedString.length),
+                                                                    NULL,
+                                                                    CGSizeMake(_lastLayoutWidth, CGFLOAT_MAX),
+                                                                    NULL);
+    
+    
+    
+    frameSize.width = _lastLayoutWidth;
+    _contentRect = CGRectZero;
+    _contentRect.size = frameSize;
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGPathAddRect(path, NULL, _contentRect);
+    _frame = CTFramesetterCreateFrame(_framesetter, CFRangeMake(0, 0), path, NULL);
+    CGPathRelease(path);
+    
 }
 
+#if !defined(TARGET_OS_TV)
 - (void)showUIMenu {
 	[[UIMenuController sharedMenuController] setTargetRect:[self circumscribingRectForStringFromIndex:_head toIndex:_tail] inView:self];
 	[[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
 }
+#endif
 
 - (BOOL)cancelSelectedText {
 	if (_status != UZTextViewNoSelection) {
@@ -417,80 +468,96 @@
 }
 
 - (void)drawContent {
-	CGContextRef context = UIGraphicsGetCurrentContext();
-	
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
 #ifdef _UZTEXTVIEW_DEBUG_
-	// draw frame for debug
-	[[UIColor redColor] setStroke];
-	CGContextStrokeRect(context, self.bounds);
-	[[UIColor blueColor] setStroke];
-	CGContextStrokeRect(context, UIEdgeInsetsInsetRect(self.bounds, _margin));
+    [[UIColor redColor] setStroke];
+    CGContextStrokeRect(context, self.bounds);
+    [[UIColor blueColor] setStroke];
+    CGContextStrokeRect(context, UIEdgeInsetsInsetRect(self.bounds, _margin));
 #endif
     
-    // draw background color
-    [self drawBackgroundColor];
-	
-	CGContextTranslateCTM(context, _margin.left, _margin.top);
-	
-	// draw text
-	CGContextSaveGState(context);
-	CGContextTranslateCTM(context, 0, _contentRect.size.height);
-	CGContextScaleCTM(context, 1.0, -1.0);
-	CGContextSetTextMatrix(context, CGAffineTransformIdentity);
-	CTFrameDraw(_frame, context);
-	CGContextRestoreGState(context);
-	
+    CGContextTranslateCTM(context, _margin.left, _margin.top);
+    
+    if (_scale != 1)
+        CGContextScaleCTM(context, _scale, _scale);
+    
+    // draw text
+    CGContextSaveGState(context);
+    CGContextTranslateCTM(context, 0, _contentRect.size.height);
+    CGContextScaleCTM(context, 1.0, -1.0);
+    CGContextSetTextMatrix(context, CGAffineTransformIdentity);
+    CTFrameDraw(_frame, context);
+    CGContextRestoreGState(context);
+    
 #ifdef _UZTEXTVIEW_DEBUG_
-	// for debug
-	[self drawStringRectForDebug];
+    [self drawStringRectForDebug];
 #endif
     
     // draw strike through line
     [self drawStrikethroughLine];
-	
-	// draw hightlighted text
-	for (NSValue *value in _highlightRanges) {
-		NSRange range = [value rangeValue];
-		[self drawSelectedTextFragmentRectsFromIndex:range.location toIndex:range.location + range.length - 1 color:[[UIColor yellowColor] colorWithAlphaComponent:0.5]];
-	}
-	// draw selected strings
-	if (_status > 0)
-		[self drawSelectedTextFragmentRectsFromIndex:_head
-											 toIndex:_tail
-											   color:[self.tintColor colorWithAlphaComponent:_tintAlpha]];
-	
-	// draw tapped link range background
-	if (_tappedLinkRange.length > 0)
-		[self drawSelectedTextFragmentRectsFromIndex:_tappedLinkRange.location
-											 toIndex:_tappedLinkRange.location + _tappedLinkRange.length - 1
-											   color:[self.tintColor colorWithAlphaComponent:_tintAlpha]];
+    
+    // draw hightlighted text
+    for (NSValue *value in _highlightRanges) {
+        NSRange range = [value rangeValue];
+        [self drawSelectedTextFragmentRectsFromIndex:range.location toIndex:range.location + range.length - 1 color:[[UIColor yellowColor] colorWithAlphaComponent:0.5]];
+    }
+    // draw selected strings
+    if (_status > 0)
+        [self drawSelectedTextFragmentRectsFromIndex:_head
+                                             toIndex:_tail
+                                               color:[self.tintColor colorWithAlphaComponent:_tintAlpha]];
+    
+    // draw tapped link range background
+    if (_tappedLinkRange.length > 0)
+        [self drawSelectedTextFragmentRectsFromIndex:_tappedLinkRange.location
+                                             toIndex:_tappedLinkRange.location + _tappedLinkRange.length - 1
+                                               color:[self.tintColor colorWithAlphaComponent:_tintAlpha]];
 }
 
 #pragma mark - UILongPressGestureDelegate
 
 - (void)didChangeLongPressGesture:(UILongPressGestureRecognizer *)gestureRecognizer {
 	if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
+        if (_tappedLinkRange.length > 0) {
+            gestureRecognizer.enabled = NO;
+            gestureRecognizer.enabled = YES;
+        }
+        else {
+            [self setSelectionWithPoint:[gestureRecognizer locationInView:self margin:_margin]];
+            _status = UZTextViewSelected;
+            [self setCursorHidden:YES];
+            [self setNeedsDisplay];
+            [_loupeView setVisible:YES animated:YES];
+            [_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
+        }
+	}
+    else if (gestureRecognizer.state == UIGestureRecognizerStateChanged) {
 		[self setSelectionWithPoint:[gestureRecognizer locationInView:self margin:_margin]];
-		_status = UZTextViewSelected;
 		[self setCursorHidden:YES];
 		[self setNeedsDisplay];
 		[_loupeView setVisible:YES animated:YES];
 		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
 	}
-	else if (gestureRecognizer.state == UIGestureRecognizerStateChanged) {
-		[self setSelectionWithPoint:[gestureRecognizer locationInView:self margin:_margin]];
-		[self setCursorHidden:YES];
-		[self setNeedsDisplay];
-		[_loupeView setVisible:YES animated:YES];
-		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
-	}
-	else if (gestureRecognizer.state == UIGestureRecognizerStateEnded || gestureRecognizer.state == UIGestureRecognizerStateCancelled || gestureRecognizer.state == UIGestureRecognizerStateFailed) {
-		[self setCursorHidden:NO];
-		[self setNeedsDisplay];
-		[_loupeView setVisible:NO animated:YES];
-		[_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
-		[self becomeFirstResponder];
-		[self showUIMenu];
+    else if (gestureRecognizer.state == UIGestureRecognizerStateEnded || gestureRecognizer.state == UIGestureRecognizerStateCancelled || gestureRecognizer.state == UIGestureRecognizerStateFailed) {
+        if (_tappedLinkRange.length > 0) {
+            if ([self.delegate respondsToSelector:@selector(textView:didLongTapLinkAttribute:)]) {
+                NSRange resultRange = NSMakeRange(0, 0);
+                CFIndex index = _tappedLinkRange.location;
+                NSDictionary *attribute = [self.attributedString attributesAtIndex:index effectiveRange:&resultRange];
+                [self.delegate textView:self didLongTapLinkAttribute:attribute];
+            }
+        }
+        else {
+            [self setCursorHidden:NO];
+            [self setNeedsDisplay];
+            [_loupeView setVisible:NO animated:YES];
+            [_loupeView updateAtLocation:[gestureRecognizer locationInView:self] textView:self];
+            [self becomeFirstResponder];
+    #if !defined(TARGET_OS_TV)
+            [self showUIMenu];
+    #endif
+        }
 	}
 }
 
@@ -501,6 +568,7 @@
 	_cursorMargin = 10;
 	_tintAlpha = 0.5;
 	_durationToCancelSuperViewScrolling = 0.25;
+    _scale = 1;
 	
 	_longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(didChangeLongPressGesture:)];
 	_longPressGestureRecognizer.minimumPressDuration = 0.5;
@@ -518,9 +586,11 @@
 	_rightCursor = [[UZCursorView alloc] initWithCursorDirection:UZTextViewDownCursor];
 	_rightCursor.userInteractionEnabled = NO;
 	[self addSubview:_rightCursor];
-	
+
+#if !defined(TARGET_OS_TV)
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(menuControllerDidHideMenuNotification:) name:UIMenuControllerDidHideMenuNotification object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidChangeStatusBarOrientationNotification:) name:UIApplicationDidChangeStatusBarOrientationNotification object:nil];
+#endif
 }
 
 #pragma mark - CoreText
@@ -579,58 +649,66 @@
 }
 
 - (CFIndex)indexForPoint:(CGPoint)point {
-	CFArrayRef lines = CTFrameGetLines(_frame);
-	CFIndex lineCount = CFArrayGetCount(lines);
-	CGPoint lineOrigins[lineCount];
-	CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
-	
-	CGRect previousLineRect = CGRectZero;
-	
-	for (NSInteger index = 0; index < lineCount; index++) {
-		CGPoint origin = lineOrigins[index];
-		CTLineRef line = CFArrayGetValueAtIndex(lines, index);
-		
-		CFRange lineCFRange = CTLineGetStringRange(line);
-		NSRange lineRange = NSMakeRange(lineCFRange.location, lineCFRange.length);
-		CGFloat ascent;
-		CGFloat descent;
-		CGFloat leading;
-		CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
-		
-		CGRect lineRect = CGRectMake(origin.x,
-									 ceilf(origin.y - descent),
-									 width,
-									 ceilf(ascent + descent));
-		lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
-		
-		CGRect temp = lineRect;
-		lineRect.size.height += (lineRect.origin.y - previousLineRect.origin.y - previousLineRect.size.height);
-		lineRect.origin.y = previousLineRect.origin.y + previousLineRect.size.height;
-		previousLineRect = temp;
-		
-		if (CGRectContainsPoint(lineRect, point)) {
-			CFIndex result = CTLineGetStringIndexForPosition(line, point);
-			if (result != kCFNotFound && NSLocationInRange(result, lineRange))
-				return result;
-		}
-		
-		CGRect marginArea = lineRect;
-		marginArea.origin.x = _contentRect.origin.x;
-		marginArea.size.width = _contentRect.size.width;
-		
-		if (CGRectContainsPoint(marginArea, point)) {
-			return lineRange.location + lineRange.length - 1;
-		}
-	}
-	return kCFNotFound;
+    CFArrayRef lines = CTFrameGetLines(_frame);
+    CFIndex lineCount = CFArrayGetCount(lines);
+    CGPoint lineOrigins[lineCount];
+    CTFrameGetLineOrigins(_frame, CFRangeMake(0, 0), lineOrigins);
+    
+    CGRect previousLineRect = CGRectZero;
+    
+    for (NSInteger index = 0; index < lineCount; index++) {
+        CGPoint origin = lineOrigins[index];
+        CTLineRef line = CFArrayGetValueAtIndex(lines, index);
+        
+        CFRange lineCFRange = CTLineGetStringRange(line);
+        NSRange lineRange = NSMakeRange(lineCFRange.location, lineCFRange.length);
+        CGFloat ascent;
+        CGFloat descent;
+        CGFloat leading;
+        CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+        
+        CGRect lineRect = CGRectMake(origin.x,
+                                     ceilf(origin.y - descent),
+                                     width,
+                                     ceilf(ascent + descent));
+        lineRect.origin.y = _contentRect.size.height - CGRectGetMaxY(lineRect);
+        
+        CGRect temp = lineRect;
+        lineRect.size.height += (lineRect.origin.y - previousLineRect.origin.y - previousLineRect.size.height);
+        lineRect.origin.y = previousLineRect.origin.y + previousLineRect.size.height;
+        previousLineRect = temp;
+        
+        // UZTextViewとの変更点
+        CGRect tapRect = CGRectInset(CGRectMake(point.x, point.y, 0, 0), -10, -10);
+        
+        if (CGRectIntersectsRect(lineRect, tapRect)) {
+            CFIndex result = CTLineGetStringIndexForPosition(line, point);
+            if (result != kCFNotFound && NSLocationInRange(result, lineRange)) {
+                if (result > 1)
+                    return (result - 1);		// UZTextViewとの変更点
+                return result;
+            }
+        }
+        
+        CGRect marginArea = lineRect;
+        marginArea.origin.x = _contentRect.origin.x;
+        marginArea.size.width = _contentRect.size.width;
+        
+        if (CGRectContainsPoint(marginArea, point)) {
+            return lineRange.location + lineRange.length - 1;
+        }
+    }
+    return kCFNotFound;
 }
 
 #pragma mark - Touch event(Override)
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [touches anyObject];
-	[self setNeedsDisplay];
+    [self setNeedsDisplay];
+#if !defined(TARGET_OS_TV)
 	[[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
+#endif
 	
 	_headWhenBegan = _head;
 	_tailWhenBegan = _tail;
@@ -644,37 +722,54 @@
 	}
 	else if (CGRectContainsPoint([self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge], [touch locationInView:self margin:_margin]) && !_leftCursor.hidden && !_rightCursor.hidden) {
 		if ([self.delegate respondsToSelector:@selector(selectionDidBeginTextView:)])
-			[self.delegate selectionDidBeginTextView:self];
+            [self.delegate selectionDidBeginTextView:self];
 		_status = UZTextViewEditingToSelection;
 		[_loupeView setVisible:YES animated:YES];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
 		[self setCursorHidden:NO];
 	}
-	else {
-		_tappedLinkRange = [self rangeOfLinkStringAtPoint:[touch locationInView:self margin:_margin]];
-		[self setNeedsDisplay];
+    else {
+        // UZTextViewとの変更点
+        CGPoint p = [touch locationInView:self margin:_margin];
+        if (_scale != 1) {
+            p.x /= _scale;
+            p.y /= _scale;
+        }
+        _tappedLinkRange = [self rangeOfLinkStringAtPoint:p];
+        [self setNeedsDisplay];
 	}
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [touches anyObject];
-	if (_status == UZTextViewEditingFromSelection) {
-		NSInteger newHead = [self indexForPoint:[touch locationInView:self margin:_margin]];
+    
+    // Z方向への押し込みを無視する
+    if (CGPointEqualToPoint([touch locationInView:self], [touch previousLocationInView:self]))
+        return;
+    
+    if (_status == UZTextViewEditingFromSelection) {
+		NSInteger index = [self indexForPoint:[touch locationInView:self margin:_margin]];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
-		if (newHead != kCFNotFound) {
-			if (newHead <= _tail) {
-				_head = newHead;
-			}
+        if (index != kCFNotFound) {
+            if (index < _tailWhenBegan) {
+                _head = index;
+            } else {
+                _head = _tailWhenBegan;
+                _tail = index;
+            }
 		}
 		[self setCursorHidden:NO];
 	}
-	else if (_status == UZTextViewEditingToSelection) {
-		NSInteger newTail = [self indexForPoint:[touch locationInView:self margin:_margin]];
+    else if (_status == UZTextViewEditingToSelection) {
+		NSInteger index = [self indexForPoint:[touch locationInView:self margin:_margin]];
 		[_loupeView updateAtLocation:[touch locationInView:self] textView:self];
-		if (newTail != kCFNotFound) {
-			if (newTail >= _head) {
-				_tail = newTail;
-			}
+		if (index != kCFNotFound) {
+            if (index > _headWhenBegan) {
+                _tail = index;
+            } else {
+                _tail = _headWhenBegan;
+                _head = index;
+            }
 		}
 		[self setCursorHidden:NO];
 	}
@@ -698,14 +793,18 @@
 	
 	if (_status == UZTextViewEditingFromSelection) {
 		[_loupeView setVisible:NO animated:YES];
-		[self becomeFirstResponder];
-		[self showUIMenu];
+        [self becomeFirstResponder];
+#if !defined(TARGET_OS_TV)
+        [self showUIMenu];
+#endif
 		_status = UZTextViewSelected;
 	}
 	else if (_status == UZTextViewEditingToSelection) {
 		[_loupeView setVisible:NO animated:YES];
-		[self becomeFirstResponder];
-		[self showUIMenu];
+        [self becomeFirstResponder];
+#if !defined(TARGET_OS_TV)
+        [self showUIMenu];
+#endif
 		_status = UZTextViewSelected;
 	}
 	else if (_longPressGestureRecognizer.state != UIGestureRecognizerStateBegan) {
@@ -713,8 +812,10 @@
 			if (_status != UZTextViewNoSelection) {
 				NSInteger tappedCharacterIndex = [self indexForPoint:[[touches anyObject] locationInView:self margin:_margin]];
 				if (_head <= tappedCharacterIndex && tappedCharacterIndex <= _tail) {
-					// show uimenu if user tapped selected text range.
+                    // show uimenu if user tapped selected text range.
+#if !defined(TARGET_OS_TV)
 					[self showUIMenu];
+#endif
 				}
 				else {
 					// selection is cancelled when some strings are selected.
@@ -748,9 +849,11 @@
 
 #pragma mark - NSNotification
 
+#if !defined(TARGET_OS_TV)
 - (void)menuControllerDidHideMenuNotification:(NSNotification*)notification {
 	[[UIMenuController sharedMenuController] setMenuItems:nil];
 }
+#endif
 
 - (void)applicationDidChangeStatusBarOrientationNotification:(NSNotification*)notification {
 	[_loupeView setVisible:NO animated:NO];
@@ -768,7 +871,9 @@
 }
 
 - (void)copy:(id)sender {
+#if !defined(TARGET_OS_TV)
 	[UIPasteboard generalPasteboard].string = [self.attributedString.string substringWithRange:self.selectedRange];
+#endif
 }
 
 - (void)selectAll:(id)sender {
@@ -809,7 +914,7 @@
 }
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
-	if (CGRectContainsPoint(self.bounds, point)) {
+    if (CGRectContainsPoint(self.bounds, point)) {
 		CGPoint pointForUZTextViewContent = point;
 		pointForUZTextViewContent.x -= _margin.left;
 		pointForUZTextViewContent.y -= _margin.top;
@@ -817,18 +922,27 @@
 		[rects addObjectsFromArray:[self fragmentRectsForGlyphFromIndex:0 toIndex:self.attributedString.length-1]];
 		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_head side:UZTextViewLeftEdge]]];
 		[rects addObject:[NSValue valueWithCGRect:[self fragmentRectForCursorAtIndex:_tail side:UZTextViewRightEdge]]];
-		
+
 		for (NSValue *rectValue in rects) {
 			if (CGRectContainsPoint([rectValue CGRectValue], pointForUZTextViewContent))
 				return [super hitTest:point withEvent:event];
 		}
-		if (_status != UZTextViewNoSelection) {
-			// does not pass tap event to the other view
-			// when some text is selected.
-			return [super hitTest:point withEvent:event];
+		if (_scale != 1) {
+			pointForUZTextViewContent.x /= _scale;
+			pointForUZTextViewContent.y /= _scale;
 		}
-	}
-	return nil;
+        
+        for (NSValue *rectValue in rects) {
+            if (CGRectContainsPoint([rectValue CGRectValue], pointForUZTextViewContent))
+                return [super hitTest:point withEvent:event];
+        }
+        if (_status != UZTextViewNoSelection) {
+            // does not pass tap event to the other view
+            // when some text is selected.
+            return [super hitTest:point withEvent:event];
+        }
+    }
+    return nil;
 }
 
 - (void)layoutSubviews {

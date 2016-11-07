@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import <CoreText/CoreText.h>
 
+static NSString * _Nonnull const UZTextViewClickedRect	= @"_UZTextViewClickedRect";
+
 /**
  * To be written
  */
@@ -17,14 +19,14 @@
  * To be written
  * \return To be written
  */
-- (NSString*)stateDescription;
+- (NSString* __nonnull)stateDescription;
 /**
  * To be written
  * \param view To be written
  * \param margin To be written
  * \return To be written
  */
-- (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin;
+- (CGPoint)locationInView:(UIView* __nonnull)view margin:(UIEdgeInsets)margin;
 @end
 
 /**
@@ -37,7 +39,7 @@
  * \param margin To be written
  * \return To be written
  */
-- (CGPoint)locationInView:(UIView *)view margin:(UIEdgeInsets)margin;
+- (CGPoint)locationInView:(UIView* __nonnull)view margin:(UIEdgeInsets)margin;
 @end
 
 #define SAFE_CFRELEASE(p) if(p){CFRelease(p);p=NULL;}
@@ -78,7 +80,14 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * \param textView The text view in which the link is tapped.
  * \param value The link attribute data which is specified as NSAttributedString's methods.
  */
-- (void)textView:(UZTextView*)textView didClickLinkAttribute:(id)value;
+- (void)textView:(UZTextView* __nonnull)textView didClickLinkAttribute:(id __nullable)value;
+
+/**
+ * Tells the delegate that a link attribute has been tapped for a long time.
+ * \param textView The text view in which the link is tapped.
+ * \param value The link attribute data which is specified as NSAttributedString's methods.
+ */
+- (void)textView:(UZTextView* __nonnull)textView didLongTapLinkAttribute:(id __nullable)value;
 
 /**
  * Tells the delegate that selecting of the specified text view has begun.
@@ -86,7 +95,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * You can use this delegate method in order to make its parent view disabled scrolling.
  * \param textView The text view in which selecting began.
  */
-- (void)selectionDidBeginTextView:(UZTextView*)textView;
+- (void)selectionDidBeginTextView:(UZTextView* __nonnull)textView;
 
 /**
  * Tells the delegate that selecting of the specified text view has ended.
@@ -94,7 +103,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * You can use this delegate method in order to make its parent view enabled scrolling.
  * \param textView The text view in which selecting ended.
  */
-- (void)selectionDidEndTextView:(UZTextView*)textView;
+- (void)selectionDidEndTextView:(UZTextView* __nonnull)textView;
 
 /**
  * Tells the delegate that tap an area which does not include any links.
@@ -103,7 +112,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * For example, you can select/deselect the UITableViewCell object whose UZTextView is tapped by an user.
  * \param textView The text view in which is tapped.
  */
-- (void)didTapTextDoesNotIncludeLinkTextView:(UZTextView*)textView;
+- (void)didTapTextDoesNotIncludeLinkTextView:(UZTextView* __nonnull)textView;
 @end
 
 /**
@@ -119,6 +128,9 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 	// Layout
 	UIEdgeInsets					_margin;
 	CGFloat							_lastLayoutWidth;					// save the width when view is laytouted previously.
+    
+    // Scaling
+    CGFloat                         _scale;
 	
 	// CoreText
 	CTFramesetterRef				_framesetter;
@@ -170,17 +182,22 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  *
  * See UZTextViewDelegate Protocol Reference for the optional methods this delegate may implement.
  */
-@property (nonatomic, assign) id <UZTextViewDelegate> delegate;
+@property (nonatomic, assign) id <UZTextViewDelegate> __nullable delegate;
 
 /**
  * The contents of the string to be drawn in this view.
  */
-@property (nonatomic, copy) NSAttributedString *attributedString;
+@property (nonatomic, copy) NSAttributedString* __nullable attributedString;
 
 /**
  * The bounding size required to draw the string.
  */
 @property (nonatomic, readonly) CGSize contentSize;
+
+/**
+ * The rendering scaling parameter.
+ */
+@property (nonatomic, assign) CGFloat scale;
 
 /**
  * The current selection range of the receiver.
@@ -195,7 +212,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
 /**
  * Ranges to be highlighted.
  */
-@property (nonatomic, copy) NSArray *highlightRanges;
+@property (nonatomic, copy) NSArray* __nullable highlightRanges;
 
 /**
  * UIEdgeInsets object, describes a margin around the content. The default value is UIEdgeInsetsZero.
@@ -208,7 +225,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * \param width The width constraint to apply when computing the string’s bounding rectangle.
  * \return A rectangle whose size component indicates the width and height required to draw the entire contents of the string.
  */
-+ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(CGFloat)width __attribute__((deprecated));
++ (CGSize)sizeForAttributedString:(NSAttributedString* __nonnull)attributedString withBoundWidth:(CGFloat)width __attribute__((deprecated));
 
 /**
  * To be written
@@ -217,12 +234,24 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * \param margin To be written
  * \return To be written
  */
-+ (CGSize)sizeForAttributedString:(NSAttributedString*)attributedString withBoundWidth:(CGFloat)width margin:(UIEdgeInsets)margin;
++ (CGSize)sizeForAttributedString:(NSAttributedString* __nonnull)attributedString withBoundWidth:(CGFloat)width margin:(UIEdgeInsets)margin;
 
 /**
  * Prepares for reusing an object. You have to call this method before you set another attributed string to the object.
  */
 - (void)prepareForReuse;
+
+/**
+ * Returns the attributes for the character at the specified point.
+ * \param point The CGPoint object indicates the location user tapped.
+ * \return The attributes for the character at the specified point.
+ */
+- (NSDictionary* __nullable)attributesAtPoint:(CGPoint)point;
+
+- (void)selectAll;
+
+- (BOOL)isSelectingAnyText;
+
 @end
 
 @interface UZTextView(Internal)
@@ -248,7 +277,9 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * \discussion You have to override `canBecomeFirstResponder` or this method if you want to make it hide or edit its items forcely.
  * \warning This is an internal/private method. Use this method in subclass of UZTextView.
  */
+#if !defined(TARGET_OS_TV)
 - (void)showUIMenu;
+#endif
 
 /**
  * Deselects selected text of the receiver.
@@ -276,7 +307,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * \param toIndex A ending index to specify strings. The value must lie within the bounds of the receiver.
  * \return An NSArray object containing frame rectangles.
  */
-- (NSArray*)fragmentRectsForGlyphFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex;
+- (NSArray* __nonnull)fragmentRectsForGlyphFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex;
 
 /**
  * Returns the frame rectangle circumscribing the specified string.
@@ -303,7 +334,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * \param toIndex A ending index to specify strings. The value must lie within the bounds of the receiver.
  * \param color UIColor object to fill rectangles.
  */
-- (void)drawSelectedTextFragmentRectsFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex color:(UIColor*)color;
+- (void)drawSelectedTextFragmentRectsFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex color:(UIColor* __nonnull)color;
 
 /**
  * Draw the background rectangles of strings for debugging.
@@ -323,7 +354,7 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  *
  * \param gestureRecognizer The UILongPressGestureRecognizer object tells this method.
  */
-- (void)didChangeLongPressGesture:(UILongPressGestureRecognizer *)gestureRecognizer;
+- (void)didChangeLongPressGesture:(UILongPressGestureRecognizer* __nonnull)gestureRecognizer;
 
 /**
  * Initialize all properties. This method is called in `init` methods.

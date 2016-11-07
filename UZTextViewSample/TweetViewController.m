@@ -40,6 +40,9 @@
 	[self.nameButton sizeToFit];
 }
 
+- (void)textView:(UZTextView* __nonnull)textView didLongTapLinkAttribute:(id __nullable)value {
+}
+
 - (void)selectionDidBeginTextView:(UZTextView*)textView {
 }
 

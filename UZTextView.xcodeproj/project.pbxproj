@@ -9,9 +9,9 @@
 /* Begin PBXBuildFile section */
 		147737D217C2F3C400A4F04B /* UZCursorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886E517C2BFA0006F5514 /* UZCursorView.m */; };
 		147737D317C2F3C700A4F04B /* UZLoupeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886E717C2BFA0006F5514 /* UZLoupeView.m */; };
-		14E539901BD0C1E2009A6004 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 14E5398E1BD0C1E2009A6004 /* Main.storyboard */; settings = {ASSET_TAGS = (); }; };
-		14E539931BD0C3F0009A6004 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 14E539911BD0C3F0009A6004 /* LaunchScreen.storyboard */; settings = {ASSET_TAGS = (); }; };
-		14E539971BD0C55F009A6004 /* TextViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 14E539961BD0C55F009A6004 /* TextViewController.m */; settings = {ASSET_TAGS = (); }; };
+		14E539901BD0C1E2009A6004 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 14E5398E1BD0C1E2009A6004 /* Main.storyboard */; };
+		14E539931BD0C3F0009A6004 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 14E539911BD0C3F0009A6004 /* LaunchScreen.storyboard */; };
+		14E539971BD0C55F009A6004 /* TextViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 14E539961BD0C55F009A6004 /* TextViewController.m */; };
 		14F8866C17C2BB02006F5514 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14F8866B17C2BB02006F5514 /* Foundation.framework */; };
 		14F8867117C2BB02006F5514 /* UZTextView.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 14F8867017C2BB02006F5514 /* UZTextView.h */; };
 		14F8867317C2BB02006F5514 /* UZTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F8867217C2BB02006F5514 /* UZTextView.m */; };
@@ -234,7 +234,7 @@
 		14F8866017C2BB02006F5514 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0700;
+				LastUpgradeCheck = 0810;
 				ORGANIZATIONNAME = sonson;
 			};
 			buildConfigurationList = 14F8866317C2BB02006F5514 /* Build configuration list for PBXProject "UZTextView" */;
@@ -360,25 +360,31 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 			};
@@ -397,18 +403,24 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
