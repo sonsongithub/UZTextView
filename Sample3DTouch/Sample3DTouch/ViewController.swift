@@ -125,4 +125,3 @@ class ViewController: UIViewController, UZTextViewDelegate, UIViewControllerPrev
         self.present(nav, animated: true, completion: nil)
     }
 }
-
