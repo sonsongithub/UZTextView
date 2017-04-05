@@ -905,6 +905,9 @@
 #pragma mark - Override
 
 - (void)dealloc {
+    SAFE_CFRELEASE(_frame);
+    SAFE_CFRELEASE(_framesetter);
+    SAFE_CFRELEASE(_tokenizer);
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
