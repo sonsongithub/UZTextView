@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0810"
+   LastUpgradeVersion = "0820"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,8 +14,8 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "14F8866717C2BB02006F5514"
-               BuildableName = "libUZTextView.a"
+               BlueprintIdentifier = "1485325B1E5354A500702442"
+               BuildableName = "UZTextView.framework"
                BlueprintName = "UZTextView"
                ReferencedContainer = "container:UZTextView.xcodeproj">
             </BuildableReference>
@@ -45,8 +45,8 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "14F8866717C2BB02006F5514"
-            BuildableName = "libUZTextView.a"
+            BlueprintIdentifier = "1485325B1E5354A500702442"
+            BuildableName = "UZTextView.framework"
             BlueprintName = "UZTextView"
             ReferencedContainer = "container:UZTextView.xcodeproj">
          </BuildableReference>
@@ -60,6 +60,15 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "1485325B1E5354A500702442"
+            BuildableName = "UZTextView.framework"
+            BlueprintName = "UZTextView"
+            ReferencedContainer = "container:UZTextView.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

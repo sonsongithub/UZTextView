@@ -12,7 +12,7 @@ import WebKit
 class WebViewController: UIViewController {
     let webView = WKWebView(frame: CGRect.zero)
     
-    override var previewActionItems : [UIPreviewActionItem] {
+    override var previewActionItems: [UIPreviewActionItem] {
         get {
             func previewActionForTitle(_ title: String, style: UIPreviewActionStyle = .default) -> UIPreviewAction {
                 return UIPreviewAction(title: title, style: style) { previewAction, viewController in
