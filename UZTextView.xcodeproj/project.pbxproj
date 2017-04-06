@@ -271,7 +271,7 @@
 		14F8866017C2BB02006F5514 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0810;
+				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = sonson;
 				TargetAttributes = {
 					1485325B1E5354A500702442 = {
@@ -583,6 +583,7 @@
 				148532671E5354A500702442 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		14F8866317C2BB02006F5514 /* Build configuration list for PBXProject "UZTextView" */ = {
 			isa = XCConfigurationList;
