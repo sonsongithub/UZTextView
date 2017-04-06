@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "UZTextView"
-  s.version      = "1.0.6"
+  s.version      = "1.0.8"
   s.summary      = "Clickable and selectable text view for iOS"
 
   s.description  = <<-DESC
