@@ -105,10 +105,8 @@ UIView *searchKeyWindow(UIView* view) {
 	group.duration = duration;
 	group.removedOnCompletion = NO;
 	group.fillMode = kCAFillModeForwards;
-	group.delegate = self;
 	
 	// commit animation
-	[group setValue:UZLoupeViewAppearingAnimation forKey:UZCoreAnimationName];
 	[self.layer addAnimation:group forKey:UZLoupeViewAppearingAnimation];
 }
 
@@ -119,22 +117,15 @@ UIView *searchKeyWindow(UIView* view) {
 	group.duration = duration;
 	group.removedOnCompletion = NO;
 	group.fillMode = kCAFillModeForwards;
-	group.delegate = self;
 	
 	// commit animation
-	[group setValue:UZLoupeViewDisappearingAnimation forKey:UZCoreAnimationName];
-	[self.layer addAnimation:group forKey:UZLoupeViewDisappearingAnimation];
-}
-
-#pragma mark - Core Animation callback
-
-- (void)animationDidStop:(CAAnimation*)animation finished:(BOOL)flag {
-	if ([[animation valueForKey:UZCoreAnimationName] isEqualToString:UZLoupeViewAppearingAnimation]) {
-	}
-	if ([[animation valueForKey:UZCoreAnimationName] isEqualToString:UZLoupeViewDisappearingAnimation]) {
-		self.hidden = YES;
-		self.layer.transform = CATransform3DIdentity;
-	}
+    [CATransaction begin];
+    [CATransaction setCompletionBlock:^{
+        self.hidden = YES;
+        self.layer.transform = CATransform3DIdentity;
+    }];
+    [self.layer addAnimation:group forKey:UZLoupeViewDisappearingAnimation];
+    [CATransaction commit];
 }
 
 #pragma mark - Public
