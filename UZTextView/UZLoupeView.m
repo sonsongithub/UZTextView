@@ -7,6 +7,7 @@
 //
 
 #import "UZLoupeView.h"
+#import "UZTextView.h"
 
 // Animation duration
 #define UZ_LOUPE_NO_ANIMATION_DUARTION						0.0001
@@ -179,6 +180,9 @@ UIView *searchKeyWindow(UIView* view) {
 #pragma mark - Override
 
 - (void)dealloc {
+#ifdef CHECK_MEMORY_LEAK
+    NSLog(@"UZLoupeView has been released");
+#endif
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 

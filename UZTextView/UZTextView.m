@@ -905,6 +905,9 @@
 #pragma mark - Override
 
 - (void)dealloc {
+#ifdef CHECK_MEMORY_LEAK
+    NSLog(@"UZTextView has been released");
+#endif
     SAFE_CFRELEASE(_frame);
     SAFE_CFRELEASE(_framesetter);
     SAFE_CFRELEASE(_tokenizer);
