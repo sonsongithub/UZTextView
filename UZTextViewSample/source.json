@@ -1,0 +1,52 @@
+ [
+  {
+  "body": "<font size=\"4\"><p><a href=\"https://letsencrypt.org\" sl-processed=\"1\">Let’sEncrypt</a>を使っ'て<a href=\"https://developers.line.me\" sl-processed=\"1\">LINE Bot</a>からの<span style=\"background-color:#ffcc99\">callback</span>を受けるサーバを作ったがダメで，さらにAWS API GatewayもLet’s Encrypt SSLを<strike>信用</strike>してなくて，大変だったというお話．</p><p>Let’s Encryptは，無料で使えるSSLの証明書取得サービスである．自動取得/更新がサーバに実装されており，それのためのサーバ側の更新スクリプトも配布されている．DNSをハックされる危険性や平文をネットワークに流す危険性が危惧される昨今，無料でSSLの証明書を利用できる趣味でサービスを開発したりするエンジニアの強い味方となっている．</p></font>",
+  "aa": false,
+  "margin": 5
+  },
+  {
+  "body": "<font size=\"5\"><p><a href=\"https://letsencrypt.org\" sl-processed=\"1\">Let’sEncrypt</a>を使っ'て<a href=\"https://developers.line.me\" sl-processed=\"1\">LINE Bot</a>からの<span style=\"background-color:#ffcc99\">callback</span>を受けるサーバを作ったがダメで，さらにAWS API GatewayもLet’s Encrypt SSLを<strike>信用</strike>してなくて，大変だったというお話．</p><p>Let’s Encryptは，無料で使えるSSLの証明書取得サービスである．自動取得/更新がサーバに実装されており，それのためのサーバ側の更新スクリプトも配布されている．DNSをハックされる危険性や平文をネットワークに流す危険性が危惧される昨今，無料でSSLの証明書を利用できる趣味でサービスを開発したりするエンジニアの強い味方となっている．</p></font>",
+  "aa": false,
+  "margin": 0
+  },
+  {
+  "body": "<font size=\"5\"><p><a href=\"https://letsencrypt.org\" sl-processed=\"1\">Let’sEncrypt</a>を使っ'て<a href=\"https://developers.line.me\" sl-processed=\"1\">LINE Bot</a>からの<span style=\"background-color:#ffcc99\">callback</span>を受けるサーバを作ったがダメで，さらにAWS API GatewayもLet’s Encrypt SSLを<strike>信用</strike>してなくて，大変だったというお話．</p><p>Let’s Encryptは，無料で使えるSSLの証明書取得サービスである．自動取得/更新がサーバに実装されており，それのためのサーバ側の更新スクリプトも配布されている．DNSをハックされる危険性や平文をネットワークに流す危険性が危惧される昨今，無料でSSLの証明書を利用できる趣味でサービスを開発したりするエンジニアの強い味方となっている．</p></font>",
+  "aa": false,
+  "margin": 30
+  },
+  {
+  "body": "<font face=\"Mona\">　　　　, -.―――--.､<br/>　　 ,ｲ,,i､ﾘ,,リ,,ﾉﾉ,,;;;;;;;;ヽ<br/>　　.i;}'　　　　　　　\"ﾐ;;;;:}<br/>　　|} ,,..､_､　 , _,,,..､ 　|;;;:|<br/>　　|} ,_tｭ,〈 　ﾋ''tｭ_　 i;;;;|<br/>　　|　 ｰ'　|　｀ - 　 　 ﾄ'{<br/>　.｢|　　 ｲ_i _ >､ 　 　 }〉}<br/>　｀{|　_.ﾉ;;/;;/,ゞ;ヽ､ 　.!-'<br/>　　 |　　 　＝'\" 　 　 |<br/>　 　 iﾞ ､_　　ﾞ,,,　 ,,　' {<br/>　　丿＼　￣￣　 _,,-\"ヽ<br/>''\"~ヽ　　＼､_;;,..-\" ＿　,i`ー-<br/>　　 ヽ､oヽ/ ＼　 /o/　 |<br/><br/><br/><br/><a href=\"https://www.google.com\">https://www.google.com</a></font>",
+  "aa": true,
+  "margin": 10
+  },
+  {
+  "body": "<font face=\"Mona\">　　　　　　　　  　 　 　 　 __|__　　　　　-┼-<br/>　 　　　　　　 七_　 　 　  ,-|ナ、 　 　,.-┼ト、<br/>　　　あ　　　 (乂 ）　　　 し'ヽ ノ　　　ヽ__ レノ<br/>　小←──────────────────────→大<br/><br/>　薄<br/>　↑米米米米米米米 : : : : : : : : : : : : : : :<br/>　｜髟髟髟髟髟髟髟 :..:..:..:..:..:..:.:..:..:..:..:.:..:<br/>　｜面面面面面面面 :.:.:.:.:.:.:.:.:.:.::.:.:.:.:.:.:.:.:<br/>　｜鼎鼎鼎鼎鼎鼎鼎 :.::.::.::.::.::.::.::.::.::.::.::.:::<br/>　｜蠻蠻蠻蠻蠻蠻蠻 ::::::::::::::::::::::::::::::::::::::<br/>　｜鬣鬣鬣鬣鬣鬣鬣 ::::::::::::::::::::::::::::::::::::::<br/>　｜麌麌麌麌麌麌麌 ;:;::;::;::;::;::;::;::;::;::;::;::;::<br/>　｜黌黌黌黌黌黌黌 :;:;:;:;:;:;:;:;:;:;::;:;:;:;:;:;:;:;:<br/>　｜鬱鬱鬱鬱鬱鬱鬱 ;;:;;:;;:;;:;;:;;:;;:;;:;;:;;:;;:;;:;;<br/>　↓䨻䨻䨻䨻䨻䨻䨻 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;<br/>　濃</font>",
+  "aa": true,
+  "margin": 25
+  },
+  {
+  "body": "<font size=\"4\"><p><a href=\"https://letsencrypt.org\" sl-processed=\"1\">Let’sEncrypt</a>を使っ'て<a href=\"https://developers.line.me\" sl-processed=\"1\">LINE Bot</a>からの<span style=\"background-color:#ffcc99\">callback</span>を受けるサーバを作ったがダメで，さらにAWS API GatewayもLet’s Encrypt SSLを<strike>信用</strike>してなくて，大変だったというお話．</p><p>Let’s Encryptは，無料で使えるSSLの証明書取得サービスである．自動取得/更新がサーバに実装されており，それのためのサーバ側の更新スクリプトも配布されている．DNSをハックされる危険性や平文をネットワークに流す危険性が危惧される昨今，無料でSSLの証明書を利用できる趣味でサービスを開発したりするエンジニアの強い味方となっている．</p></font>",
+  "aa": false,
+  "margin": 5
+  },
+  {
+  "body": "<font size=\"5\"><p><a href=\"https://letsencrypt.org\" sl-processed=\"1\">Let’sEncrypt</a>を使っ'て<a href=\"https://developers.line.me\" sl-processed=\"1\">LINE Bot</a>からの<span style=\"background-color:#ffcc99\">callback</span>を受けるサーバを作ったがダメで，さらにAWS API GatewayもLet’s Encrypt SSLを<strike>信用</strike>してなくて，大変だったというお話．</p><p>Let’s Encryptは，無料で使えるSSLの証明書取得サービスである．自動取得/更新がサーバに実装されており，それのためのサーバ側の更新スクリプトも配布されている．DNSをハックされる危険性や平文をネットワークに流す危険性が危惧される昨今，無料でSSLの証明書を利用できる趣味でサービスを開発したりするエンジニアの強い味方となっている．</p></font>",
+  "aa": false,
+  "margin": 0
+  },
+  {
+  "body": "<font size=\"5\"><p><a href=\"https://letsencrypt.org\" sl-processed=\"1\">Let’sEncrypt</a>を使っ'て<a href=\"https://developers.line.me\" sl-processed=\"1\">LINE Bot</a>からの<span style=\"background-color:#ffcc99\">callback</span>を受けるサーバを作ったがダメで，さらにAWS API GatewayもLet’s Encrypt SSLを<strike>信用</strike>してなくて，大変だったというお話．</p><p>Let’s Encryptは，無料で使えるSSLの証明書取得サービスである．自動取得/更新がサーバに実装されており，それのためのサーバ側の更新スクリプトも配布されている．DNSをハックされる危険性や平文をネットワークに流す危険性が危惧される昨今，無料でSSLの証明書を利用できる趣味でサービスを開発したりするエンジニアの強い味方となっている．</p></font>",
+  "aa": false,
+  "margin": 30
+  },
+  {
+  "body": "<font face=\"Mona\">　　　　, -.―――--.､<br/>　　 ,ｲ,,i､ﾘ,,リ,,ﾉﾉ,,;;;;;;;;ヽ<br/>　　.i;}'　　　　　　　\"ﾐ;;;;:}<br/>　　|} ,,..､_､　 , _,,,..､ 　|;;;:|<br/>　　|} ,_tｭ,〈 　ﾋ''tｭ_　 i;;;;|<br/>　　|　 ｰ'　|　｀ - 　 　 ﾄ'{<br/>　.｢|　　 ｲ_i _ >､ 　 　 }〉}<br/>　｀{|　_.ﾉ;;/;;/,ゞ;ヽ､ 　.!-'<br/>　　 |　　 　＝'\" 　 　 |<br/>　 　 iﾞ ､_　　ﾞ,,,　 ,,　' {<br/>　　丿＼　￣￣　 _,,-\"ヽ<br/>''\"~ヽ　　＼､_;;,..-\" ＿　,i`ー-<br/>　　 ヽ､oヽ/ ＼　 /o/　 |<br/><br/><br/><br/><a href=\"https://www.google.com\">https://www.google.com</a></font>",
+  "aa": true,
+  "margin": 10
+  },
+  {
+  "body": "<font face=\"Mona\">　　　　　　　　  　 　 　 　 __|__　　　　　-┼-<br/>　 　　　　　　 七_　 　 　  ,-|ナ、 　 　,.-┼ト、<br/>　　　あ　　　 (乂 ）　　　 し'ヽ ノ　　　ヽ__ レノ<br/>　小←──────────────────────→大<br/><br/>　薄<br/>　↑米米米米米米米 : : : : : : : : : : : : : : :<br/>　｜髟髟髟髟髟髟髟 :..:..:..:..:..:..:.:..:..:..:..:.:..:<br/>　｜面面面面面面面 :.:.:.:.:.:.:.:.:.:.::.:.:.:.:.:.:.:.:<br/>　｜鼎鼎鼎鼎鼎鼎鼎 :.::.::.::.::.::.::.::.::.::.::.::.:::<br/>　｜蠻蠻蠻蠻蠻蠻蠻 ::::::::::::::::::::::::::::::::::::::<br/>　｜鬣鬣鬣鬣鬣鬣鬣 ::::::::::::::::::::::::::::::::::::::<br/>　｜麌麌麌麌麌麌麌 ;:;::;::;::;::;::;::;::;::;::;::;::;::<br/>　｜黌黌黌黌黌黌黌 :;:;:;:;:;:;:;:;:;:;::;:;:;:;:;:;:;:;:<br/>　｜鬱鬱鬱鬱鬱鬱鬱 ;;:;;:;;:;;:;;:;;:;;:;;:;;:;;:;;:;;:;;<br/>　↓䨻䨻䨻䨻䨻䨻䨻 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;<br/>　濃</font>",
+  "aa": true,
+  "margin": 25
+  }
+]

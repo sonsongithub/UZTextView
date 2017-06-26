@@ -7,35 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		148532601E5354A500702442 /* UZTextView.h in Headers */ = {isa = PBXBuildFile; fileRef = 1485325E1E5354A500702442 /* UZTextView.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		148532631E5354A500702442 /* UZTextView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1485325C1E5354A500702442 /* UZTextView.framework */; };
-		148532641E5354A500702442 /* UZTextView.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1485325C1E5354A500702442 /* UZTextView.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		14590BB51F009717002A31A0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14590BB41F009717002A31A0 /* AppDelegate.swift */; };
+		14590BBA1F009717002A31A0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 14590BB81F009717002A31A0 /* Main.storyboard */; };
+		14590BBC1F009717002A31A0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14590BBB1F009717002A31A0 /* Assets.xcassets */; };
+		14590BBF1F009717002A31A0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 14590BBD1F009717002A31A0 /* LaunchScreen.storyboard */; };
+		14590BCD1F0097B4002A31A0 /* MainTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14590BC91F0097B4002A31A0 /* MainTableViewController.swift */; };
+		14590BCE1F0097B4002A31A0 /* mona.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 14590BCA1F0097B4002A31A0 /* mona.ttf */; };
+		14590BCF1F0097B4002A31A0 /* SampleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14590BCB1F0097B4002A31A0 /* SampleCell.swift */; };
+		14590BD01F0097B4002A31A0 /* source.json in Resources */ = {isa = PBXBuildFile; fileRef = 14590BCC1F0097B4002A31A0 /* source.json */; };
+		14590BD41F0099AE002A31A0 /* UZTextView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1485325C1E5354A500702442 /* UZTextView.framework */; };
+		14590BD51F0099AE002A31A0 /* UZTextView.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1485325C1E5354A500702442 /* UZTextView.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		14590BD61F0099EE002A31A0 /* UZTextView.h in Headers */ = {isa = PBXBuildFile; fileRef = 14F8867017C2BB02006F5514 /* UZTextView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		148532691E5354AC00702442 /* UZTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F8867217C2BB02006F5514 /* UZTextView.m */; };
 		1485326A1E5354AC00702442 /* UZCursorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886E517C2BFA0006F5514 /* UZCursorView.m */; };
 		1485326B1E5354AC00702442 /* UZLoupeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886E717C2BFA0006F5514 /* UZLoupeView.m */; };
-		14E539901BD0C1E2009A6004 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 14E5398E1BD0C1E2009A6004 /* Main.storyboard */; };
-		14E539931BD0C3F0009A6004 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 14E539911BD0C3F0009A6004 /* LaunchScreen.storyboard */; };
-		14E539971BD0C55F009A6004 /* TextViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 14E539961BD0C55F009A6004 /* TextViewController.m */; };
-		14F8869617C2BB4A006F5514 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14F8866B17C2BB02006F5514 /* Foundation.framework */; };
-		14F8869817C2BB4A006F5514 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14F8869717C2BB4A006F5514 /* CoreGraphics.framework */; };
-		14F8869F17C2BB4A006F5514 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 14F8869D17C2BB4A006F5514 /* InfoPlist.strings */; };
-		14F886A117C2BB4A006F5514 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886A017C2BB4A006F5514 /* main.m */; };
-		14F886A517C2BB4A006F5514 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886A417C2BB4A006F5514 /* AppDelegate.m */; };
-		14F886AE17C2BB4A006F5514 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886AD17C2BB4A006F5514 /* ViewController.m */; };
-		14F886B017C2BB4A006F5514 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14F886AF17C2BB4A006F5514 /* Images.xcassets */; };
-		14F886D917C2BEE6006F5514 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886CE17C2BEE6006F5514 /* RootViewController.m */; };
-		14F886DA17C2BEE6006F5514 /* SEImageCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886D017C2BEE6006F5514 /* SEImageCache.m */; };
-		14F886DB17C2BEE6006F5514 /* TextCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886D217C2BEE6006F5514 /* TextCell.m */; };
-		14F886DC17C2BEE6006F5514 /* Tweet.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886D417C2BEE6006F5514 /* Tweet.m */; };
-		14F886DD17C2BEE6006F5514 /* TweetViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886D617C2BEE6006F5514 /* TweetViewController.m */; };
-		14F886DE17C2BEE6006F5514 /* WebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886D817C2BEE6006F5514 /* WebViewController.m */; };
-		14F886E817C2BFC5006F5514 /* UZTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F8867217C2BB02006F5514 /* UZTextView.m */; };
-		14F886E917C2BFC5006F5514 /* UZCursorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886E517C2BFA0006F5514 /* UZCursorView.m */; };
-		14F886EA17C2BFC5006F5514 /* UZLoupeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14F886E717C2BFA0006F5514 /* UZLoupeView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		148532611E5354A500702442 /* PBXContainerItemProxy */ = {
+		14590BD71F009A69002A31A0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 14F8866017C2BB02006F5514 /* Project object */;
 			proxyType = 1;
@@ -45,13 +34,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		148532681E5354A500702442 /* Embed Frameworks */ = {
+		14590BC81F009751002A31A0 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				148532641E5354A500702442 /* UZTextView.framework in Embed Frameworks */,
+				14590BD51F0099AE002A31A0 /* UZTextView.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -59,41 +48,24 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		14590BB21F009717002A31A0 /* UZTextViewSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UZTextViewSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		14590BB41F009717002A31A0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		14590BB91F009717002A31A0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		14590BBB1F009717002A31A0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		14590BBE1F009717002A31A0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		14590BC01F009717002A31A0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		14590BC91F0097B4002A31A0 /* MainTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainTableViewController.swift; sourceTree = "<group>"; };
+		14590BCA1F0097B4002A31A0 /* mona.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = mona.ttf; sourceTree = "<group>"; };
+		14590BCB1F0097B4002A31A0 /* SampleCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleCell.swift; sourceTree = "<group>"; };
+		14590BCC1F0097B4002A31A0 /* source.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = source.json; sourceTree = "<group>"; };
+		14590BD91F009BAA002A31A0 /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		1485325C1E5354A500702442 /* UZTextView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = UZTextView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		1485325E1E5354A500702442 /* UZTextView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UZTextView.h; sourceTree = "<group>"; };
 		1485325F1E5354A500702442 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		14B29459180E2542000DCA46 /* UZTextView-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UZTextView-Prefix.pch"; sourceTree = SOURCE_ROOT; };
-		14E5398F1BD0C1E2009A6004 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		14E539921BD0C3F0009A6004 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		14E539951BD0C55F009A6004 /* TextViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextViewController.h; sourceTree = "<group>"; };
-		14E539961BD0C55F009A6004 /* TextViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextViewController.m; sourceTree = "<group>"; };
 		14F8866B17C2BB02006F5514 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		14F8867017C2BB02006F5514 /* UZTextView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UZTextView.h; sourceTree = "<group>"; };
 		14F8867217C2BB02006F5514 /* UZTextView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UZTextView.m; sourceTree = "<group>"; };
 		14F8867917C2BB02006F5514 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
-		14F8869517C2BB4A006F5514 /* UZTextViewSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UZTextViewSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		14F8869717C2BB4A006F5514 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		14F8869C17C2BB4A006F5514 /* UZTextViewSample-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "UZTextViewSample-Info.plist"; sourceTree = "<group>"; };
-		14F8869E17C2BB4A006F5514 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		14F886A017C2BB4A006F5514 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		14F886A217C2BB4A006F5514 /* UZTextViewSample-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UZTextViewSample-Prefix.pch"; sourceTree = "<group>"; };
-		14F886A317C2BB4A006F5514 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		14F886A417C2BB4A006F5514 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		14F886AC17C2BB4A006F5514 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		14F886AD17C2BB4A006F5514 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		14F886AF17C2BB4A006F5514 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		14F886CD17C2BEE6006F5514 /* RootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootViewController.h; sourceTree = "<group>"; };
-		14F886CE17C2BEE6006F5514 /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootViewController.m; sourceTree = "<group>"; };
-		14F886CF17C2BEE6006F5514 /* SEImageCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SEImageCache.h; sourceTree = "<group>"; };
-		14F886D017C2BEE6006F5514 /* SEImageCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SEImageCache.m; sourceTree = "<group>"; };
-		14F886D117C2BEE6006F5514 /* TextCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextCell.h; sourceTree = "<group>"; };
-		14F886D217C2BEE6006F5514 /* TextCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextCell.m; sourceTree = "<group>"; };
-		14F886D317C2BEE6006F5514 /* Tweet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tweet.h; sourceTree = "<group>"; };
-		14F886D417C2BEE6006F5514 /* Tweet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Tweet.m; sourceTree = "<group>"; };
-		14F886D517C2BEE6006F5514 /* TweetViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TweetViewController.h; sourceTree = "<group>"; };
-		14F886D617C2BEE6006F5514 /* TweetViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TweetViewController.m; sourceTree = "<group>"; };
-		14F886D717C2BEE6006F5514 /* WebViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebViewController.h; sourceTree = "<group>"; };
-		14F886D817C2BEE6006F5514 /* WebViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WebViewController.m; sourceTree = "<group>"; };
 		14F886E417C2BFA0006F5514 /* UZCursorView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UZCursorView.h; sourceTree = "<group>"; };
 		14F886E517C2BFA0006F5514 /* UZCursorView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UZCursorView.m; sourceTree = "<group>"; };
 		14F886E617C2BFA0006F5514 /* UZLoupeView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UZLoupeView.h; sourceTree = "<group>"; };
@@ -101,6 +73,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		14590BAF1F009717002A31A0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				14590BD41F0099AE002A31A0 /* UZTextView.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		148532581E5354A500702442 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -108,34 +88,31 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		14F8869217C2BB4A006F5514 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				148532631E5354A500702442 /* UZTextView.framework in Frameworks */,
-				14F8869817C2BB4A006F5514 /* CoreGraphics.framework in Frameworks */,
-				14F8869617C2BB4A006F5514 /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1485325D1E5354A500702442 /* UZTextView */ = {
+		14590BB31F009717002A31A0 /* UZTextViewSample */ = {
 			isa = PBXGroup;
 			children = (
-				1485325E1E5354A500702442 /* UZTextView.h */,
-				1485325F1E5354A500702442 /* Info.plist */,
+				14590BC91F0097B4002A31A0 /* MainTableViewController.swift */,
+				14590BCA1F0097B4002A31A0 /* mona.ttf */,
+				14590BCB1F0097B4002A31A0 /* SampleCell.swift */,
+				14590BCC1F0097B4002A31A0 /* source.json */,
+				14590BB41F009717002A31A0 /* AppDelegate.swift */,
+				14590BB81F009717002A31A0 /* Main.storyboard */,
+				14590BBB1F009717002A31A0 /* Assets.xcassets */,
+				14590BBD1F009717002A31A0 /* LaunchScreen.storyboard */,
+				14590BC01F009717002A31A0 /* Info.plist */,
+				14590BD91F009BAA002A31A0 /* Bridging-Header.h */,
 			);
-			path = UZTextView;
+			path = UZTextViewSample;
 			sourceTree = "<group>";
 		};
 		14F8865F17C2BB02006F5514 = {
 			isa = PBXGroup;
 			children = (
 				14F8866D17C2BB02006F5514 /* UZTextView */,
-				14F8869A17C2BB4A006F5514 /* UZTextViewSample */,
-				1485325D1E5354A500702442 /* UZTextView */,
+				14590BB31F009717002A31A0 /* UZTextViewSample */,
 				14F8866A17C2BB02006F5514 /* Frameworks */,
 				14F8866917C2BB02006F5514 /* Products */,
 			);
@@ -144,8 +121,8 @@
 		14F8866917C2BB02006F5514 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				14F8869517C2BB4A006F5514 /* UZTextViewSample.app */,
 				1485325C1E5354A500702442 /* UZTextView.framework */,
+				14590BB21F009717002A31A0 /* UZTextViewSample.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -153,9 +130,9 @@
 		14F8866A17C2BB02006F5514 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				14F8869717C2BB4A006F5514 /* CoreGraphics.framework */,
 				14F8866B17C2BB02006F5514 /* Foundation.framework */,
 				14F8867917C2BB02006F5514 /* XCTest.framework */,
-				14F8869717C2BB4A006F5514 /* CoreGraphics.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -163,6 +140,7 @@
 		14F8866D17C2BB02006F5514 /* UZTextView */ = {
 			isa = PBXGroup;
 			children = (
+				1485325F1E5354A500702442 /* Info.plist */,
 				14F8867017C2BB02006F5514 /* UZTextView.h */,
 				14F8867217C2BB02006F5514 /* UZTextView.m */,
 				14F886E417C2BFA0006F5514 /* UZCursorView.h */,
@@ -173,47 +151,6 @@
 			path = UZTextView;
 			sourceTree = "<group>";
 		};
-		14F8869A17C2BB4A006F5514 /* UZTextViewSample */ = {
-			isa = PBXGroup;
-			children = (
-				14F886CD17C2BEE6006F5514 /* RootViewController.h */,
-				14F886CE17C2BEE6006F5514 /* RootViewController.m */,
-				14E539951BD0C55F009A6004 /* TextViewController.h */,
-				14E539961BD0C55F009A6004 /* TextViewController.m */,
-				14F886CF17C2BEE6006F5514 /* SEImageCache.h */,
-				14F886D017C2BEE6006F5514 /* SEImageCache.m */,
-				14F886D117C2BEE6006F5514 /* TextCell.h */,
-				14F886D217C2BEE6006F5514 /* TextCell.m */,
-				14F886D317C2BEE6006F5514 /* Tweet.h */,
-				14F886D417C2BEE6006F5514 /* Tweet.m */,
-				14F886D517C2BEE6006F5514 /* TweetViewController.h */,
-				14F886D617C2BEE6006F5514 /* TweetViewController.m */,
-				14F886D717C2BEE6006F5514 /* WebViewController.h */,
-				14F886D817C2BEE6006F5514 /* WebViewController.m */,
-				14F886A317C2BB4A006F5514 /* AppDelegate.h */,
-				14F886A417C2BB4A006F5514 /* AppDelegate.m */,
-				14F886AC17C2BB4A006F5514 /* ViewController.h */,
-				14F886AD17C2BB4A006F5514 /* ViewController.m */,
-				14F8869B17C2BB4A006F5514 /* Supporting Files */,
-			);
-			path = UZTextViewSample;
-			sourceTree = "<group>";
-		};
-		14F8869B17C2BB4A006F5514 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				14E5398E1BD0C1E2009A6004 /* Main.storyboard */,
-				14F886AF17C2BB4A006F5514 /* Images.xcassets */,
-				14F8869C17C2BB4A006F5514 /* UZTextViewSample-Info.plist */,
-				14F8869D17C2BB4A006F5514 /* InfoPlist.strings */,
-				14F886A017C2BB4A006F5514 /* main.m */,
-				14B29459180E2542000DCA46 /* UZTextView-Prefix.pch */,
-				14F886A217C2BB4A006F5514 /* UZTextViewSample-Prefix.pch */,
-				14E539911BD0C3F0009A6004 /* LaunchScreen.storyboard */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -221,13 +158,32 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				148532601E5354A500702442 /* UZTextView.h in Headers */,
+				14590BD61F0099EE002A31A0 /* UZTextView.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		14590BB11F009717002A31A0 /* UZTextViewSample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 14590BC11F009717002A31A0 /* Build configuration list for PBXNativeTarget "UZTextViewSample" */;
+			buildPhases = (
+				14590BAE1F009717002A31A0 /* Sources */,
+				14590BAF1F009717002A31A0 /* Frameworks */,
+				14590BB01F009717002A31A0 /* Resources */,
+				14590BC81F009751002A31A0 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				14590BD81F009A69002A31A0 /* PBXTargetDependency */,
+			);
+			name = UZTextViewSample;
+			productName = UZTextViewSample;
+			productReference = 14590BB21F009717002A31A0 /* UZTextViewSample.app */;
+			productType = "com.apple.product-type.application";
+		};
 		1485325B1E5354A500702442 /* UZTextView */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 148532651E5354A500702442 /* Build configuration list for PBXNativeTarget "UZTextView" */;
@@ -246,36 +202,24 @@
 			productReference = 1485325C1E5354A500702442 /* UZTextView.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		14F8869417C2BB4A006F5514 /* UZTextViewSample */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 14F886C317C2BB4A006F5514 /* Build configuration list for PBXNativeTarget "UZTextViewSample" */;
-			buildPhases = (
-				14F8869117C2BB4A006F5514 /* Sources */,
-				14F8869217C2BB4A006F5514 /* Frameworks */,
-				14F8869317C2BB4A006F5514 /* Resources */,
-				148532681E5354A500702442 /* Embed Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				148532621E5354A500702442 /* PBXTargetDependency */,
-			);
-			name = UZTextViewSample;
-			productName = UZTextViewSample;
-			productReference = 14F8869517C2BB4A006F5514 /* UZTextViewSample.app */;
-			productType = "com.apple.product-type.application";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		14F8866017C2BB02006F5514 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0830;
 				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = sonson;
 				TargetAttributes = {
+					14590BB11F009717002A31A0 = {
+						CreatedOnToolsVersion = 8.3.3;
+						DevelopmentTeam = JP866VWWSD;
+						ProvisioningStyle = Automatic;
+					};
 					1485325B1E5354A500702442 = {
 						CreatedOnToolsVersion = 8.2;
+						DevelopmentTeam = JP866VWWSD;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -293,13 +237,25 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				14F8869417C2BB4A006F5514 /* UZTextViewSample */,
 				1485325B1E5354A500702442 /* UZTextView */,
+				14590BB11F009717002A31A0 /* UZTextViewSample */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		14590BB01F009717002A31A0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				14590BBF1F009717002A31A0 /* LaunchScreen.storyboard in Resources */,
+				14590BBC1F009717002A31A0 /* Assets.xcassets in Resources */,
+				14590BBA1F009717002A31A0 /* Main.storyboard in Resources */,
+				14590BCE1F0097B4002A31A0 /* mona.ttf in Resources */,
+				14590BD01F0097B4002A31A0 /* source.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1485325A1E5354A500702442 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -307,20 +263,19 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		14F8869317C2BB4A006F5514 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				14F886B017C2BB4A006F5514 /* Images.xcassets in Resources */,
-				14E539931BD0C3F0009A6004 /* LaunchScreen.storyboard in Resources */,
-				14E539901BD0C1E2009A6004 /* Main.storyboard in Resources */,
-				14F8869F17C2BB4A006F5514 /* InfoPlist.strings in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		14590BAE1F009717002A31A0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				14590BCF1F0097B4002A31A0 /* SampleCell.swift in Sources */,
+				14590BCD1F0097B4002A31A0 /* MainTableViewController.swift in Sources */,
+				14590BB51F009717002A31A0 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		148532571E5354A500702442 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -331,64 +286,86 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		14F8869117C2BB4A006F5514 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				14F886DD17C2BEE6006F5514 /* TweetViewController.m in Sources */,
-				14F886DB17C2BEE6006F5514 /* TextCell.m in Sources */,
-				14F886AE17C2BB4A006F5514 /* ViewController.m in Sources */,
-				14E539971BD0C55F009A6004 /* TextViewController.m in Sources */,
-				14F886A517C2BB4A006F5514 /* AppDelegate.m in Sources */,
-				14F886E817C2BFC5006F5514 /* UZTextView.m in Sources */,
-				14F886DE17C2BEE6006F5514 /* WebViewController.m in Sources */,
-				14F886DC17C2BEE6006F5514 /* Tweet.m in Sources */,
-				14F886D917C2BEE6006F5514 /* RootViewController.m in Sources */,
-				14F886A117C2BB4A006F5514 /* main.m in Sources */,
-				14F886DA17C2BEE6006F5514 /* SEImageCache.m in Sources */,
-				14F886E917C2BFC5006F5514 /* UZCursorView.m in Sources */,
-				14F886EA17C2BFC5006F5514 /* UZLoupeView.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		148532621E5354A500702442 /* PBXTargetDependency */ = {
+		14590BD81F009A69002A31A0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1485325B1E5354A500702442 /* UZTextView */;
-			targetProxy = 148532611E5354A500702442 /* PBXContainerItemProxy */;
+			targetProxy = 14590BD71F009A69002A31A0 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		14E5398E1BD0C1E2009A6004 /* Main.storyboard */ = {
+		14590BB81F009717002A31A0 /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				14E5398F1BD0C1E2009A6004 /* Base */,
+				14590BB91F009717002A31A0 /* Base */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
-		14E539911BD0C3F0009A6004 /* LaunchScreen.storyboard */ = {
+		14590BBD1F009717002A31A0 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				14E539921BD0C3F0009A6004 /* Base */,
+				14590BBE1F009717002A31A0 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-		14F8869D17C2BB4A006F5514 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				14F8869E17C2BB4A006F5514 /* en */,
-			);
-			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		14590BC21F009717002A31A0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = JP866VWWSD;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = UZTextViewSample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sonson.UZTextViewSample;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/UZTextViewSample/Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		14590BC31F009717002A31A0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = JP866VWWSD;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = UZTextViewSample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sonson.UZTextViewSample;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/UZTextViewSample/Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
 		148532661E5354A500702442 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -399,6 +376,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = JP866VWWSD;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -429,6 +407,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = JP866VWWSD;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -527,55 +506,17 @@
 			};
 			name = Release;
 		};
-		14F886C417C2BB4A006F5514 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Yuichi Yoshida (AK9FYY958C)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "UZTextViewSample/UZTextViewSample-Prefix.pch";
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = "UZTextViewSample/UZTextViewSample-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.sonson.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = "1,2";
-				WRAPPER_EXTENSION = app;
-			};
-			name = Debug;
-		};
-		14F886C517C2BB4A006F5514 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Yuichi Yoshida (AK9FYY958C)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "UZTextViewSample/UZTextViewSample-Prefix.pch";
-				INFOPLIST_FILE = "UZTextViewSample/UZTextViewSample-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.sonson.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = "1,2";
-				WRAPPER_EXTENSION = app;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		14590BC11F009717002A31A0 /* Build configuration list for PBXNativeTarget "UZTextViewSample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				14590BC21F009717002A31A0 /* Debug */,
+				14590BC31F009717002A31A0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		148532651E5354A500702442 /* Build configuration list for PBXNativeTarget "UZTextView" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -590,15 +531,6 @@
 			buildConfigurations = (
 				14F8868917C2BB02006F5514 /* Debug */,
 				14F8868A17C2BB02006F5514 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		14F886C317C2BB4A006F5514 /* Build configuration list for PBXNativeTarget "UZTextViewSample" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				14F886C417C2BB4A006F5514 /* Debug */,
-				14F886C517C2BB4A006F5514 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
