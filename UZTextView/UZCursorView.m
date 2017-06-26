@@ -7,6 +7,7 @@
 //
 
 #import "UZCursorView.h"
+#import "UZTextView.h"
 
 #define UZ_CURSOR_BALL_RADIUS			4
 #define UZ_CURSOR_POLE_WIDTH			2
@@ -31,6 +32,12 @@
 						  UZ_CURSOR_HORIZONTAL_MARGIN1 + UZ_CURSOR_HORIZONTAL_MARGIN2,
 						  rect.size.height + UZ_CURSOR_VERTICAL_MARGIN * 2);
 	}
+}
+
+- (void)dealloc {
+#ifdef CHECK_MEMORY_LEAK
+    NSLog(@"UZCursorView has been released");
+#endif
 }
 
 - (id)initWithCursorDirection:(UZTextViewCursorDirection)direction {
