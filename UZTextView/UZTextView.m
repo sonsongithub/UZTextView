@@ -71,7 +71,17 @@
 
 @end
 
+static BOOL checkMemoryLeak = NO;
+
 @implementation UZTextView
+
++ (BOOL)checkMemoryLeak {
+    return checkMemoryLeak;
+}
+
++ (void)setCheckMemoryLeak:(BOOL)newValue {
+    checkMemoryLeak = newValue;
+}
 
 #pragma mark - Class method to estimate attributed string size
 
@@ -905,9 +915,9 @@
 #pragma mark - Override
 
 - (void)dealloc {
-#ifdef CHECK_MEMORY_LEAK
-    NSLog(@"UZTextView has been released");
-#endif
+    if (UZTextView.checkMemoryLeak) {
+        NSLog(@"UZTextView has been released");
+    }
     SAFE_CFRELEASE(_frame);
     SAFE_CFRELEASE(_framesetter);
     SAFE_CFRELEASE(_tokenizer);

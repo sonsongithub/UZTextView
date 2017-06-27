@@ -23,6 +23,8 @@ class MainTableViewController: UITableViewController, UZTextViewDelegate, UIView
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        UZTextView.checkMemoryLeak = false
+        
         do {
             let data = try Data(contentsOf: Bundle.main.url(forResource: "source", withExtension: "json")!)
             if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] {

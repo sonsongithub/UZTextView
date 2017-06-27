@@ -180,9 +180,9 @@ UIView *searchKeyWindow(UIView* view) {
 #pragma mark - Override
 
 - (void)dealloc {
-#ifdef CHECK_MEMORY_LEAK
-    NSLog(@"UZLoupeView has been released");
-#endif
+    if (UZTextView.checkMemoryLeak) {
+        NSLog(@"UZLoupeView has been released");
+    }
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 

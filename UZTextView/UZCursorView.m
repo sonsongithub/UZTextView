@@ -35,9 +35,9 @@
 }
 
 - (void)dealloc {
-#ifdef CHECK_MEMORY_LEAK
-    NSLog(@"UZCursorView has been released");
-#endif
+    if (UZTextView.checkMemoryLeak) {
+        NSLog(@"UZCursorView has been released");
+    }
 }
 
 - (id)initWithCursorDirection:(UZTextViewCursorDirection)direction {

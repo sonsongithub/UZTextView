@@ -51,7 +51,6 @@ static NSString * _Nonnull const UZTextViewClickedRect	= @"_UZTextViewClickedRec
 @end
 
 #define SAFE_CFRELEASE(p) if(p){CFRelease(p);p=NULL;}
-//#define CHECK_MEMORY_LEAK
 
 @class UZLoupeView;
 @class UZCursorView;
@@ -396,4 +395,9 @@ typedef NS_ENUM(NSUInteger, UZTextViewStatus) {
  * \return CFIndex object describes the index of the tapped character.
  */
 - (CFIndex)indexForPoint:(CGPoint)point;
+
+/**
+ Debug flag
+ */
+@property (class) BOOL checkMemoryLeak;
 @end
